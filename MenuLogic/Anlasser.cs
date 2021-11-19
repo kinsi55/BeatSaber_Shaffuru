@@ -44,7 +44,7 @@ namespace Shaffuru.MenuLogic {
 
 			var bpm = 13.37f;
 
-			beatmapLevelData.SetJsonData(@"{""_version"":""2.2.0"",""_events"":[{""_type"":12}],""_notes"":[{""_time"":0.5,""_lineIndex"":1,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":1,""_lineLayer"":1,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":1,""_lineLayer"":2,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":2,""_type"":1,""_cutDirection"":8},{""_time"":801.75}],""_obstacles"":[{""_time"":0.4,""_lineIndex"":3,""_duration"":3,""_width"":1},{""_time"":0.4,""_duration"":3,""_width"":1},{""_time"":" + bpm * ((lengthSeconds - 1) / 60) + @",""_duration"":0.1,""_width"":4}],""_waypoints"":[]}");
+			beatmapLevelData.SetJsonData(@"{""_version"":""2.2.0"",""_events"":[{""_type"":12}],""_notes"":[{""_time"":0.5,""_lineIndex"":1,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":1,""_lineLayer"":1,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":1,""_lineLayer"":2,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":2,""_type"":1,""_cutDirection"":8},{""_time"":801.75}],""_obstacles"":[{""_time"":0.4,""_lineIndex"":3,""_duration"":3,""_width"":1},{""_time"":0.4,""_duration"":3,""_width"":1},{""_time"":" + (bpm * ((lengthSeconds - 1) / 60)).ToString("0.000", System.Globalization.CultureInfo.InvariantCulture) + @",""_duration"":0.1,""_width"":4}],""_waypoints"":[]}");
 
 			beatmapLevel.InitFull(
 				LevelId,
