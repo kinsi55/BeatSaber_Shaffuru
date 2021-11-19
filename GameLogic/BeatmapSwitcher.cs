@@ -185,6 +185,8 @@ namespace Shaffuru.GameLogic {
 				for(var i = 0; i < replacementLine.Count; i++) {
 					var obj = replacementLine[i];
 					// We only wanna insert items which would be at least moveDuration time away
+
+					//TODO: for obstacles, if the start time is in the past, but the end time isnt, move it accordingly so its still shown
 					var x = obj.time - startTime - jDuration;
 					if(x < 0f)
 						continue;
@@ -208,8 +210,6 @@ namespace Shaffuru.GameLogic {
 				 */
 				for(var i = objInsertIndex; i < line.Count; i++)
 					line[i].MoveTime(float.MaxValue);
-
-				Console.WriteLine("Added {0} items to line {1}", objInsertIndex - idkman[lineIndex], lineIndex);
 			}
 
 

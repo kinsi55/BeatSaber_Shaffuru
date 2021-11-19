@@ -17,7 +17,7 @@ using BeatSaberMarkupLanguage.Components.Settings;
 
 namespace Shaffuru.UI {
 	[HotReload(RelativePathToLayout = @"setup.bsml")]
-	[ViewDefinition("Shaffuru.UI.setup.bsml")]
+	[ViewDefinition("Shaffuru.MenuLogic.UI.setup.bsml")]
 	class SetupUI : BSMLAutomaticViewController {
 		Config config;
 		[Inject] readonly MapPool mapPool = null;
@@ -52,12 +52,13 @@ namespace Shaffuru.UI {
 			//filteredSongsLabel.text = $"Playable Levels: {(mapPool?.filteredLevels?.Length ?? 0)} ({(mapPool?.requestableLevels?.Count ?? 0)} requestable)";
 		}
 
+		[UIAction("ClearQueue")]
 		void ClearQueue() {
 			songQueueManager.Clear();
 		}
 
-		[UIComponent("filteredSongsLabel")] TextMeshProUGUI filteredSongsLabel;
-		[UIComponent("startLevelButton")] NoTransitionsButton startLevelButton;
+		[UIComponent("label_songCount")] TextMeshProUGUI filteredSongsLabel = null;
+		[UIComponent("button_startLevel")] NoTransitionsButton startLevelButton = null;
 
 		async void OpenStartModal() {
 			playlists.Add("HIO");
@@ -69,8 +70,10 @@ namespace Shaffuru.UI {
 				await mapPool.ProcessBeatmapPool();
 				playable = (mapPool?.filteredLevels?.Length ?? 0);
 				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} requestable)";
-			} catch {
+			} catch(Exception ex) {
 				filteredSongsLabel.text = $"Failed to build map pool";
+				Plugin.Log.Error("Failed to build map pool:");
+				Plugin.Log.Error(ex);
 				return;
 			}
 

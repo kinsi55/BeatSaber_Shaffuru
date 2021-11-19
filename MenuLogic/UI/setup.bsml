@@ -6,7 +6,7 @@
 				<macro.as-host host='config'>
 					<slider-setting value='filter_minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' bind-value='true' apply-on-change='true'
 						hover-hint='Songs must be at least this long to be allowed'
-				/>
+					/>
 				</macro.as-host>
 				<dropdown-list-setting id='dropdown_playlist' value='filter_playlist' choices='playlists' text='Playlist' bind-value='true' apply-on-change='true'/>
 			</modifier-container>
@@ -20,10 +20,10 @@
 						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!chaos)' bind-value='true' apply-on-change='true'/>
 						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be queued' bind-value='true' apply-on-change='true'
 							hover-hint='Usage: !chaos 25f Normal or !chaos 25f ExpertPlus 4:20'
-					/>
+						/>
 						<toggle-setting value='request_allowSpecificTime' text='Allow a specific time to be queued *' bind-value='true' apply-on-change='true'
-							hover-hint='Usage: !chaos 25f 4:20 or !chaos 25f 4:20 Expert'
-					/>
+							hover-hint='Usage: !chaos 25f 4:20 or !chaos 25f Expert 4:20'
+						/>
 						<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' bind-value='true' apply-on-change='true'/>
 					</modifier-container>
 				</macro.as-host>
@@ -35,16 +35,16 @@
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 					<toggle-setting value='jumpcut_enabled' text='Enable Jumpcut' bind-value='true' apply-on-change='true'
 						hover-hint='Starts / Ends songs at random positions of the song instead of playing the entire song'
-				/>
+					/>
 					<slider-setting value='jumpcut_reactionTime' text='Transition duration' min='0.3' max='1' increment='0.1' bind-value='true' apply-on-change='true'
 						hover-hint='How long should the transition from one song to another be?'
-				/>
+					/>
 					<slider-setting value='jumpcut_minSeconds' text='Minimum play duration' integer-only='true' min='5' max='40' bind-value='true' apply-on-change='true'
 						hover-hint='How long should a specific song play at least?'
-				/>
+					/>
 					<slider-setting value='jumpcut_maxSeconds' text='Maximum play duration' integer-only='true' min='10' max='60' bind-value='true' apply-on-change='true'
 						hover-hint='How long should a specific song play at most?'
-				/>
+					/>
 				</modifier-container>
 			</macro.as-host>
 		</tab>
@@ -54,13 +54,13 @@
 					<macro.as-host host='config'>
 						<slider-setting value='queue_sizeLimit' text='Queue size Limit' integer-only='true' min='16' max='69' bind-value='true' apply-on-change='true'
 							hover-hint='How many songs, overall, can be queued at the same time?'
-					/>
+						/>
 						<!--<slider-setting value='queue_sizeLimit' text='Re-queue block' integer-only='true' min='0' max='69' bind-value='true' apply-on-change='true'
 							hover-hint='How many different songs must be requested before a specific song can be requested again? (Ignored by next option if necessary)'
-					/>-->
+						/>-->
 						<toggle-setting value='queue_pickRandomSongIfEmpty' text='Use random song if nothing queued' bind-value='true' apply-on-change='true'
 							hover-hint='Use / Pick a random song if there is no requests? Else it will just stay on silence until something is requested'
-					/>
+						/>
 					</macro.as-host>
 				</modifier-container>
 				<horizontal pad-top='5' preferred-height='10'>
@@ -98,12 +98,12 @@
 				</horizontal>
 			</horizontal>
 			<vertical horizontal-fit='Unconstrained' pad='2' spacing='2' child-expand-height='false' min-height='30'>
-				<text id='filteredSongsLabel' text='J' align='Center'/>
+				<text id='label_songCount' text='J' align='Center'/>
 				<slider-setting value='playDuration' text='Play time' integer-only='true' min='3' max='120' formatter='PlayTimeFormatter' apply-on-change='true'/>
 			</vertical>
 			<horizontal>
 				<vertical>
-					<primary-button id='startLevelButton' on-click='StartGame' text='Start' min-width='20' interactable='false'/>
+					<primary-button id='button_startLevel' on-click='StartGame' text='Start' min-width='20' interactable='false'/>
 				</vertical>
 				<vertical>
 					<button event-click='CloseStartModal' text='Close' min-width='20'/>
