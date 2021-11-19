@@ -10,7 +10,6 @@ namespace Shaffuru.UI {
 		[Inject] GameplaySetupViewController gameplaySetupViewController = null;
 
 		protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
-			Console.WriteLine("SetupUI {0} gameplaySetupViewController {1}", ui, gameplaySetupViewController);
 			if(firstActivation) {
 				SetTitle("Shaffuru Setup");
 				showBackButton = true;
@@ -33,8 +32,12 @@ namespace Shaffuru.UI {
 			BeatSaberUI.PresentFlowCoordinator(_parentFlow, this);
 		}
 
+		static Action show;
+
 		public void Initialize() {
-			MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", ShowFlow, true));
+			if(show == null)
+				MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", () => show(), true));
+			show = ShowFlow;
 		}
 	}
 }
