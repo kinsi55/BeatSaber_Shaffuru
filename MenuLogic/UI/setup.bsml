@@ -3,12 +3,12 @@
 	<vertical vertical-fit="PreferredSize" preferred-height="62" pad-bottom="2">
 		<tab tags='tabs' tab-name='Song Filtering'>
 			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-				<dropdown-list-setting value='filter_playlist' choices='playlists' text='Playlist' bind-value='true' apply-on-change='true'/>
 				<macro.as-host host='config'>
 					<slider-setting value='filter_minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' bind-value='true' apply-on-change='true'
 						hover-hint='Songs must be at least this long to be allowed'
 				/>
 				</macro.as-host>
+				<dropdown-list-setting id='dropdown_playlist' value='filter_playlist' choices='playlists' text='Playlist' bind-value='true' apply-on-change='true'/>
 			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Chat Commands'>

@@ -13,6 +13,7 @@ using System.Linq;
 using TMPro;
 using Zenject;
 using BeatSaberMarkupLanguage.Parser;
+using BeatSaberMarkupLanguage.Components.Settings;
 
 namespace Shaffuru.UI {
 	[HotReload(RelativePathToLayout = @"setup.bsml")]
@@ -26,14 +27,24 @@ namespace Shaffuru.UI {
 		[UIParams] readonly BSMLParserParams parserParams = null;
 
 		string filter_playlist { get => config.filter_playlist; set => config.filter_playlist = value; }
-		List<object> playlists = new[] { "None (All Songs)" }.ToList<object>();
+		[UIValue("playlists")] List<object> playlists = null;
+		[UIComponent("dropdown_playlist")] DropDownListSetting playlistDropdown = null;
 
 		public void Awake() {
 			config = Config.Instance;
 		}
 
 		public void OnEnable() {
-			playlists = new[] { "None (All Songs)", "None (All Songs2)" }.ToList<object>();
+			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
+				LoadPlaylistsList();
+		}
+
+		void LoadPlaylistsList() {
+			playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists().Select(x => x.packName).Prepend("None (All Songs)").ToList<object>();
+			if(playlistDropdown != null) {
+				playlistDropdown.values = playlists;
+				playlistDropdown.UpdateChoices();
+			}
 		}
 
 		[UIAction("#post-parse")]

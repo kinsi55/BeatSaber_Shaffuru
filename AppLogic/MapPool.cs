@@ -58,13 +58,29 @@ namespace Shaffuru.AppLogic {
 			requestableLevels = null;
 		}
 
+		IPreviewBeatmapLevel[] GetLevelsOfPlaylist() {
+			var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists().FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
+
+			return x?.beatmapLevelCollection?.beatmapLevels;
+		}
+
+		IEnumerable<IPreviewBeatmapLevel> GetLevels() {
+			IEnumerable<IPreviewBeatmapLevel> ret = null;
+
+			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
+				ret = GetLevelsOfPlaylist();
+
+			ret ??= beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks
+				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
+
+			return ret;
+		}
+
 		public async Task ProcessBeatmapPool() {
 			var minLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
 
 			//TODO: Option to Limit to playlist instead of customLevelPackCollection
-			var maps = beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels)
-				.Where(x => x.songDuration - x.songTimeOffset > minLength);
+			var maps = GetLevels().Where(x => x.songDuration - x.songTimeOffset > minLength);
 
 			var newFilteredLevels = new List<ValidSong>();
 
