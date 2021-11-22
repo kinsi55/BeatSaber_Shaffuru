@@ -24,7 +24,7 @@ namespace Shaffuru {
 
 		public virtual bool jumpcut_enabled { get; set; } = true;
 		// Maybe at some point. I feel like this would be a massive pain
-		//public virtual bool jumpcut_tryKeepParity { get; set; } = false;
+		//public virtual bool jumpcut_tryKeepParity { get; set; } = false;f
 		public virtual float jumpcut_reactionTime { get; set; } = 0.5f;
 		public virtual int jumpcut_minSeconds { get; set; } = 10;
 		public virtual int jumpcut_maxSeconds { get; set; } = 30;

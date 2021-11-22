@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using UnityEngine;
 using Zenject;
 
@@ -17,6 +18,9 @@ namespace Shaffuru.GameLogic {
 
 		public void Initialize() {
 			if(didPlayThisSession)
+				return;
+
+			if(DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
 				return;
 
 			didPlayThisSession = true;
