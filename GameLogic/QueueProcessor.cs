@@ -1,5 +1,6 @@
 ﻿using Shaffuru.AppLogic;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -51,9 +52,17 @@ namespace Shaffuru.GameLogic {
 				if(!Config.Instance.queue_pickRandomSongIfEmpty)
 					return;
 
-				var x = mapPool.filteredLevels[UnityEngine.Random.Range(0, mapPool.filteredLevels.Length)];
+				var levels = mapPool.filteredLevels.Where(x => !songQueueManager.history.Contains(x.level.levelID));
+
+				// Shouldnt ever be the case, failsafe
+				if(levels.Count() == 0)
+					return;
+
+				var x = levels.ElementAt(UnityEngine.Random.Range(0, levels.Count()));
 
 				queuedSong = new QueuedSong(x.level.levelID, x.GetRandomValidDiff(), -1, -1, null);
+
+				songQueueManager.history.Add(x.level.levelID);
 			}
 
 			IDifficultyBeatmap outDiff = null;
