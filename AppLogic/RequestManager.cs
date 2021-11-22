@@ -35,12 +35,17 @@ namespace Shaffuru.AppLogic {
 
 		private void Twitch_OnTextMessageReceived(IChatMessage message) {
 			if(Config.Instance.chat_request_enabled && message.Message.StartsWith("!chaos")) {
+				var sender = message.Sender.UserName;
+
+				if(mapPool.filteredLevels == null) {
+					Msg($"@{sender} Shaffuru is not initialized", message.Channel);
+					return;
+				}
+
 				var split = message.Message.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
 				if(split.Length < 2)
 					return;
-
-				var sender = message.Sender.UserName;
 
 				if(songQueueManager.IsFull()) {
 					Msg($"@{sender} The queue is full", message.Channel);
