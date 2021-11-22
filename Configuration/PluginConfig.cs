@@ -49,8 +49,8 @@ namespace Shaffuru {
 			if(jumpcut_minSeconds < 5)
 				jumpcut_minSeconds = 5;
 
-			if(jumpcut_gracePeriod > 1)
-				jumpcut_minSeconds = 1;
+			if(jumpcut_gracePeriod > 1.2f)
+				jumpcut_gracePeriod = 1.2f;
 
 			if(jumpcut_reactionTime > 1f)
 				jumpcut_reactionTime = 1f;
