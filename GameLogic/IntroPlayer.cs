@@ -20,7 +20,7 @@ namespace Shaffuru.GameLogic {
 			if(didPlayThisSession)
 				return;
 
-			if(DateTime.Now.Month == 4 && DateTime.Now.Day == 1)
+			if(DateTime.Now.Day != 1 || DateTime.Now.Month != 4)
 				return;
 
 			didPlayThisSession = true;
