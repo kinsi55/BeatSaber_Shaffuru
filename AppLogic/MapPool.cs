@@ -1,8 +1,12 @@
-﻿using Shaffuru.MenuLogic;
+﻿using BeatSaberPlaylistsLib.Blist;
+using BeatSaberPlaylistsLib.Legacy;
+using BeatSaberPlaylistsLib.Types;
+using Shaffuru.MenuLogic;
 using SongDetailsCache;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Shaffuru.AppLogic {
@@ -58,39 +62,74 @@ namespace Shaffuru.AppLogic {
 			requestableLevels = null;
 		}
 
-		IPreviewBeatmapLevel[] GetLevelsOfPlaylist() {
-			var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists().FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
-
-			return x?.beatmapLevelCollection?.beatmapLevels;
-		}
-
-		IEnumerable<IPreviewBeatmapLevel> GetLevels() {
-			IEnumerable<IPreviewBeatmapLevel> ret = null;
-
-			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
-				ret = GetLevelsOfPlaylist();
-
-			ret ??= beatmapLevelsModel.customLevelPackCollection.beatmapLevelPacks
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
-
-			return ret;
-		}
-
 		public async Task ProcessBeatmapPool() {
 			var minLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
 
-			//TODO: Option to Limit to playlist instead of customLevelPackCollection
-			var maps = GetLevels().Where(x => x.songDuration - x.songTimeOffset > minLength);
+			var maps = beatmapLevelsModel
+				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
+				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels)
+				.Where(x => x.songDuration - x.songTimeOffset >= minLength);
+
+			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
+
+			// Wrapping this to prevent missing symbol stuff if no bsplaylistlib
+			void FilterInPlaylist() {
+				// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
+				var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
+					.GetAllPlaylists()
+					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
+
+				IEnumerable<IGrouping<IPreviewBeatmapLevel, PlaylistSong>> theThing = null;
+
+				if(x is LegacyPlaylist l) {
+					theThing = l.BeatmapLevels.Cast<PlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
+				} else if(x is BlistPlaylist bl) {
+					theThing = bl.BeatmapLevels.Cast<BlistPlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
+				} else {
+					return;
+				}
+
+				playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
+
+				foreach(var xy in theThing) {
+					var highlightedDiffs = xy.Where(x => x.Difficulties != null)
+						.SelectMany(x => x.Difficulties)
+						.Select(x => x.BeatmapDifficulty)
+						.Distinct().ToArray();
+
+					playlistSongs.Add(
+						xy.First().PreviewBeatmapLevel,
+
+						highlightedDiffs.Length == 0 ? null : highlightedDiffs
+					);
+				}
+
+			}
+
+			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
+				FilterInPlaylist();
 
 			var newFilteredLevels = new List<ValidSong>();
 
 			foreach(var map in maps) {
-				var extraData = SongCore.Collections.RetrieveExtraSongData(GetHashOfPreview(map));
+				BeatmapDifficulty[] playlistDiffs = null;
 
-				if(extraData == null)
+				if(playlistSongs?.TryGetValue(map, out playlistDiffs) == false)
 					continue;
 
-				var mappedExtraData = extraData._difficulties.ToDictionary(x => $"{x._beatmapCharacteristicName}_{x._difficulty}");
+				var sH = GetHashOfPreview(map);
+				Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData> mappedExtraData = null;
+
+				if(sH != null && map is CustomPreviewBeatmapLevel customMap) {
+					var extraData = SongCore.Collections.RetrieveExtraSongData(sH, customMap.customLevelPath);
+
+					if(extraData == null) {
+						Console.WriteLine("Hash {0} has no extra data? But does it with full level data? {1}", sH, SongCore.Collections.RetrieveExtraSongData(map.levelID));
+						continue;
+					}
+
+					mappedExtraData = extraData._difficulties.ToDictionary(x => $"{x._beatmapCharacteristicName}_{x._difficulty}");
+				}
 
 				foreach(var beatmapSet in map.previewDifficultyBeatmapSets) {
 					// For now we limit to just Standard characteristic. This might not be necessary
@@ -102,13 +141,18 @@ namespace Shaffuru.AppLogic {
 					};
 
 					foreach(var beatmapDiff in beatmapSet.beatmapDifficulties) {
-						// Failsafe
-						if(!mappedExtraData.TryGetValue($"{beatmapSet.beatmapCharacteristic.serializedName}_{beatmapDiff}", out var extradata))
+						if(Config.Instance.filter_playlist_onlyHighlighted && playlistDiffs?.Contains(beatmapDiff) == false)
 							continue;
 
-						// I have a feeling any requirements in the map would be BAAAD
-						if(extradata.additionalDifficultyData._requirements.Length > 0)
-							continue;
+							// Failsafe
+						if(mappedExtraData != null) {
+							if(!mappedExtraData.TryGetValue($"{beatmapSet.beatmapCharacteristic.serializedName}_{beatmapDiff}", out var extradata))
+								continue;
+
+							// I have a feeling any requirements in the map would be BAAAD
+							if(extradata.additionalDifficultyData._requirements.Length > 0)
+								continue;
+						}
 
 						//TODO: More filters? Here
 

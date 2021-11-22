@@ -24,6 +24,9 @@ namespace Shaffuru.GameLogic {
 
 		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect = AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
 
+
+		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), "noFail");
+
 		static Action<BeatmapEventData, float> FIELD_BeatmapEventData_time_SETTER;
 
 
@@ -38,6 +41,7 @@ namespace Shaffuru.GameLogic {
 		readonly BeatmapObjectSpawnController beatmapObjectSpawnController;
 		readonly BeatmapObjectCallbackController beatmapObjectCallbackController;
 		readonly AudioTimeSyncController audioTimeSyncController;
+		readonly GameEnergyCounter gameEnergyCounter;
 		readonly GameSongController gameSongController;
 
 		RamCleaner ramCleaner;
@@ -50,6 +54,7 @@ namespace Shaffuru.GameLogic {
 			BeatmapObjectSpawnController beatmapObjectSpawnController,
 			BeatmapObjectCallbackController beatmapObjectCallbackController,
 			AudioTimeSyncController audioTimeSyncController,
+			GameEnergyCounter gameEnergyCounter,
 			GameSongController gameSongController
 		) {
 			this._sceneSetupData = _sceneSetupData;
@@ -59,6 +64,7 @@ namespace Shaffuru.GameLogic {
 			this.beatmapObjectSpawnController = beatmapObjectSpawnController;
 			this.beatmapObjectCallbackController = beatmapObjectCallbackController;
 			this.audioTimeSyncController = audioTimeSyncController;
+			this.gameEnergyCounter = gameEnergyCounter;
 			this.gameSongController = gameSongController;
 
 			if(FIELD_BeatmapEventData_time_SETTER == null) {
@@ -260,6 +266,12 @@ namespace Shaffuru.GameLogic {
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
 			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime + jDuration - reactionTime + (audioTimeSyncController.songTime - timePre));
+
+			if(Config.Instance.jumpcut_gracePeriod > 0) {
+				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
+				yield return new WaitForSeconds(Config.Instance.jumpcut_gracePeriod);
+				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
+			}
 		}
 	}
 

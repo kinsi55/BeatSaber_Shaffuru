@@ -65,16 +65,19 @@ namespace Shaffuru.AppLogic {
 				}
 
 				if(hash == null) {
-					Msg($"@{sender} Unknown Map ID", message.Channel);
+					Msg($"@{sender} Unknown map ID", message.Channel);
 
 				} else if(!mapPool.HasLevelId(hash)) {
-					Msg($"@{sender} The Map is not downloaded or does not match the configured filters", message.Channel);
+					Msg($"@{sender} The map is not downloaded or does not match the configured filters", message.Channel);
 
 				} else if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
-					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} Maps in the queue", message.Channel);
+					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} maps in the queue", message.Channel);
 
 				} else if(songQueueManager.Contains(x => MapPool.GetHashOfLevelid(x.levelId) == hash)) {
-					Msg($"@{sender} This song is already in the queue currently", message.Channel);
+					Msg($"@{sender} This map is already in the queue", message.Channel);
+
+				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory($"custom_level_{hash}")) {
+					Msg($"@{sender} The map has already been played recently", message.Channel);
 
 				} else {
 					var theMappe = mapPool.filteredLevels[mapPool.requestableLevels[hash]];

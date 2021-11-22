@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Shaffuru.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,11 +30,13 @@ namespace Shaffuru.AppLogic {
 		}
 
 		Queue<QueuedSong> queue;
+		public RollingList<string> history { get; private set; }
 
 		readonly MapPool mapPool;
 
 		public SongQueueManager(MapPool mapPool) {
 			this.queue = new Queue<QueuedSong>();
+			this.history = new RollingList<string>(Config.Instance.queue_requeueLimit);
 			this.mapPool = mapPool;
 		}
 
@@ -53,10 +56,20 @@ namespace Shaffuru.AppLogic {
 
 		public void Clear() => queue?.Clear();
 
-		public QueuedSong DequeueSong() => queue.Count > 0 ? queue.Dequeue() : null;
+		public QueuedSong DequeueSong() {
+			if(queue.Count == 0)
+				return null;
+
+			var x = queue.Dequeue();
+
+			history.Add(x.levelId.Length > 53 ? x.levelId.Substring(0, 53) : x.levelId);
+
+			return x;
+		}
 
 		public int Count(Func<QueuedSong, bool> action) => queue.Count(action);
 		public bool Contains(Func<QueuedSong, bool> action) => queue.Any(action);
+		public bool IsInHistory(string levelId) => history?.Contains(levelId) == true;
 		public bool IsEmpty() => queue.Count == 0;
 
 		public bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;

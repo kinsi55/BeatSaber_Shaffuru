@@ -69,7 +69,7 @@ namespace Shaffuru.UI {
 			try {
 				await mapPool.ProcessBeatmapPool();
 				playable = (mapPool?.filteredLevels?.Length ?? 0);
-				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} requestable)";
+				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} on BeatSaver / requestable)";
 			} catch(Exception ex) {
 				filteredSongsLabel.text = $"Failed to build map pool";
 				Plugin.Log.Error("Failed to build map pool:");
@@ -78,11 +78,14 @@ namespace Shaffuru.UI {
 			}
 
 			startLevelButton.interactable = playable > 0;
+			// We cannot require 2 songs to be played if the is only one..
+			songQueueManager.history.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
 		}
 
-		int playDuration = 3;
+		[UIValue("playDuration")] int playDuration = 3;
 		string PlayTimeFormatter(int mins) => mins == 69 ? "69 Nice!" : mins == 96 ? "96.41 的笑容都没你的" : $"{mins} Minutes";
 
+		[UIAction("StartGame")]
 		void StartGame() {
 			anlasser.Start(60 * playDuration);
 		}
