@@ -16,6 +16,6 @@ namespace Shaffuru.HarmonyPatches {
 			yield return AccessTools.Method(typeof(NoteCutSoundEffectManager), nameof(NoteCutSoundEffectManager.HandleNoteWasCut));
 		}
 
-		static bool Prefix() => enablePatch;
+		static bool Prefix() => !enablePatch;
 	}
 }
