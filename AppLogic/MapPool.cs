@@ -131,7 +131,14 @@ namespace Shaffuru.AppLogic {
 					if(extraData == null)
 						continue;
 
-					mappedExtraData = extraData._difficulties.ToDictionary(x => $"{x._beatmapCharacteristicName}_{x._difficulty}");
+					mappedExtraData = new Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData>();
+
+					foreach(var x in extraData._difficulties) {
+						var k = $"{x._beatmapCharacteristicName}_{x._difficulty}";
+
+						if(!mappedExtraData.ContainsKey(k))
+							mappedExtraData[k] = x;
+					}
 				}
 
 				if(songDetails == null)
