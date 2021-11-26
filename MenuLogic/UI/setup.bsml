@@ -9,8 +9,8 @@
 					/>
 				</macro.as-host>
 				<horizontal>
-					<toggle-setting value='filter_enableAdvancedFilters' text='Highlighted Playlist difficulties' bind-value='true' apply-on-change='true'
-						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
+					<toggle-setting value='filter_enableAdvancedFilters' text='Enable more Filter settings' bind-value='true' apply-on-change='true'
+						hover-hint='When enabled only songs which are uploaded on BeatSaver will be playable'
 					/>
 					<button id='button_advancedFiltersConfig' text='Configure' event-click='OpenAdvancedFiltersModal'/>
 				</horizontal>
