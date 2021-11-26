@@ -139,10 +139,10 @@ namespace Shaffuru.GameLogic {
 		IEnumerator Switcher(IDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float lengthLimit) {
 			// Get the "spawn ahead" time the current song uses - These are notes which are spawned / moving in
 			// before the specific song location has been reached
-			var jDuration = beatmapObjectSpawnController.jumpDuration;
-			var mDuration = beatmapObjectSpawnController.moveDuration;
+			var oldJumpDuration = beatmapObjectSpawnController.jumpDuration;
+			var oldMoveDuration = beatmapObjectSpawnController.moveDuration;
 
-			var dissolveTime = (mDuration * 0.2f) / audioTimeSyncController.audioSource.pitch;
+			var dissolveTime = (oldMoveDuration * 0.2f) / audioTimeSyncController.audioSource.pitch;
 
 			// We are switching to the new map... Dissolve everything thats active right now
 			foreach(var x in _gameNotePoolContainer.activeItems)
@@ -163,10 +163,10 @@ namespace Shaffuru.GameLogic {
 
 				// Make sure we have had at least 20 frames, not just half a second
 				audioTimeSyncController.audioSource.UnPause();
-				var s = audioTimeSyncController.audioSource.time;
+				var s = audioTimeSyncController.songTime;
 				for(var i = 0; i < 20; i++)
 					yield return null;
-				yield return new WaitUntil(() => audioTimeSyncController.audioSource.time - s >= 0.3f);
+				yield return new WaitUntil(() => audioTimeSyncController.songTime - s >= 0.3f);
 			}
 
 
@@ -193,7 +193,7 @@ namespace Shaffuru.GameLogic {
 					// We only wanna insert items which would be at least moveDuration time away
 
 					//TODO: for obstacles, if the start time is in the past, but the end time isnt, move it accordingly so its still shown
-					var x = obj.time - startTime - jDuration;
+					var x = obj.time - startTime - oldJumpDuration;
 					if(x < 0f)
 						continue;
 
@@ -229,7 +229,7 @@ namespace Shaffuru.GameLogic {
 			for(var i = 0; i < replacementBeatmapData.beatmapEventsData.Count; i++) {
 				var obj = replacementEvents[i];
 
-				var x = obj.time - startTime - jDuration;
+				var x = obj.time - startTime - oldJumpDuration;
 				if(x < 0f)
 					continue;
 
@@ -265,9 +265,11 @@ namespace Shaffuru.GameLogic {
 			// New audio
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
-			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime + jDuration - reactionTime + (audioTimeSyncController.songTime - timePre));
+			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime + oldJumpDuration - reactionTime + (audioTimeSyncController.songTime - timePre));
 
 			if(Config.Instance.jumpcut_gracePeriod > 0) {
+				//TODO: Not sure if we need jump or move duration here, need to test
+				yield return new WaitUntil(() => audioTimeSyncController.songTime > timePre + reactionTime);
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
 				yield return new WaitForSeconds(Config.Instance.jumpcut_gracePeriod);
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
