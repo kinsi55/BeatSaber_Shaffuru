@@ -76,8 +76,10 @@ namespace Shaffuru.AppLogic {
 			void FilterInPlaylist() {
 				// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
 				var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
-					.GetAllPlaylists()
+					.GetAllPlaylists(true)
 					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
+
+				Console.WriteLine(">>> {0}", x.Filename);
 
 				IEnumerable<IGrouping<IPreviewBeatmapLevel, PlaylistSong>> theThing = null;
 
