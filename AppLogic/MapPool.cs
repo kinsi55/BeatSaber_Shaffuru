@@ -92,6 +92,11 @@ namespace Shaffuru.AppLogic {
 				playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
 
 				foreach(var xy in theThing) {
+					if(!Config.Instance.filter_playlist_onlyHighlighted) {
+						playlistSongs.Add(xy.First().PreviewBeatmapLevel, null);
+						continue;
+					}
+
 					var highlightedDiffs = xy.Where(x => x.Difficulties != null)
 						.SelectMany(x => x.Difficulties)
 						.Select(x => x.BeatmapDifficulty)
@@ -117,34 +122,47 @@ namespace Shaffuru.AppLogic {
 				if(playlistSongs?.TryGetValue(map, out playlistDiffs) == false)
 					continue;
 
-				var sH = GetHashOfPreview(map);
+				var songHash = GetHashOfPreview(map);
 				Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData> mappedExtraData = null;
 
-				if(sH != null && map is CustomPreviewBeatmapLevel customMap) {
-					var extraData = SongCore.Collections.RetrieveExtraSongData(sH, customMap.customLevelPath);
+				if(songHash != null && map is CustomPreviewBeatmapLevel customMap) {
+					var extraData = SongCore.Collections.RetrieveExtraSongData(songHash, customMap.customLevelPath);
 
-					if(extraData == null) {
-						Console.WriteLine("Hash {0} has no extra data? But does it with full level data? {1}", sH, SongCore.Collections.RetrieveExtraSongData(map.levelID));
+					if(extraData == null)
 						continue;
-					}
 
 					mappedExtraData = extraData._difficulties.ToDictionary(x => $"{x._beatmapCharacteristicName}_{x._difficulty}");
 				}
+
+				if(songDetails == null)
+					songDetails = await SongDetails.Init();
 
 				foreach(var beatmapSet in map.previewDifficultyBeatmapSets) {
 					// For now we limit to just Standard characteristic. This might not be necessary
 					if(beatmapSet.beatmapCharacteristic != Anlasser.standardCharacteristic)
 						continue;
 
+					SongDetailsCache.Structs.Song songDetailsSong = SongDetailsCache.Structs.Song.none;
+
+					// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
+					if(Config.Instance.filter_enableAdvancedFilters) {
+						if(songHash == null || !songDetails.songs.FindByHash(songHash, out songDetailsSong))
+							continue;
+
+						if(songDetailsSong.bpm < Config.Instance.filter_advanced_bpm_min)
+							continue;
+					}
+
 					var validSonge = new ValidSong() {
 						level = map
 					};
 
 					foreach(var beatmapDiff in beatmapSet.beatmapDifficulties) {
-						if(Config.Instance.filter_playlist_onlyHighlighted && playlistDiffs?.Contains(beatmapDiff) == false)
+						// playlistDiffs is only created if the playlist entry actually has any highlit diffs (And the option is enabled)
+						if(playlistDiffs?.Contains(beatmapDiff) == false)
 							continue;
 
-							// Failsafe
+						// mappedExtraData will be null for OST
 						if(mappedExtraData != null) {
 							if(!mappedExtraData.TryGetValue($"{beatmapSet.beatmapCharacteristic.serializedName}_{beatmapDiff}", out var extradata))
 								continue;
@@ -154,7 +172,30 @@ namespace Shaffuru.AppLogic {
 								continue;
 						}
 
-						//TODO: More filters? Here
+						if(Config.Instance.filter_enableAdvancedFilters) {
+							var diffIsValid = false;
+							for(int i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
+								var diff = songDetails.difficulties[i];
+
+								if((int)diff.difficulty != (int)beatmapDiff)
+									continue;
+
+								if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
+									break;
+
+								var nps = diff.notes / songDetailsSong.songDurationSeconds;
+								if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
+									break;
+
+								if(Config.Instance.filter_advanced_only_ranked && !diff.ranked)
+									break;
+
+								diffIsValid = true;
+							}
+
+							if(!diffIsValid)
+								continue;
+						}
 
 						validSonge.SetDiffValid(beatmapDiff);
 					}
@@ -168,9 +209,6 @@ namespace Shaffuru.AppLogic {
 
 			var requestableLevels = new Dictionary<string, int>();
 
-			if(songDetails == null)
-				songDetails = await SongDetails.Init();
-
 			for(var i = 0; i < filteredLevels.Length; i++) {
 				var mapHash = GetHashOfPreview(filteredLevels[i].level);
 
@@ -181,38 +219,6 @@ namespace Shaffuru.AppLogic {
 			}
 
 			this.requestableLevels = requestableLevels;
-
-			//for(var mapIter = 0; mapIter < maps.Length; mapIter++) {
-			//	var mapHash = GetHashOfPreview(maps[mapIter]);
-
-			//	if(mapHash == null || !songDetails.songs.FindByHash(mapHash, out var song))
-			//		continue;
-
-			//	bool hadAny = false;
-
-			//	var s = new ValidSong() {
-			//		level = maps[i]
-			//	};
-
-			//	for(int i = (int)song.diffOffset; i < song.diffOffset + song.diffCount; i++) {
-			//		var diff = songDetails.difficulties[i];
-
-			//		// Checking this with SongDetails is doodoo - Should rather check on the map directly
-			//		if(diff.notes == 0 || (diff.mods != SongDetailsCache.Structs.MapMods.Chroma && (int)diff.mods != 0))
-			//			continue;
-
-			//		var stars = diff.stars;
-
-			//		if(stars < Config.Instance.filter_minStars || stars > Config.Instance.filter_maxStars)
-			//			continue;
-
-			//		hadAny = true;
-			//		s.validDiffs |= (int)Math.Pow(2, (int)diff.difficulty);
-			//	}
-
-			//	if(hadAny)
-			//		newFilteredLevels[mapHash] = s;
-			//}
 		}
 
 		public static string GetHashOfPreview(IPreviewBeatmapLevel preview) {

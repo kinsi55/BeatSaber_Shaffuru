@@ -7,6 +7,14 @@
 					<slider-setting value='filter_minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' bind-value='true' apply-on-change='true'
 						hover-hint='Songs must be at least this long to be allowed'
 					/>
+				</macro.as-host>
+				<horizontal>
+					<toggle-setting value='filter_enableAdvancedFilters' text='Highlighted Playlist difficulties' bind-value='true' apply-on-change='true'
+						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
+					/>
+					<button id='button_advancedFiltersConfig' text='Configure' event-click='OpenAdvancedFiltersModal'/>
+				</horizontal>
+				<macro.as-host host='config'>
 					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' bind-value='true' apply-on-change='true'
 						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
 					/>
@@ -96,42 +104,33 @@
 		</vertical>
 	</horizontal>
 
-	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='75' size-delta-y='85'>
+	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='75' size-delta-y='67'>
 		<vertical preferred-width='75' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
-			<horizontal pad-bottom='-5' pad-top='3'>
-				<horizontal bg='panel-top-gradient'>
-					<text text="Shaffuru - Advanced Filters" align='Center' font-size='4'/>
-				</horizontal>
+			<horizontal bg='panel-top-gradient'>
+				<text text="Shaffuru - Advanced Filters" align='Center' font-size='4'/>
 			</horizontal>
-			<!-- This is complete garbage -->
-			<horizontal pad-left='-6'>
-				<settings-container preferred-height='71'>
-					<modifier-container child-expand-width='true' child-expand-height='true' preferred-width='67'>
-						<macro.as-host host='config'>
-							<slider-setting value='filter_advanced_njs_min' text='Min. NJS' min='0' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
-							<slider-setting value='filter_advanced_njs_max' text='Max. NJS' min='10' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
-							<slider-setting value='filter_advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' bind-value='true' apply-on-change='true'/>
-							<slider-setting value='filter_advanced_nps_max' text='Max. Note/s' min='2' max='20' increment='0.2' bind-value='true' apply-on-change='true'/>
-							<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' bind-value='true' apply-on-change='true'/>
-							<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' bind-value='true' apply-on-change='true'/>
-						</macro.as-host>
-					</modifier-container>
-				</settings-container>
+			<horizontal>
+				<modifier-container child-expand-width='true'>
+					<macro.as-host host='config'>
+						<slider-setting value='filter_advanced_njs_min' text='Min. NJS' min='0' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
+						<slider-setting value='filter_advanced_njs_max' text='Max. NJS' min='10' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
+						<slider-setting value='filter_advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' bind-value='true' apply-on-change='true'/>
+						<slider-setting value='filter_advanced_nps_max' text='Max. Note/s' min='2' max='20' increment='0.2' bind-value='true' apply-on-change='true'/>
+						<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' bind-value='true' apply-on-change='true'/>
+						<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' bind-value='true' apply-on-change='true'/>
+					</macro.as-host>
+				</modifier-container>
 			</horizontal>
-			<horizontal pad-top='-2'>
-				<vertical>
-					<button event-click='CloseAdvancedFiltersModal' text='Close' min-width='20'/>
-				</vertical>
+			<horizontal>
+				<button event-click='CloseAdvancedFiltersModal' text='Close' min-width='20'/>
 			</horizontal>
 		</vertical>
 	</modal>
 
 	<modal move-to-center='true' hide-event='CloseStartModal' show-event='OpenStartModal' size-delta-x='80' size-delta-y='52'>
 		<vertical preferred-width='80' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
-			<horizontal>
-				<horizontal bg='panel-top-gradient'>
-					<text text="Shaffuru - Start" align='Center' font-size='4'/>
-				</horizontal>
+			<horizontal bg='panel-top-gradient'>
+				<text text="Shaffuru - Start" align='Center' font-size='4'/>
 			</horizontal>
 			<vertical horizontal-fit='Unconstrained' pad='2' spacing='2' child-expand-height='false' min-height='30'>
 				<text id='label_songCount' text='J' align='Center'/>
@@ -148,9 +147,9 @@
 		</vertical>
 	</modal>
 			
-	<modal move-to-center='true' hide-event='CloseSponsorModal' show-event='OpenSponsorModal' size-delta-x='80' size-delta-y='82'>
+	<modal move-to-center='true' hide-event='CloseSponsorModal' show-event='OpenSponsorModal' size-delta-x='80' size-delta-y='81'>
 		<vertical preferred-width='80' vertical-fit='PreferredSize' pad-left='2' pad-right='2' spacing='2' child-expand-width='true'>
-			<horizontal pad-bottom='2' pad-top='1'>
+			<horizontal pad-bottom='2'>
 				<horizontal bg='panel-top-gradient'>
 					<text text="Shaffuru - Sponsors" align='Center' font-size='4'/>
 				</horizontal>

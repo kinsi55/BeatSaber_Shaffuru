@@ -22,6 +22,16 @@ namespace Shaffuru {
 		public virtual bool filter_playlist_onlyHighlighted { get; set; } = true;
 		public virtual int filter_minSeconds { get; set; } = 10;
 
+		public virtual bool filter_enableAdvancedFilters { get; set; } = false;
+		public virtual float filter_advanced_njs_min { get; set; } = 0f;
+		public virtual float filter_advanced_njs_max { get; set; } = 30f;
+		public virtual float filter_advanced_nps_min { get; set; } = 0f;
+		public virtual float filter_advanced_nps_max { get; set; } = 30f;
+		public virtual int filter_advanced_bpm_min { get; set; } = 0;
+		public virtual bool filter_advanced_only_ranked { get; set; } = false;
+
+
+
 		public virtual bool jumpcut_enabled { get; set; } = true;
 		// Maybe at some point. I feel like this would be a massive pain
 		//public virtual bool jumpcut_tryKeepParity { get; set; } = false;f

@@ -47,8 +47,21 @@ namespace Shaffuru.UI {
 			}
 		}
 
+		[UIComponent("button_advancedFiltersConfig")] NoTransitionsButton advancedFiltersConfigButton = null;
+
+		bool filter_enableAdvancedFilters {
+			get => config.filter_enableAdvancedFilters;
+			set {
+				if(advancedFiltersConfigButton != null)
+					advancedFiltersConfigButton.interactable = value;
+				config.filter_enableAdvancedFilters = value;
+			}
+		}
+
 		[UIAction("#post-parse")]
 		public void Parsed() {
+			// Trigger setter / set button interactable accordingly
+			filter_enableAdvancedFilters = filter_enableAdvancedFilters;
 			//filteredSongsLabel.text = $"Playable Levels: {(mapPool?.filteredLevels?.Length ?? 0)} ({(mapPool?.requestableLevels?.Count ?? 0)} requestable)";
 		}
 
@@ -78,8 +91,11 @@ namespace Shaffuru.UI {
 			}
 
 			startLevelButton.interactable = playable > 0;
-			// We cannot require 2 songs to be played if the is only one..
-			songQueueManager.history.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
+
+			if(playable > 0) {
+				// We cannot require 2 songs to be played if the is only one..
+				songQueueManager.history.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
+			}
 		}
 
 		[UIValue("playDuration")] int playDuration = 3;
