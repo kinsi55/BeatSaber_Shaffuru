@@ -153,6 +153,8 @@ namespace Shaffuru.GameLogic {
 			foreach(var x in _obstaclePoolContainer.activeItems)
 				x.Dissolve(dissolveTime);
 
+			HeckOffCutSoundsCrash.enablePatch = true;
+
 			if(!ramCleaner.TrySkip()) {
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);
 				customAudioSource.SetAudio(null);
@@ -181,8 +183,6 @@ namespace Shaffuru.GameLogic {
 			var reactionTime = Config.Instance.jumpcut_reactionTime;
 
 			var idkman = BeatmapObjectCallbackData_nextObjectIndexInLine[0].nextObjectIndexInLine;
-
-			HeckOffCutSoundsCrash.enablePatch = true;
 
 			for(var lineIndex = 0; lineIndex < BeatmapObjectSpawnController_InitData.noteLinesCount; lineIndex++) {
 				// Readonly? I dont think so.
