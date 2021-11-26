@@ -85,12 +85,14 @@ namespace Shaffuru.AppLogic {
 					if(split.Length > 2 && (Config.Instance.request_allowSpecificDiff || Config.Instance.request_allowSpecificTime)) {
 						var m = diffTimePattern.Match(message.Message);
 
-						if(split.Length >= 4 && !m.Groups["timeM"].Success) {
-							Msg($"@{sender} Invalid time (Ex: 2:33)", message.Channel);
-							return;
-						} else if(!m.Groups["diff"].Success) {
-							Msg($"@{sender} Invalid difficulty (Ex: 'hard' or 'ExpertPlus')", message.Channel);
-							return;
+						if(split.Length >= 4) {
+							if(!m.Groups["timeM"].Success) {
+								Msg($"@{sender} Invalid time (Ex: 2:33)", message.Channel);
+								return;
+							} else if(!m.Groups["diff"].Success) {
+								Msg($"@{sender} Invalid difficulty (Ex: 'hard' or 'ExpertPlus')", message.Channel);
+								return;
+							}
 						}
 
 						if(
