@@ -40,7 +40,7 @@ namespace Shaffuru.UI {
 		}
 
 		void LoadPlaylistsList() {
-			playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists().Select(x => x.packName).Prepend("None (All Songs)").ToList<object>();
+			playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists().Select(x => x.packName).Prepend("None (All Songs)").Distinct().ToList<object>();
 			if(playlistDropdown != null) {
 				playlistDropdown.values = playlists;
 				playlistDropdown.UpdateChoices();

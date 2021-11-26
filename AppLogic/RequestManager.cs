@@ -31,7 +31,7 @@ namespace Shaffuru.AppLogic {
 			twitch.SendTextMessage($"! {message}", channel);
 		}
 
-		Regex diffTimePattern = new Regex("(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?( (?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
 		private void Twitch_OnTextMessageReceived(IChatMessage message) {
 			if(Config.Instance.chat_request_enabled && message.Message.StartsWith("!chaos")) {

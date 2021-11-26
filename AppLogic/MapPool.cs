@@ -243,5 +243,11 @@ namespace Shaffuru.AppLogic {
 
 			return levelid.Substring(13, 40);
 		}
+		public static string GetLevelIdWithoutUniquenessAddition(string levelid) {
+			if(levelid.Length <= 53)
+				return levelid;
+
+			return levelid.Substring(0, 53);
+		}
 	}
 }

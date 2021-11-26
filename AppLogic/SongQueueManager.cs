@@ -62,14 +62,14 @@ namespace Shaffuru.AppLogic {
 
 			var x = queue.Dequeue();
 
-			history.Add(x.levelId.Length > 53 ? x.levelId.Substring(0, 53) : x.levelId);
+			history.Add(MapPool.GetLevelIdWithoutUniquenessAddition(x.levelId));
 
 			return x;
 		}
 
 		public int Count(Func<QueuedSong, bool> action) => queue.Count(action);
 		public bool Contains(Func<QueuedSong, bool> action) => queue.Any(action);
-		public bool IsInHistory(string levelId) => history?.Contains(levelId) == true;
+		public bool IsInHistory(string levelId) => history?.Contains(MapPool.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
 		public bool IsEmpty() => queue.Count == 0;
 
 		public bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;
