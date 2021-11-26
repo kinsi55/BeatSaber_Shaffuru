@@ -96,6 +96,36 @@
 		</vertical>
 	</horizontal>
 
+	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='75' size-delta-y='85'>
+		<vertical preferred-width='75' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
+			<horizontal pad-bottom='-5' pad-top='3'>
+				<horizontal bg='panel-top-gradient'>
+					<text text="Shaffuru - Advanced Filters" align='Center' font-size='4'/>
+				</horizontal>
+			</horizontal>
+			<!-- This is complete garbage -->
+			<horizontal pad-left='-6'>
+				<settings-container preferred-height='71'>
+					<modifier-container child-expand-width='true' child-expand-height='true' preferred-width='67'>
+						<macro.as-host host='config'>
+							<slider-setting value='filter_advanced_njs_min' text='Min. NJS' min='0' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
+							<slider-setting value='filter_advanced_njs_max' text='Max. NJS' min='10' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
+							<slider-setting value='filter_advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' bind-value='true' apply-on-change='true'/>
+							<slider-setting value='filter_advanced_nps_max' text='Max. Note/s' min='2' max='20' increment='0.2' bind-value='true' apply-on-change='true'/>
+							<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' bind-value='true' apply-on-change='true'/>
+							<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' bind-value='true' apply-on-change='true'/>
+						</macro.as-host>
+					</modifier-container>
+				</settings-container>
+			</horizontal>
+			<horizontal pad-top='-2'>
+				<vertical>
+					<button event-click='CloseAdvancedFiltersModal' text='Close' min-width='20'/>
+				</vertical>
+			</horizontal>
+		</vertical>
+	</modal>
+
 	<modal move-to-center='true' hide-event='CloseStartModal' show-event='OpenStartModal' size-delta-x='80' size-delta-y='52'>
 		<vertical preferred-width='80' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
 			<horizontal>
