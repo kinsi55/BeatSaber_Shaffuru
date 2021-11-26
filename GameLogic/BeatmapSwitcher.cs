@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using Shaffuru.HarmonyPatches;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +10,7 @@ using UnityEngine;
 using Zenject;
 
 namespace Shaffuru.GameLogic {
-	class BeatmapSwitcher : IInitializable {
+	class BeatmapSwitcher : IInitializable, IDisposable {
 		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_gameNotePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_gameNotePoolContainer");
 		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_bombNotePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_bombNotePoolContainer");
 		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_obstaclePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_obstaclePoolContainer");
@@ -181,6 +182,8 @@ namespace Shaffuru.GameLogic {
 
 			var idkman = BeatmapObjectCallbackData_nextObjectIndexInLine[0].nextObjectIndexInLine;
 
+			HeckOffCutSoundsCrash.enablePatch = true;
+
 			for(var lineIndex = 0; lineIndex < BeatmapObjectSpawnController_InitData.noteLinesCount; lineIndex++) {
 				// Readonly? I dont think so.
 				var line = (List<BeatmapObjectData>)_readonlyBeatmapData.beatmapLinesData[lineIndex].beatmapObjectsData;
@@ -267,6 +270,8 @@ namespace Shaffuru.GameLogic {
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
 			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime + oldJumpDuration - reactionTime + (audioTimeSyncController.songTime - timePre));
 
+			HeckOffCutSoundsCrash.enablePatch = false;
+
 			if(Config.Instance.jumpcut_gracePeriod > 0) {
 				//TODO: Not sure if we need jump or move duration here, need to test
 				yield return new WaitUntil(() => audioTimeSyncController.songTime > timePre + reactionTime);
@@ -274,6 +279,10 @@ namespace Shaffuru.GameLogic {
 				yield return new WaitForSeconds(Config.Instance.jumpcut_gracePeriod);
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
 			}
+		}
+
+		public void Dispose() {
+			HeckOffCutSoundsCrash.enablePatch = false;
 		}
 	}
 

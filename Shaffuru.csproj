@@ -152,7 +152,4 @@
   <ItemGroup>
     <Reference Update="System.Runtime.Serialization"></Reference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="HarmonyPatches\" />
-  </ItemGroup>
 </Project>

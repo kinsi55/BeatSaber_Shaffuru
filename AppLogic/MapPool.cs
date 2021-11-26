@@ -79,8 +79,6 @@ namespace Shaffuru.AppLogic {
 					.GetAllPlaylists(true)
 					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
 
-				Console.WriteLine(">>> {0}", x.Filename);
-
 				IEnumerable<IGrouping<IPreviewBeatmapLevel, PlaylistSong>> theThing = null;
 
 				if(x is LegacyPlaylist l) {
