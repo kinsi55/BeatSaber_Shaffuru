@@ -10,7 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
 namespace Shaffuru.AppLogic {
-	public class MapPool {
+	public class MapPool : IDisposable {
 		readonly BeatmapLevelsModel beatmapLevelsModel;
 
 		public static SongDetails songDetails;
@@ -61,6 +61,8 @@ namespace Shaffuru.AppLogic {
 			filteredLevels = null;
 			requestableLevels = null;
 		}
+
+		public void Dispose() => Clear();
 
 		public async Task ProcessBeatmapPool() {
 			var minLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
@@ -141,8 +143,7 @@ namespace Shaffuru.AppLogic {
 					}
 				}
 
-				if(songDetails == null)
-					songDetails = await SongDetails.Init();
+				songDetails ??= await SongDetails.Init();
 
 				foreach(var beatmapSet in map.previewDifficultyBeatmapSets) {
 					// For now we limit to just Standard characteristic. This might not be necessary

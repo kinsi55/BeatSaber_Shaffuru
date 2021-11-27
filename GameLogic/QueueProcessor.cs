@@ -55,7 +55,7 @@ namespace Shaffuru.GameLogic {
 				if(!Config.Instance.queue_pickRandomSongIfEmpty)
 					return;
 
-				var levels = mapPool.filteredLevels.Where(x => !songQueueManager.history.Contains(x.level.levelID));
+				var levels = mapPool.filteredLevels.Where(x => !SongQueueManager.history.Contains(x.level.levelID));
 
 				// Shouldnt ever be the case, failsafe
 				if(levels.Count() == 0)
@@ -65,7 +65,7 @@ namespace Shaffuru.GameLogic {
 
 				queuedSong = new QueuedSong(x.level.levelID, x.GetRandomValidDiff(), -1, -1, null);
 
-				songQueueManager.history.Add(x.level.levelID);
+				SongQueueManager.history.Add(x.level.levelID);
 			}
 
 			IDifficultyBeatmap outDiff = null;

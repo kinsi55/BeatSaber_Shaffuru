@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Shaffuru.AppLogic {
-	class SongQueueManager : IDisposable {
+	class SongQueueManager {
 		public class QueuedSong {
 			public string levelId { get; private set; }
 			public int diffIndex { get; private set; } = -1;
@@ -29,20 +29,27 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
-		Queue<QueuedSong> queue;
-		public RollingList<string> history { get; private set; }
+		static Queue<QueuedSong> queue;
+		public static RollingList<string> history { get; private set; }
 
 		readonly MapPool mapPool;
 
 		public SongQueueManager(MapPool mapPool) {
-			this.queue = new Queue<QueuedSong>();
-			this.history = new RollingList<string>(Config.Instance.queue_requeueLimit);
 			this.mapPool = mapPool;
+
+			queue ??= new Queue<QueuedSong>();
+
+			if(history == null) {
+				history = new RollingList<string>(Config.Instance.queue_requeueLimit);
+			} else {
+				history.SetSize(Config.Instance.queue_requeueLimit);
+			}
 		}
 
 		public bool EnqueueSong(string levelId, BeatmapDifficulty difficulty, float startTime = -1, float length = -1, string source = null) {
 			return EnqueueSong(new QueuedSong(levelId, difficulty, startTime, length, source));
 		}
+
 		public bool EnqueueSong(QueuedSong queuedSong) {
 			if(IsFull())
 				return false;
@@ -73,10 +80,5 @@ namespace Shaffuru.AppLogic {
 		public bool IsEmpty() => queue.Count == 0;
 
 		public bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;
-
-
-		public void Dispose() {
-			queue = null;
-		}
 	}
 }

@@ -94,7 +94,7 @@ namespace Shaffuru.UI {
 
 			if(playable > 0) {
 				// We cannot require 2 songs to be played if the is only one..
-				songQueueManager.history.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
+				SongQueueManager.history.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
 			}
 		}
 

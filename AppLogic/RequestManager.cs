@@ -7,9 +7,9 @@ using Zenject;
 using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.AppLogic {
-	class RequestManager : IInitializable {
-		ChatCoreInstance chatCore;
-		TwitchService twitch;
+	class RequestManager : IInitializable, IDisposable {
+		static ChatCoreInstance chatCore;
+		static TwitchService twitch;
 		SongQueueManager songQueueManager;
 
 		MapPool mapPool;
@@ -20,20 +20,24 @@ namespace Shaffuru.AppLogic {
 		}
 
 		public void Initialize() {
-			chatCore = ChatCoreInstance.Create();
+			chatCore ??= ChatCoreInstance.Create();
 
-			twitch = chatCore.RunTwitchServices();
+			twitch ??= chatCore.RunTwitchServices();
 
-			twitch.OnTextMessageReceived += (_, message) => Twitch_OnTextMessageReceived(message);
+			twitch.OnTextMessageReceived += Twitch_OnTextMessageReceived;
+		}
+
+		public void Dispose() {
+			twitch.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 		}
 
 		void Msg(string message, IChatChannel channel) {
 			twitch.SendTextMessage($"! {message}", channel);
 		}
 
-		Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-		private void Twitch_OnTextMessageReceived(IChatMessage message) {
+		private void Twitch_OnTextMessageReceived(IChatService _, IChatMessage message) {
 			if(Config.Instance.chat_request_enabled && message.Message.StartsWith("!chaos")) {
 				var sender = message.Sender.UserName;
 
