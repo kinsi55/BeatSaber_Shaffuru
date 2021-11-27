@@ -180,7 +180,7 @@ namespace Shaffuru.GameLogic {
 			// This is a MASSIVE amount of hack
 
 			var currentAudioTime = audioTimeSyncController.songTime;
-			var reactionTime = Config.Instance.jumpcut_reactionTime;
+			var reactionTime = Config.Instance.transition_reactionTime;
 
 			var idkman = BeatmapObjectCallbackData_nextObjectIndexInLine[0].nextObjectIndexInLine;
 
@@ -272,11 +272,11 @@ namespace Shaffuru.GameLogic {
 
 			HeckOffCutSoundsCrash.enablePatch = false;
 
-			if(Config.Instance.jumpcut_gracePeriod > 0) {
+			if(Config.Instance.transition_gracePeriod > 0) {
 				//TODO: Not sure if we need jump or move duration here, need to test
 				yield return new WaitUntil(() => audioTimeSyncController.songTime > timePre + reactionTime);
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
-				yield return new WaitForSeconds(Config.Instance.jumpcut_gracePeriod);
+				yield return new WaitForSeconds(Config.Instance.transition_gracePeriod);
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
 			}
 		}

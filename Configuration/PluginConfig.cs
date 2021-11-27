@@ -35,10 +35,10 @@ namespace Shaffuru {
 		public virtual bool jumpcut_enabled { get; set; } = true;
 		// Maybe at some point. I feel like this would be a massive pain
 		//public virtual bool jumpcut_tryKeepParity { get; set; } = false;f
-		public virtual float jumpcut_reactionTime { get; set; } = 0.5f;
+		public virtual float transition_reactionTime { get; set; } = 0.5f;
+		public virtual float transition_gracePeriod { get; set; } = 0.4f;
 		public virtual int jumpcut_minSeconds { get; set; } = 10;
 		public virtual int jumpcut_maxSeconds { get; set; } = 30;
-		public virtual float jumpcut_gracePeriod { get; set; } = 0.0f;
 
 		public virtual bool random_prefer_top_diff { get; set; } = false;
 
@@ -59,13 +59,13 @@ namespace Shaffuru {
 			if(jumpcut_minSeconds < 5)
 				jumpcut_minSeconds = 5;
 
-			if(jumpcut_gracePeriod > 1.2f)
-				jumpcut_gracePeriod = 1.2f;
+			if(transition_gracePeriod > 1.2f)
+				transition_gracePeriod = 1.2f;
 
-			if(jumpcut_reactionTime > 1f)
-				jumpcut_reactionTime = 1f;
-			else if(jumpcut_reactionTime < 0.3f)
-				jumpcut_reactionTime = 0.3f;
+			if(transition_reactionTime > 1f)
+				transition_reactionTime = 1f;
+			else if(transition_reactionTime < 0.3f)
+				transition_reactionTime = 0.3f;
 		}
 
 		/// <summary>

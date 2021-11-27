@@ -41,22 +41,22 @@
 				<text text='* Only respected when Jumpcut is enabled' color='cyan' font-size='3.5' align='Center'/>
 			</vertical>
 		</tab>
-		<tab tags='tabs' tab-name='Jumpcut'>
+		<tab tags='tabs' tab-name='Map Transition'>
 			<macro.as-host host='config'>
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
+					<slider-setting value='transition_reactionTime' text='Transition duration' min='0.3' max='1.0' increment='0.01' bind-value='true' apply-on-change='true'
+						hover-hint='How long should the transition from one song to another be?'
+					/>
+					<slider-setting value='transition_gracePeriod' text='Transition grace period' min='0.0' max='1.2' increment='0.01' bind-value='true' apply-on-change='true'
+						hover-hint='Amount of seconds that you cant lose health in when the map switches'
+					/>
 					<toggle-setting value='jumpcut_enabled' text='Enable Jumpcut' bind-value='true' apply-on-change='true'
 						hover-hint='Starts / Ends songs at random positions of the song instead of playing the entire song'
 					/>
-					<slider-setting value='jumpcut_reactionTime' text='Transition duration' min='0.3' max='1.0' increment='0.01' bind-value='true' apply-on-change='true'
-						hover-hint='How long should the transition from one song to another be?'
-					/>
-					<slider-setting value='jumpcut_gracePeriod' text='Transition grace period' min='0.0' max='1.2' increment='0.01' bind-value='true' apply-on-change='true'
-						hover-hint='Amount of seconds that you cant lose health in when the map switches'
-					/>
-					<slider-setting value='jumpcut_minSeconds' text='Minimum play duration' integer-only='true' min='5' max='40' bind-value='true' apply-on-change='true'
+					<slider-setting value='jumpcut_minSeconds' text='Jumpcut Min. play duration' integer-only='true' min='5' max='40' bind-value='true' apply-on-change='true'
 						hover-hint='How long should a specific song play at least?'
 					/>
-					<slider-setting value='jumpcut_maxSeconds' text='Maximum play duration' integer-only='true' min='10' max='60' bind-value='true' apply-on-change='true'
+					<slider-setting value='jumpcut_maxSeconds' text='Jumpcut Max. play duration' integer-only='true' min='10' max='60' bind-value='true' apply-on-change='true'
 						hover-hint='How long should a specific song play at most?'
 					/>
 				</modifier-container>
