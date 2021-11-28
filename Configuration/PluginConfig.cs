@@ -13,14 +13,14 @@ namespace Shaffuru {
 
 
 		public virtual bool chat_request_enabled { get; set; } = true;
-		public virtual bool chat_currentmap_enabled { get; set; } = false;
+		//public virtual bool chat_currentmap_enabled { get; set; } = false;
 		public virtual bool request_allowSpecificDiff { get; set; } = false;
 		public virtual bool request_allowSpecificTime { get; set; } = false;
 		public virtual int request_limitPerUser { get; set; } = 2;
 
 		public virtual string filter_playlist { get; set; } = "None (All Songs)";
 		public virtual bool filter_playlist_onlyHighlighted { get; set; } = true;
-		public virtual int filter_minSeconds { get; set; } = 10;
+		public virtual int filter_minSeconds { get; set; } = 15;
 
 		public virtual bool filter_enableAdvancedFilters { get; set; } = false;
 		public virtual float filter_advanced_njs_min { get; set; } = 0f;
@@ -32,7 +32,7 @@ namespace Shaffuru {
 
 
 
-		public virtual bool jumpcut_enabled { get; set; } = true;
+		public virtual bool jumpcut_enabled { get; set; } = false;
 		// Maybe at some point. I feel like this would be a massive pain
 		//public virtual bool jumpcut_tryKeepParity { get; set; } = false;f
 		public virtual float transition_reactionTime { get; set; } = 0.5f;
@@ -53,8 +53,8 @@ namespace Shaffuru {
 		/// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
 		/// </summary>
 		public virtual void Changed() {
-			if(filter_minSeconds < 10)
-				filter_minSeconds = 10;
+			if(filter_minSeconds < 15)
+				filter_minSeconds = 15;
 
 			if(jumpcut_minSeconds < 5)
 				jumpcut_minSeconds = 5;

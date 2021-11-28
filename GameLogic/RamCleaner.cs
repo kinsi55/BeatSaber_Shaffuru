@@ -24,6 +24,7 @@ namespace Shaffuru.GameLogic {
 		}
 
 		public bool TrySkip() {
+			// TODO: Maybe in addition to requiring at least N maps to have been played, check if free system memory is actually low
 			return cleanSkips++ < 20;
 		}
 
@@ -35,8 +36,8 @@ namespace Shaffuru.GameLogic {
 			cleanInfoText.SetActive(true);
 
 			/*
-			 * I have no idea why I need to do it 8 times, but It is always the 8th
-			 * time when the memory is ACTUALLY cleared
+			 * I have no idea why I need to do it 8 times, but It is always the 7-8th
+			 * time when the memory is ACTUALLY freed
 			 */
 			for(var i = 0; i < 8; i++) {
 				yield return new WaitForSeconds(0.2f);
