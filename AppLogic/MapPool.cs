@@ -130,7 +130,7 @@ namespace Shaffuru.AppLogic {
 				if(songHash != null && map is CustomPreviewBeatmapLevel customMap) {
 					var extraData = SongCore.Collections.RetrieveExtraSongData(songHash, customMap.customLevelPath);
 
-					if(extraData == null)
+					if(extraData?._difficulties == null)
 						continue;
 
 					mappedExtraData = new Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData>();
