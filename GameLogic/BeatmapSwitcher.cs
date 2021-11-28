@@ -169,12 +169,15 @@ namespace Shaffuru.GameLogic {
 				var s = audioTimeSyncController.songTime;
 				for(var i = 0; i < 20; i++)
 					yield return null;
-				yield return new WaitUntil(() => audioTimeSyncController.songTime - s >= 0.3f);
+				yield return new WaitUntil(() => audioTimeSyncController == null || audioTimeSyncController.songTime - s >= 0.3f);
 			}
 
 
 			// Force this to execute after Behaviour Update()'s so the TimeSyncController is up-to-date
 			yield return null;
+
+			if(audioTimeSyncController == null)
+				yield break;
 
 			// Yeet everything from the beatmap, starting from the index the map is being currently processed from
 			// This is a MASSIVE amount of hack
@@ -263,7 +266,10 @@ namespace Shaffuru.GameLogic {
 
 			var timePre = audioTimeSyncController.songTime;
 			// Wait before swapping in the new audio until the new notes are a bit closer. Feels better
-			yield return new WaitUntil(() => audioTimeSyncController.songTime - timePre >= Math.Min(reactionTime * 0.5f, startTime));
+			yield return new WaitUntil(() => audioTimeSyncController == null || audioTimeSyncController.songTime - timePre >= Math.Min(reactionTime * 0.5f, startTime));
+
+			if(audioTimeSyncController == null)
+				yield break;
 
 			// New audio
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
@@ -274,9 +280,18 @@ namespace Shaffuru.GameLogic {
 
 			if(Config.Instance.transition_gracePeriod > 0) {
 				//TODO: Not sure if we need jump or move duration here, need to test
-				yield return new WaitUntil(() => audioTimeSyncController.songTime > timePre + reactionTime);
+				yield return new WaitUntil(() => audioTimeSyncController == null || audioTimeSyncController.songTime > timePre + reactionTime);
+
+				if(audioTimeSyncController == null)
+					yield break;
+
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
+
 				yield return new WaitForSeconds(Config.Instance.transition_gracePeriod);
+
+				if(audioTimeSyncController == null)
+					yield break;
+
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
 			}
 		}
