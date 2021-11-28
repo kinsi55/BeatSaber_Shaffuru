@@ -79,10 +79,14 @@ namespace Shaffuru.MenuLogic {
 				playerDataModel.playerData.gameplayModifiers,
 				playerDataModel.playerData.playerSpecificSettings, // gameplaySetupViewController.playerSettings is only initialized after entering solo once
 				null,
-				"Lmao",
+				"Exit",
 				false,
 				null,
-				(a, b) => { Console.WriteLine("Finished"); }
+				(a, b) => {
+					// TODO: Handle other cases in some way maybe? Some end stats screen?
+					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart)
+						Start(lengthSeconds);
+				}
 			);
 		}
 	}
