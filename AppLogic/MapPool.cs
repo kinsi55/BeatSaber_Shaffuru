@@ -69,6 +69,7 @@ namespace Shaffuru.AppLogic {
 
 			var maps = beatmapLevelsModel
 				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
+				.Where(x => !(x is PreviewBeatmapLevelPackSO))
 				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels)
 				.Where(x => x.songDuration - x.songTimeOffset >= minLength);
 
