@@ -1,4 +1,5 @@
-# Shaffuru | シャッフル
+# Shaffuru
+### シャッフル | Shuffle in Japanese
 
 Endless Mode evolved. You pick a duration to play for and it keeps feeding you songs that you have downloaded in a random order.
 
