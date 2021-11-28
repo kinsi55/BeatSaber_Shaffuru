@@ -130,8 +130,10 @@ namespace Shaffuru.GameLogic {
 
 				if(queuedSong.length > 0) {
 					length = Mathf.Clamp(queuedSong.length, Config.Instance.jumpcut_minSeconds, Config.Instance.jumpcut_maxSeconds);
-				} else {
+				} else if(Config.Instance.jumpcut_maxSeconds > Config.Instance.jumpcut_minSeconds) {
 					length = UnityEngine.Random.Range(Config.Instance.jumpcut_minSeconds, Config.Instance.jumpcut_maxSeconds);
+				} else {
+					length = Config.Instance.jumpcut_maxSeconds;
 				}
 
 				length = Mathf.Clamp(length, 0, songLength);
