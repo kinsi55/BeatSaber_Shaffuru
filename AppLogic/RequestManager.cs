@@ -38,7 +38,7 @@ namespace Shaffuru.AppLogic {
 		static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
 		private void Twitch_OnTextMessageReceived(IChatService _, IChatMessage message) {
-			if(Config.Instance.chat_request_enabled && message.Message.StartsWith("!chaos")) {
+			if(Config.Instance.chat_request_enabled && (message.Message.StartsWith("!chaos") || message.Message.StartsWith("!sr"))) {
 				var sender = message.Sender.UserName;
 
 				if(mapPool.filteredLevels == null) {

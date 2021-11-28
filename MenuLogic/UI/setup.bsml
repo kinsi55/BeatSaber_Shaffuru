@@ -28,12 +28,12 @@
 				<macro.as-host host='config'>
 					<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' bind-value='true' apply-on-change='true'/>-->
-						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!chaos)' bind-value='true' apply-on-change='true'/>
+						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr [bsr code])' bind-value='true' apply-on-change='true'/>
 						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' bind-value='true' apply-on-change='true'
-							hover-hint='Usage: !chaos 25f Normal or !chaos 25f ExpertPlus 4:20'
+							hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
 						/>
 						<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *' bind-value='true' apply-on-change='true'
-							hover-hint='Usage: !chaos 25f 4:20 or !chaos 25f Expert 4:20'
+							hover-hint='Usage: !sr 25f 4:20 or !sr 25f Expert 4:20'
 						/>
 						<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' bind-value='true' apply-on-change='true'/>
 					</modifier-container>
