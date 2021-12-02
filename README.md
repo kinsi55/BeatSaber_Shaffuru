@@ -28,6 +28,11 @@ For now - **Make sure to not use any mods that disable score submission** as tha
 
 Click the Shaffuru Mod Button in the Main Menu, configure the Settings as you please and then click the Play button at the bottom. It will tell you how many maps you have that fit your configured options, give you an option to pick how long you want to play and off you go.
 
+### Chat Requests
+
+As mentioned before, this can be used completely offline, but if you are streaming and want to take song requests from chat theres a builtin queue.
+Songs can be requested with `!sr [bsr id] ([Difficulty]) ([Time])`. Difficulty and Time are both optional and are ignored if not permitted to be picked, so examples on how to queue a Song would be `!sr 25f ExpertPlus 4:20`, `!sr 25f 3:20` or just `!sr 25f`. Depending on the settings, difficulty and start time are automatically / randomly picked if not explicity given.
+
 ## Limitations
 
 - If a map has any requirement it cannot be played
