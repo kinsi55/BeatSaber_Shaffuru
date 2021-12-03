@@ -1,15 +1,16 @@
-﻿using ChatCore;
-using ChatCore.Interfaces;
-using ChatCore.Services.Twitch;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
+using CatCore;
+using CatCore.Models.Twitch;
+using CatCore.Models.Twitch.IRC;
+using CatCore.Services.Twitch.Interfaces;
 using Zenject;
 using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.AppLogic {
 	class RequestManager : IInitializable, IDisposable {
-		static ChatCoreInstance chatCore;
-		static TwitchService twitch;
+		static CatCoreInstance chatCore;
+		static ITwitchService twitch;
 		SongQueueManager songQueueManager;
 
 		MapPool mapPool;
@@ -20,7 +21,7 @@ namespace Shaffuru.AppLogic {
 		}
 
 		public void Initialize() {
-			chatCore ??= ChatCoreInstance.Create();
+			chatCore ??= CatCoreInstance.Create();
 
 			twitch ??= chatCore.RunTwitchServices();
 
@@ -31,13 +32,13 @@ namespace Shaffuru.AppLogic {
 			twitch.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 		}
 
-		void Msg(string message, IChatChannel channel) {
-			twitch.SendTextMessage($"! {message}", channel);
+		void Msg(string message, TwitchChannel channel) {
+			channel.SendMessage($"! {message}");
 		}
 
 		static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-		private void Twitch_OnTextMessageReceived(IChatService _, IChatMessage message) {
+		private void Twitch_OnTextMessageReceived(ITwitchService _, TwitchMessage message) {
 			if(Config.Instance.chat_request_enabled && (message.Message.StartsWith("!chaos") || message.Message.StartsWith("!sr"))) {
 				var sender = message.Sender.UserName;
 
