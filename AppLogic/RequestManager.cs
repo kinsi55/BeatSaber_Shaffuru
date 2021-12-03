@@ -140,7 +140,7 @@ namespace Shaffuru.AppLogic {
 						if(queued) {
 							Msg($"@{sender} Queued {split[1]} - {theMappe.level.songName} ({(BeatmapDifficulty)diff})", message.Channel);
 						} else {
-							Msg($"@{sender} Couldnt queue map (Unknown error)", message.Channel);
+							Msg($"@{sender} Couldn't queue map (Unknown error)", message.Channel);
 						}
 					}
 				}
