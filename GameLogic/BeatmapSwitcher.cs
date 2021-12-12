@@ -160,9 +160,10 @@ namespace Shaffuru.GameLogic {
 			HeckOffCutSoundsCrash.enablePatch = true;
 
 			if(!ramCleaner.TrySkip()) {
+				beatmapObjectCallbackController.Pause();
+
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);
 				customAudioSource.SetAudio(null);
-
 				audioSource.Pause();
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.2f);
@@ -174,11 +175,14 @@ namespace Shaffuru.GameLogic {
 				for(var i = 0; i < 20; i++)
 					yield return null;
 				yield return new WaitUntil(() => audioTimeSyncController == null || audioTimeSyncController.songTime - s >= 0.3f);
+
+				beatmapObjectCallbackController.Resume();
+			} else {
+				// Force this to execute after Behaviour Update()'s so the TimeSyncController is up-to-date
+				yield return null;
 			}
 
 
-			// Force this to execute after Behaviour Update()'s so the TimeSyncController is up-to-date
-			yield return null;
 
 			if(audioTimeSyncController == null)
 				yield break;
