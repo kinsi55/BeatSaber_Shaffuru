@@ -42,6 +42,8 @@ namespace Shaffuru {
 
 		public virtual bool random_prefer_top_diff { get; set; } = false;
 
+		public virtual int ramclearer_frequency { get; set; } = 25;
+
 		/// <summary>
 		/// This is called whenever BSIPA reads the config from disk (including when file changes are detected).
 		/// </summary>
@@ -58,6 +60,11 @@ namespace Shaffuru {
 
 			if(jumpcut_minSeconds < 5)
 				jumpcut_minSeconds = 5;
+
+			if(ramclearer_frequency > 50)
+				ramclearer_frequency = 50;
+			else if(ramclearer_frequency < 20)
+				ramclearer_frequency = 20;
 
 			if(transition_gracePeriod > 1.2f)
 				transition_gracePeriod = 1.2f;

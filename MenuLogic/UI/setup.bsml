@@ -82,11 +82,14 @@
 				</horizontal>
 			</vertical>
 		</tab>
-		<tab tags='tabs' tab-name='Random Picker'>
+		<tab tags='tabs' tab-name='Misc'>
 			<macro.as-host host='config'>
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 					<toggle-setting value='random_prefer_top_diff' text='Always pick highest Difficulty' apply-on-change='true'
 						hover-hint='Always pick the highest diff when selecting a random song'
+					/>
+					<slider-setting value='ramclearer_frequency' text='RAM clearing frequency' apply-on-change='true' min='25' max='50' integer-only='true'
+						hover-hint='After how many played maps should the RAM be cleared?'
 					/>
 				</modifier-container>
 			</macro.as-host>
