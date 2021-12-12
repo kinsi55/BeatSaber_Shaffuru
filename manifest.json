@@ -3,13 +3,13 @@
     "id": "Shaffuru",
     "name": "Shaffuru",
     "author": "Kinsi55",
-    "version": "0.0.5",
-    "description": "",
-    "gameVersion": "1.18.0",
+    "version": "0.0.6",
+    "description": "Endless Mode evolved - Allows you to play a randomly* picked list of songs in various different ways",
+    "gameVersion": "1.19.0",
     "dependsOn": {
         "BSIPA": "^4.0.5",
         "SongCore": "^3.8.0",
-        "SiraUtil": "^2.5.8",
+        "SiraUtil": "^3.0.0-rc1",
         "BeatSaberMarkupLanguage": "^1.5.11",
         "SongDetailsCache": "^1.1.8"
     },

@@ -22,6 +22,7 @@ namespace Shaffuru.GameLogic {
 		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_nextEventIndex = AccessTools.Field(typeof(BeatmapObjectCallbackController), "_nextEventIndex");
 
 		static readonly FieldInfo FIELD_AudioTimeSyncController_audioLatency = AccessTools.Field(typeof(AudioTimeSyncController), "_audioLatency");
+		static readonly FieldInfo FIELD_AudioTimeSyncController_audioSource = AccessTools.Field(typeof(AudioTimeSyncController), "_audioSource");
 
 		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect = AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
 
@@ -113,7 +114,7 @@ namespace Shaffuru.GameLogic {
 			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController)).SetAudioSource(customAudioSource.source);
 
 			// We dont need that to play
-			audioTimeSyncController.audioSource.mute = true;
+			((AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController)).mute = true;
 			Plugin.Log.Debug("BeatmapSwitcher loaded");
 		}
 
@@ -124,6 +125,7 @@ namespace Shaffuru.GameLogic {
 				BeatmapObjectSpawnController_InitData.noteLinesCount,
 				njs,
 				bpm,
+				BeatmapObjectSpawnMovementData.NoteJumpValueType.BeatOffset,
 				offset,
 				// This should be fixed, based off player height
 				BeatmapObjectSpawnController_InitData.jumpOffsetY,
@@ -143,7 +145,9 @@ namespace Shaffuru.GameLogic {
 			var oldJumpDuration = beatmapObjectSpawnController.jumpDuration;
 			var oldMoveDuration = beatmapObjectSpawnController.moveDuration;
 
-			var dissolveTime = (oldMoveDuration * 0.2f) / audioTimeSyncController.audioSource.pitch;
+			var audioSource = (AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController);
+
+			var dissolveTime = (oldMoveDuration * 0.2f) / audioSource.pitch;
 
 			// We are switching to the new map... Dissolve everything thats active right now
 			foreach(var x in _gameNotePoolContainer.activeItems)
@@ -159,13 +163,13 @@ namespace Shaffuru.GameLogic {
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);
 				customAudioSource.SetAudio(null);
 
-				audioTimeSyncController.audioSource.Pause();
+				audioSource.Pause();
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.2f);
 				yield return ramCleaner.ClearRam();
 
 				// Make sure we have had at least 20 frames, not just half a second
-				audioTimeSyncController.audioSource.UnPause();
+				audioSource.UnPause();
 				var s = audioTimeSyncController.songTime;
 				for(var i = 0; i < 20; i++)
 					yield return null;

@@ -4,22 +4,22 @@
 		<tab tags='tabs' tab-name='Song Filtering'>
 			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 				<macro.as-host host='config'>
-					<slider-setting value='filter_minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' bind-value='true' apply-on-change='true'
+					<slider-setting value='filter_minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' apply-on-change='true'
 						hover-hint='Songs must be at least this long to be allowed'
 					/>
 				</macro.as-host>
 				<horizontal>
-					<toggle-setting value='filter_enableAdvancedFilters' text='Enable more Filter settings' bind-value='true' apply-on-change='true'
+					<toggle-setting value='filter_enableAdvancedFilters' text='Enable more Filter settings' apply-on-change='true'
 						hover-hint='When enabled only songs which are uploaded on BeatSaver will be playable'
 					/>
 					<button id='button_advancedFiltersConfig' text='Configure' event-click='OpenAdvancedFiltersModal'/>
 				</horizontal>
 				<macro.as-host host='config'>
-					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' bind-value='true' apply-on-change='true'
+					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
 						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
 					/>
 				</macro.as-host>
-				<dropdown-list-setting id='dropdown_playlist' value='filter_playlist' choices='playlists' text='Playlist' bind-value='true' apply-on-change='true'/>
+				<dropdown-list-setting id='dropdown_playlist' value='filter_playlist' choices='playlists' text='Playlist' apply-on-change='true'/>
 			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Chat Commands'>
@@ -27,15 +27,15 @@
 				<text text='Chat Integration requires you to have ChatCore installed and configured to work!' color='grey' font-size='3.5' align='Center'/>
 				<macro.as-host host='config'>
 					<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' bind-value='true' apply-on-change='true'/>-->
-						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr [bsr code])' bind-value='true' apply-on-change='true'/>
-						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' bind-value='true' apply-on-change='true'
+						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->
+						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr [bsr code])' apply-on-change='true'/>
+						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' apply-on-change='true'
 							hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
 						/>
-						<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *' bind-value='true' apply-on-change='true'
+						<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *' apply-on-change='true'
 							hover-hint='Usage: !sr 25f 4:20 or !sr 25f Expert 4:20'
 						/>
-						<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' bind-value='true' apply-on-change='true'/>
+						<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' apply-on-change='true'/>
 					</modifier-container>
 				</macro.as-host>
 				<text text='* Only respected when Jumpcut is enabled' color='cyan' font-size='3.5' align='Center'/>
@@ -44,19 +44,19 @@
 		<tab tags='tabs' tab-name='Map Transition'>
 			<macro.as-host host='config'>
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-					<slider-setting value='transition_reactionTime' text='Transition duration (Seconds)' min='0.3' max='1.0' increment='0.01' bind-value='true' apply-on-change='true'
+					<slider-setting value='transition_reactionTime' text='Transition duration (Seconds)' min='0.3' max='1.0' increment='0.01' apply-on-change='true'
 						hover-hint='How long should the transition from one song to another be?'
 					/>
-					<slider-setting value='transition_gracePeriod' text='Transition grace period (Seconds)' min='0.0' max='1.2' increment='0.01' bind-value='true' apply-on-change='true'
+					<slider-setting value='transition_gracePeriod' text='Transition grace period (Seconds)' min='0.0' max='1.2' increment='0.01' apply-on-change='true'
 						hover-hint='Amount of seconds that you cant lose health in when the map switches'
 					/>
-					<toggle-setting value='jumpcut_enabled' text='Enable Jumpcut (Aka "Chaosmod")' bind-value='true' apply-on-change='true'
+					<toggle-setting value='jumpcut_enabled' text='Enable Jumpcut (Aka "Chaosmod")' apply-on-change='true'
 						hover-hint='Starts / Ends songs at random positions of the song instead of playing the entire song'
 					/>
-					<slider-setting value='jumpcut_minSeconds' text='Jumpcut Min. play duration' integer-only='true' min='5' max='40' bind-value='true' apply-on-change='true'
+					<slider-setting value='jumpcut_minSeconds' text='Jumpcut Min. play duration' integer-only='true' min='5' max='40' apply-on-change='true'
 						hover-hint='How long should a specific song play at least?'
 					/>
-					<slider-setting value='jumpcut_maxSeconds' text='Jumpcut Max. play duration' integer-only='true' min='10' max='60' bind-value='true' apply-on-change='true'
+					<slider-setting value='jumpcut_maxSeconds' text='Jumpcut Max. play duration' integer-only='true' min='10' max='60' apply-on-change='true'
 						hover-hint='How long should a specific song play at most?'
 					/>
 				</modifier-container>
@@ -66,13 +66,13 @@
 			<vertical>
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 					<macro.as-host host='config'>
-						<slider-setting value='queue_sizeLimit' text='Queue size Limit' integer-only='true' min='16' max='69' bind-value='true' apply-on-change='true'
+						<slider-setting value='queue_sizeLimit' text='Queue size Limit' integer-only='true' min='16' max='69' apply-on-change='true'
 							hover-hint='How many songs, overall, can be queued at the same time?'
 						/>
-						<slider-setting value='queue_requeueLimit' text='Re-queue block' integer-only='true' min='0' max='69' bind-value='true' apply-on-change='true'
+						<slider-setting value='queue_requeueLimit' text='Re-queue block' integer-only='true' min='0' max='69' apply-on-change='true'
 							hover-hint='How many different songs must be played before a specific song can be played again? (This value is lowered as necessary depending on the amount of valid songs)'
 						/>
-						<toggle-setting value='queue_pickRandomSongIfEmpty' text='Use random song if nothing queued' bind-value='true' apply-on-change='true'
+						<toggle-setting value='queue_pickRandomSongIfEmpty' text='Use random song if nothing queued' apply-on-change='true'
 							hover-hint='Use / Pick a random song if there is no requests? Else it will just stay on silence until something is requested'
 						/>
 					</macro.as-host>
@@ -85,7 +85,7 @@
 		<tab tags='tabs' tab-name='Random Picker'>
 			<macro.as-host host='config'>
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-					<toggle-setting value='random_prefer_top_diff' text='Always pick highest Difficulty' bind-value='true' apply-on-change='true'
+					<toggle-setting value='random_prefer_top_diff' text='Always pick highest Difficulty' apply-on-change='true'
 						hover-hint='Always pick the highest diff when selecting a random song'
 					/>
 				</modifier-container>
@@ -104,20 +104,20 @@
 		</vertical>
 	</horizontal>
 
-	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='75' size-delta-y='67'>
-		<vertical preferred-width='75' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
+	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='85' size-delta-y='67'>
+		<vertical preferred-width='85' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
 			<horizontal bg='panel-top-gradient'>
 				<text text="Shaffuru - Advanced Filters" align='Center' font-size='4'/>
 			</horizontal>
 			<horizontal>
 				<modifier-container child-expand-width='true'>
 					<macro.as-host host='config'>
-						<slider-setting value='filter_advanced_njs_min' text='Min. NJS' min='0' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
-						<slider-setting value='filter_advanced_njs_max' text='Max. NJS' min='10' max='30' increment='0.25' bind-value='true' apply-on-change='true'/>
-						<slider-setting value='filter_advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' bind-value='true' apply-on-change='true'/>
-						<slider-setting value='filter_advanced_nps_max' text='Max. Note/s' min='2' max='20' increment='0.2' bind-value='true' apply-on-change='true'/>
-						<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' bind-value='true' apply-on-change='true'/>
-						<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' bind-value='true' apply-on-change='true'/>
+						<slider-setting value='filter_advanced_njs_min' text='Min. NJS' min='0' max='25' increment='0.25' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='filter_advanced_njs_max' text='Max. NJS' min='10' max='40' increment='0.25' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='filter_advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='filter_advanced_nps_max' text='Max. Note/s' min='2' max='25' increment='0.2' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' apply-on-change='true' show-buttons='true'/>
+						<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' apply-on-change='true'/>
 					</macro.as-host>
 				</modifier-container>
 			</horizontal>
@@ -134,7 +134,7 @@
 			</horizontal>
 			<vertical horizontal-fit='Unconstrained' pad='2' spacing='2' child-expand-height='false' min-height='30'>
 				<text id='label_songCount' text='J' align='Center'/>
-				<slider-setting value='playDuration' text='Play time' integer-only='true' min='3' max='120' formatter='PlayTimeFormatter' apply-on-change='true'/>
+				<slider-setting value='playDuration' text='Play time' integer-only='true' min='3' max='120' increment='1' formatter='PlayTimeFormatter' apply-on-change='true' show-buttons='true'/>
 			</vertical>
 			<horizontal>
 				<vertical>
