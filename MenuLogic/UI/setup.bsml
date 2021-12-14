@@ -91,6 +91,11 @@
 					<slider-setting value='ramclearer_frequency' text='RAM clearing frequency' apply-on-change='true' min='25' max='50' integer-only='true'
 						hover-hint='After how many played maps should the RAM be cleared?'
 					/>
+					<horizontal preferred-width="90">
+						<text color="#EEC" font-size="4" align="Center" word-wrapping="true"
+							text="⚠ You should probably not increase RAM clearing frequency above like 35 unless you either run almost nothing in the background, or have 32GB of RAM"
+						/>
+					</horizontal>
 				</modifier-container>
 			</macro.as-host>
 		</tab>
