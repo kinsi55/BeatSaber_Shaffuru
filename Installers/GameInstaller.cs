@@ -7,8 +7,11 @@ namespace Shaffuru.Installers {
 		public override void InstallBindings() {
 			var setupData = Container.Resolve<GameplayCoreSceneSetupData>();
 
+			Plugin.isShaffuruActive = false;
 			if(setupData.difficultyBeatmap.level.levelID != Anlasser.LevelId)
 				return;
+
+			Plugin.isShaffuruActive = true;
 
 			Container.BindInterfacesAndSelfTo<BeatmapLoader>().AsSingle();
 			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();

@@ -1,6 +1,8 @@
-﻿using Shaffuru.AppLogic;
+﻿using HarmonyLib;
+using Shaffuru.AppLogic;
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using UnityEngine;
 using Zenject;
@@ -15,19 +17,25 @@ namespace Shaffuru.GameLogic {
 
 		readonly AudioTimeSyncController audioTimeSyncController;
 
+
+		static readonly FieldInfo FIELD_PauseMenuManager_InitData_previewBeatmapLevel = AccessTools.Field(typeof(PauseMenuManager.InitData), "previewBeatmapLevel");
+		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapDifficulty = AccessTools.Field(typeof(PauseMenuManager.InitData), "beatmapDifficulty");
+		readonly PauseMenuManager.InitData pauseMenuManager_InitData;
+
 		public QueueProcessor(
 			BeatmapLoader beatmapLoader,
 			BeatmapSwitcher beatmapSwitcher,
 			SongQueueManager songQueueManager,
 			MapPool mapPool,
 			AudioTimeSyncController audioTimeSyncController,
-			GameplayCoreSceneSetupData _sceneSetupData
+			PauseMenuManager.InitData pauseMenuManager_InitData
 		) {
 			this.beatmapLoader = beatmapLoader;
 			this.beatmapSwitcher = beatmapSwitcher;
 			this.songQueueManager = songQueueManager;
 			this.mapPool = mapPool;
 			this.audioTimeSyncController = audioTimeSyncController;
+			this.pauseMenuManager_InitData = pauseMenuManager_InitData;
 		}
 
 		public void Initialize() {
@@ -70,9 +78,9 @@ namespace Shaffuru.GameLogic {
 
 			IDifficultyBeatmap outDiff = null;
 			IReadonlyBeatmapData outBeatmap = null;
+			BeatmapLevelsModel.GetBeatmapLevelResult loadedBeatmap = default;
 
 			await Task.Run(async () => {
-				BeatmapLevelsModel.GetBeatmapLevelResult loadedBeatmap;
 				try {
 					loadedBeatmap = await beatmapLoader.LoadBeatmap(queuedSong.levelId);
 
@@ -148,6 +156,9 @@ namespace Shaffuru.GameLogic {
 				length = 0;
 
 			beatmapSwitcher.SwitchToDifferentBeatmap(outDiff, outBeatmap, startTime, length);
+
+			FIELD_PauseMenuManager_InitData_previewBeatmapLevel.SetValue(pauseMenuManager_InitData, loadedBeatmap.beatmapLevel);
+			FIELD_PauseMenuManager_InitData_beatmapDifficulty.SetValue(pauseMenuManager_InitData, outDiff.difficulty);
 
 			isQueueingNewSong = false;
 		}
