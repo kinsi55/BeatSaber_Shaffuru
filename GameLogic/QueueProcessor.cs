@@ -123,7 +123,7 @@ namespace Shaffuru.GameLogic {
 
 			if(Config.Instance.jumpcut_enabled) {
 				if(queuedSong.startTime < 0) {
-					startTime = UnityEngine.Random.Range(0, songLength);
+					startTime = UnityEngine.Random.Range(songLength * .1f, (songLength - Config.Instance.jumpcut_minSeconds) * .9f);
 				} else {
 					startTime = queuedSong.startTime;
 				}
