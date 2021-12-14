@@ -122,12 +122,6 @@ namespace Shaffuru.GameLogic {
 			float length = songLength;
 
 			if(Config.Instance.jumpcut_enabled) {
-				if(queuedSong.startTime < 0) {
-					startTime = UnityEngine.Random.Range(songLength * .1f, (songLength - Config.Instance.jumpcut_minSeconds) * .9f);
-				} else {
-					startTime = queuedSong.startTime;
-				}
-
 				if(queuedSong.length > 0) {
 					length = Mathf.Clamp(queuedSong.length, Config.Instance.jumpcut_minSeconds, Config.Instance.jumpcut_maxSeconds);
 				} else if(Config.Instance.jumpcut_maxSeconds > Config.Instance.jumpcut_minSeconds) {
@@ -136,7 +130,13 @@ namespace Shaffuru.GameLogic {
 					length = Config.Instance.jumpcut_maxSeconds;
 				}
 
-				length = Mathf.Clamp(length, 0, songLength);
+				if(queuedSong.startTime < 0) {
+					startTime = UnityEngine.Random.Range(songLength * .1f, (songLength - length) * .9f);
+				} else {
+					startTime = queuedSong.startTime;
+				}
+
+				length = Mathf.Clamp(length, Math.Min(1, songLength), songLength);
 
 				startTime = Mathf.Clamp(startTime, 0, songLength - length);
 			}
