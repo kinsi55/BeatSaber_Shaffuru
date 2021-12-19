@@ -80,7 +80,7 @@ namespace Shaffuru.UI {
 			parserParams.EmitEvent("OpenStartModal");
 			var playable = 0;
 			try {
-				await mapPool.ProcessBeatmapPool();
+				await Task.Run(mapPool.ProcessBeatmapPool);
 				playable = (mapPool?.filteredLevels?.Length ?? 0);
 				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} on BeatSaver / requestable)";
 			} catch(Exception ex) {
