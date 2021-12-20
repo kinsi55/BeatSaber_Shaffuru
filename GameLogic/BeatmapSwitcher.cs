@@ -135,11 +135,11 @@ namespace Shaffuru.GameLogic {
 			);
 		}
 
-		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float lengthLimit = 0) {
-			audioTimeSyncController.StartCoroutine(Switcher(difficultyBeatmap, replacementBeatmapData, startTime, lengthLimit));
+		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float insertBeatmapUntilTime = 0) {
+			audioTimeSyncController.StartCoroutine(Switcher(difficultyBeatmap, replacementBeatmapData, startTime, insertBeatmapUntilTime));
 		}
 
-		IEnumerator Switcher(IDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float lengthLimit) {
+		IEnumerator Switcher(IDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float insertBeatmapUntilTime = 0) {
 			// Get the "spawn ahead" time the current song uses - These are notes which are spawned / moving in
 			// before the specific song location has been reached
 			var oldJumpDuration = beatmapObjectSpawnController.jumpDuration;
@@ -159,7 +159,7 @@ namespace Shaffuru.GameLogic {
 
 			HeckOffCutSoundsCrash.enablePatch = true;
 
-			if(!ramCleaner.TrySkip()) {
+			if(!ramCleaner.TrySkip() && audioTimeSyncController.songTime - audioTimeSyncController.songLength >= 30f) {
 				beatmapObjectCallbackController.Pause();
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);

@@ -52,6 +52,10 @@ namespace Shaffuru.GameLogic {
 			if(audioTimeSyncController.songTime < switchToNextBeatmapAt || isQueueingNewSong)
 				return;
 
+			// Dont queue a new song in the last 5 seconds... Kinda pointless
+			if(audioTimeSyncController.songLength - audioTimeSyncController.songTime <= 5f)
+				return;
+
 			isQueueingNewSong = true;
 
 			var queuedSong = songQueueManager.DequeueSong();
