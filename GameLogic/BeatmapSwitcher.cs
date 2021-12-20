@@ -147,7 +147,8 @@ namespace Shaffuru.GameLogic {
 
 			var audioSource = (AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController);
 
-			var dissolveTime = (oldMoveDuration * 0.2f) / audioSource.pitch;
+			var reactionTime = Config.Instance.transition_reactionTime;
+			var dissolveTime = reactionTime * 0.3f;
 
 			// We are switching to the new map... Dissolve everything thats active right now
 			foreach(var x in _gameNotePoolContainer.activeItems)
@@ -186,6 +187,14 @@ namespace Shaffuru.GameLogic {
 
 			if(audioTimeSyncController == null)
 				yield break;
+
+			// Dissolve again to be sure because Beat Saber™
+			foreach(var x in _gameNotePoolContainer.activeItems)
+				x.Dissolve(dissolveTime);
+			foreach(var x in _bombNotePoolContainer.activeItems)
+				x.Dissolve(dissolveTime);
+			foreach(var x in _obstaclePoolContainer.activeItems)
+				x.Dissolve(dissolveTime);
 
 			// Yeet everything from the beatmap, starting from the index the map is being currently processed from
 			// This is a MASSIVE amount of hack
