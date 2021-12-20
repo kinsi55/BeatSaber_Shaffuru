@@ -43,9 +43,6 @@ namespace Shaffuru.GameLogic {
 			//songQueueManager.EnqueueSong("custom_level_64B81F99B76742B3C70EAC3BDA4230ED55E0D2AD", BeatmapDifficulty.Hard, 50, 4);
 			//songQueueManager.EnqueueSong("custom_level_D77B25882287CD6CDF4E6D784BBE607C3295F79A", BeatmapDifficulty.Hard, 30, 5.5f);
 			//songQueueManager.EnqueueSong("custom_level_9F783CE7F810062852795F4CBDF8335245FD044A", BeatmapDifficulty.ExpertPlus, 137);
-
-			// Basegame always Initializes the RNG with seed 0 on scene change.. That would be kinda not very RNG probably maybe. Cant hurt.
-			UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 		}
 
 		public float switchToNextBeatmapAt = 1f;
@@ -68,6 +65,9 @@ namespace Shaffuru.GameLogic {
 				// Shouldnt ever be the case, failsafe
 				if(levels.Count() == 0)
 					return;
+
+				// Basegame always Initializes the RNG with seed 0 on scene change.. That would be kinda not very RNG probably maybe. Cant hurt.
+				UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
 
 				var x = levels.ElementAt(UnityEngine.Random.Range(0, levels.Count()));
 
