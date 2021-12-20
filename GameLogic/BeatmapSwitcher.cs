@@ -200,7 +200,6 @@ namespace Shaffuru.GameLogic {
 			// This is a MASSIVE amount of hack
 
 			var currentAudioTime = audioTimeSyncController.songTime;
-			var reactionTime = Config.Instance.transition_reactionTime;
 
 			var idkman = BeatmapObjectCallbackData_nextObjectIndexInLine[0].nextObjectIndexInLine;
 
@@ -215,15 +214,34 @@ namespace Shaffuru.GameLogic {
 					var obj = replacementLine[i];
 					// We only wanna insert items which would be at least moveDuration time away
 
-					//TODO: for obstacles, if the start time is in the past, but the end time isnt, move it accordingly so its still shown
 					var x = obj.time - startTime - oldJumpDuration;
-					if(x < 0f)
-						continue;
+					if(x < 0f) {
+						// If it is a wall, it could be a 20 second long wall that started 10 seconds ago
+						if(obj.beatmapObjectType != BeatmapObjectType.Obstacle)
+							continue;
 
-					if(lengthLimit > 0 && x > lengthLimit + 1)
+						var woll = (ObstacleData)obj;
+
+						// x is negative, the time it is in the "past", so obviously addition actually subtracts
+						var newLength = woll.duration - reactionTime + x;
+
+						if(newLength < 0)
+							continue;
+
+						woll.UpdateDuration(newLength);
+
+						x = 0f;
+					}
+
+					if(insertBeatmapUntilTime > 0 && x > insertBeatmapUntilTime + 1)
 						break;
 
-					obj.MoveTime(x + currentAudioTime + reactionTime);
+					var ttime = x + currentAudioTime + reactionTime;
+
+					if(ttime >= audioTimeSyncController.songLength - 0.5f)
+						break;
+
+					obj.MoveTime(ttime);
 
 					if(objInsertIndex < line.Count) {
 						line[objInsertIndex] = obj;
@@ -253,10 +271,10 @@ namespace Shaffuru.GameLogic {
 				var obj = replacementEvents[i];
 
 				var x = obj.time - startTime - oldJumpDuration;
-				if(x < 0f)
+				if(x < 0f || x > audioTimeSyncController.songLength)
 					continue;
 
-				if(lengthLimit > 0 && x > lengthLimit + 1)
+				if(insertBeatmapUntilTime > 0 && x > insertBeatmapUntilTime + 1)
 					break;
 
 				// readonly 😡
