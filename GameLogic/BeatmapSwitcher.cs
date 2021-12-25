@@ -125,7 +125,9 @@ namespace Shaffuru.GameLogic {
 				BeatmapObjectSpawnController_InitData.noteLinesCount,
 				njs,
 				bpm,
+#if !PRE1_19
 				BeatmapObjectSpawnMovementData.NoteJumpValueType.BeatOffset,
+#endif
 				offset,
 				// This should be fixed, based off player height
 				BeatmapObjectSpawnController_InitData.jumpOffsetY,
