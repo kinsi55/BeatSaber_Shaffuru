@@ -40,9 +40,13 @@
     <DisableCopyToPlugins>True</DisableCopyToPlugins>
     <DisableZipRelease>True</DisableZipRelease>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DefineConstants>TRACE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="Assets\triangle" />
     <None Remove="MenuLogic\UI\setup.bsml" />
+    <None Remove="MenuLogic\UI\Views\result.bsml" />
   </ItemGroup>
 
   <ItemGroup>
@@ -131,7 +135,8 @@
   <ItemGroup>
     <EmbeddedResource Include="Assets\triangle" />
     <EmbeddedResource Include="manifest.json" />
-    <EmbeddedResource Include="MenuLogic\UI\setup.bsml" />
+    <EmbeddedResource Include="MenuLogic\UI\Views\result.bsml" />
+    <EmbeddedResource Include="MenuLogic\UI\Views\setup.bsml" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="BeatSaberModdingTools.Tasks">

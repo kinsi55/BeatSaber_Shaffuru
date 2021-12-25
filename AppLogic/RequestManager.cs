@@ -126,7 +126,7 @@ namespace Shaffuru.AppLogic {
 					if(diff == -1)
 						diff = (int)theMappe.GetRandomValidDiff();
 
-					var queued = songQueueManager.EnqueueSong(new QueuedSong(
+					var queued = songQueueManager.EnqueueSong(new ShaffuruSong(
 						$"custom_level_{hash}",
 						diff,
 						startTime,

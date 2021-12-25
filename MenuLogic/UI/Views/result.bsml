@@ -1,0 +1,30 @@
+﻿<horizontal preferred-width="120" spacing="2" horizontal-fit="PreferredSize" xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<vertical pad='2' pad-right='9' pad-left='5' horizontal-fit='Unconstrained' child-expand-width='true'>
+		<custom-list id='songList' show-scrollbar='true' stick-scrolling='true' cell-size='7.5' select-cell='SongSelected'>
+			<horizontal id='bgContainer' bg='round-rect-panel' vertical-fit='PreferredSize' preferred-height='7.5' child-expand-width='false'>
+				<vertical preferred-width='8' horizontal-fit='PreferredSize' child-expand-width='false' pad='1' min-width='7.5'>
+					<image id='cover' preserve-aspect='true'/>
+				</vertical>
+				<vertical pad='1' horizontal-fit='Unconstrained'>
+					<horizontal>
+						<text text='~songName' align='MidlineLeft' font-size='3' overflow-mode='Ellipsis' word-wrapping='false'/>
+					</horizontal>
+					<horizontal spacing='2'>
+						<text text='~diffAndSource' align='MidlineLeft' font-size='2.3' font-color='#BBB' word-wrapping='true'/>
+						<text text='~playTime' align='MidlineRight' font-size='2.5' word-wrapping='false'/>
+					</horizontal>
+				</vertical>
+			</horizontal>
+		</custom-list>
+	</vertical>
+	<vertical bg='round-rect-panel' preferred-width='40' pad='4' spacing='3'>
+		<text id='sessionResult' text='Passed PogU' align='Center' font-size='5' color='#0F0'/>
+		<text id='sessionLength' text='Session Length: 69 Minutes' align='MidlineLeft' font-size='3'/>
+		<text id='songCount' text='Songs Played: 69' align='MidlineLeft' font-size='3'/>
+		<text id='sessionAcc' text='Accuracy: 69.69%' align='MidlineLeft' font-size='3'/>
+		<vertical horizontal-fit='Unconstrained' child-expand-height='false'>
+			<button on-click='PlaySelected' text='Play Selected' horizontal-fit='Unconstrained'/>
+			<primary-button on-click='closexd' text='Close' horizontal-fit='Unconstrained'/>
+		</vertical>
+	</vertical>
+</horizontal>

@@ -5,52 +5,28 @@ using System.Linq;
 
 namespace Shaffuru.AppLogic {
 	class SongQueueManager {
-		public class QueuedSong {
-			public string levelId { get; private set; }
-			public int diffIndex { get; private set; } = -1;
-			public float startTime { get; private set; }
-			public float length { get; private set; }
-			public string source { get; private set; }
-
-			public QueuedSong(string levelId, int diffIndex, float startTime = -1, float length = -1, string source = null) {
-				this.levelId = levelId;
-				this.diffIndex = diffIndex;
-				this.startTime = startTime;
-				this.length = length;
-				this.source = source;
-			}
-
-			public QueuedSong(string levelId, BeatmapDifficulty diff, float startTime = -1, float length = -1, string source = null) {
-				this.levelId = levelId;
-				this.diffIndex = (int)diff;
-				this.startTime = startTime;
-				this.length = length;
-				this.source = source;
-			}
-		}
-
-		static Queue<QueuedSong> queue;
-		public static RollingList<string> history { get; private set; }
+		static Queue<ShaffuruSong> queue;
+		public static RollingList<string> requeueBlockList { get; private set; }
 
 		readonly MapPool mapPool;
 
 		public SongQueueManager(MapPool mapPool) {
 			this.mapPool = mapPool;
 
-			queue ??= new Queue<QueuedSong>();
+			queue ??= new Queue<ShaffuruSong>();
 
-			if(history == null) {
-				history = new RollingList<string>(Config.Instance.queue_requeueLimit);
+			if(requeueBlockList == null) {
+				requeueBlockList = new RollingList<string>(Config.Instance.queue_requeueLimit);
 			} else {
-				history.SetSize(Config.Instance.queue_requeueLimit);
+				requeueBlockList.SetSize(Config.Instance.queue_requeueLimit);
 			}
 		}
 
 		public bool EnqueueSong(string levelId, BeatmapDifficulty difficulty, float startTime = -1, float length = -1, string source = null) {
-			return EnqueueSong(new QueuedSong(levelId, difficulty, startTime, length, source));
+			return EnqueueSong(new ShaffuruSong(levelId, difficulty, startTime, length, source));
 		}
 
-		public bool EnqueueSong(QueuedSong queuedSong) {
+		public bool EnqueueSong(ShaffuruSong queuedSong) {
 			if(IsFull())
 				return false;
 
@@ -63,20 +39,34 @@ namespace Shaffuru.AppLogic {
 
 		public void Clear() => queue?.Clear();
 
-		public QueuedSong DequeueSong() {
-			if(queue.Count == 0)
-				return null;
+		public ShaffuruSong GetNextSong() {
+			ShaffuruSong x;
 
-			var x = queue.Dequeue();
+			if(queue.Count == 0) {
+				var levels = mapPool.filteredLevels.Where(x => !SongQueueManager.requeueBlockList.Contains(x.level.levelID));
 
-			history.Add(MapPool.GetLevelIdWithoutUniquenessAddition(x.levelId));
+				// Shouldnt ever be the case, failsafe
+				if(levels.Count() == 0)
+					return null;
+
+				// Basegame always Initializes the RNG with seed 0 on scene change.. That would be kinda not very RNG probably maybe. Cant hurt.
+				UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
+
+				var l = levels.ElementAt(UnityEngine.Random.Range(0, levels.Count()));
+
+				x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff(), -1, -1, null);
+			} else {
+				x = queue.Dequeue();
+			}
+
+			requeueBlockList.Add(MapPool.GetLevelIdWithoutUniquenessAddition(x.levelId));
 
 			return x;
 		}
 
-		public int Count(Func<QueuedSong, bool> action) => queue.Count(action);
-		public bool Contains(Func<QueuedSong, bool> action) => queue.Any(action);
-		public bool IsInHistory(string levelId) => history?.Contains(MapPool.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
+		public int Count(Func<ShaffuruSong, bool> action) => queue.Count(action);
+		public bool Contains(Func<ShaffuruSong, bool> action) => queue.Any(action);
+		public bool IsInHistory(string levelId) => requeueBlockList.Contains(MapPool.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
 		public bool IsEmpty() => queue.Count == 0;
 
 		public bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;

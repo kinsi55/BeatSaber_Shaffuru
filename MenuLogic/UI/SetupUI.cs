@@ -15,14 +15,15 @@ using Zenject;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.Components.Settings;
 
-namespace Shaffuru.UI {
-	[HotReload(RelativePathToLayout = @"setup.bsml")]
-	[ViewDefinition("Shaffuru.MenuLogic.UI.setup.bsml")]
+namespace Shaffuru.MenuLogic.UI {
+	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]
+	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.setup.bsml")]
 	class SetupUI : BSMLAutomaticViewController {
 		Config config;
 		[Inject] readonly MapPool mapPool = null;
 		[Inject] readonly SongQueueManager songQueueManager = null;
 		[Inject] readonly Anlasser anlasser = null;
+		[Inject] readonly PlayedSongList playedSongList = null;
 
 		[UIParams] readonly BSMLParserParams parserParams = null;
 
@@ -94,7 +95,7 @@ namespace Shaffuru.UI {
 
 			if(playable > 0) {
 				// We cannot require 2 songs to be played if the is only one..
-				SongQueueManager.history.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
+				SongQueueManager.requeueBlockList.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
 			}
 		}
 
@@ -103,6 +104,7 @@ namespace Shaffuru.UI {
 
 		[UIAction("StartGame")]
 		void StartGame() {
+			playedSongList.Clear();
 			anlasser.Start(60 * playDuration);
 		}
 

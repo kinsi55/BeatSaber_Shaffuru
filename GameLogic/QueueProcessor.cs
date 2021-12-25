@@ -22,13 +22,17 @@ namespace Shaffuru.GameLogic {
 		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapDifficulty = AccessTools.Field(typeof(PauseMenuManager.InitData), "beatmapDifficulty");
 		readonly PauseMenuManager.InitData pauseMenuManager_InitData;
 
+
+		readonly PlayedSongList playedSongList;
+
 		public QueueProcessor(
 			BeatmapLoader beatmapLoader,
 			BeatmapSwitcher beatmapSwitcher,
 			SongQueueManager songQueueManager,
 			MapPool mapPool,
 			AudioTimeSyncController audioTimeSyncController,
-			PauseMenuManager.InitData pauseMenuManager_InitData
+			PauseMenuManager.InitData pauseMenuManager_InitData,
+			PlayedSongList playedSongList
 		) {
 			this.beatmapLoader = beatmapLoader;
 			this.beatmapSwitcher = beatmapSwitcher;
@@ -36,6 +40,7 @@ namespace Shaffuru.GameLogic {
 			this.mapPool = mapPool;
 			this.audioTimeSyncController = audioTimeSyncController;
 			this.pauseMenuManager_InitData = pauseMenuManager_InitData;
+			this.playedSongList = playedSongList;
 		}
 
 		public void Initialize() {
@@ -49,7 +54,7 @@ namespace Shaffuru.GameLogic {
 		bool isQueueingNewSong = false;
 
 		public async void Tick() {
-			if(audioTimeSyncController.songTime < switchToNextBeatmapAt || isQueueingNewSong)
+			if(isQueueingNewSong || audioTimeSyncController.songTime < switchToNextBeatmapAt)
 				return;
 
 			// Dont queue a new song in the last 5 seconds... Kinda pointless
@@ -58,27 +63,10 @@ namespace Shaffuru.GameLogic {
 
 			isQueueingNewSong = true;
 
-			var queuedSong = songQueueManager.DequeueSong();
+			var queuedSong = songQueueManager.GetNextSong();
 
-			if(queuedSong == null) {
-				if(!Config.Instance.queue_pickRandomSongIfEmpty)
-					return;
-
-				var levels = mapPool.filteredLevels.Where(x => !SongQueueManager.history.Contains(x.level.levelID));
-
-				// Shouldnt ever be the case, failsafe
-				if(levels.Count() == 0)
-					return;
-
-				// Basegame always Initializes the RNG with seed 0 on scene change.. That would be kinda not very RNG probably maybe. Cant hurt.
-				UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
-
-				var x = levels.ElementAt(UnityEngine.Random.Range(0, levels.Count()));
-
-				queuedSong = new QueuedSong(x.level.levelID, x.GetRandomValidDiff(), -1, -1, null);
-
-				SongQueueManager.history.Add(x.level.levelID);
-			}
+			if(queuedSong == null)
+				return;
 
 			IDifficultyBeatmap outDiff = null;
 			IReadonlyBeatmapData outBeatmap = null;
@@ -156,6 +144,8 @@ namespace Shaffuru.GameLogic {
 			switchToNextBeatmapAt = audioTimeSyncController.songTime + length;
 
 			beatmapSwitcher.SwitchToDifferentBeatmap(outDiff, outBeatmap, startTime, length);
+
+			playedSongList.Add(new ShaffuruSong(queuedSong.levelId, outDiff.difficulty, startTime, length, queuedSong.source));
 
 			FIELD_PauseMenuManager_InitData_previewBeatmapLevel.SetValue(pauseMenuManager_InitData, loadedBeatmap.beatmapLevel);
 			FIELD_PauseMenuManager_InitData_beatmapDifficulty.SetValue(pauseMenuManager_InitData, outDiff.difficulty);

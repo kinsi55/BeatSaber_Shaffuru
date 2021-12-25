@@ -34,6 +34,8 @@ namespace Shaffuru.MenuLogic {
 			standardCharacteristic = beatmapCharacteristicCollectionSO.GetBeatmapCharacteristicBySerializedName("Standard");
 		}
 
+		public event Action<LevelCompletionResults> finishedOrFailedCallback;
+
 		public void Start(int lengthSeconds) {
 			beatmapLevel.beatmapLevelData.audioClip?.UnloadAudioData();
 
@@ -84,8 +86,15 @@ namespace Shaffuru.MenuLogic {
 				null,
 				(a, b) => {
 					// TODO: Handle other cases in some way maybe? Some end stats screen?
-					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart)
+					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
 						Start(lengthSeconds);
+					} else if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared || 
+						b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed ||
+						// If user is dum dum and plays with nofail and then backs out to menu we show this too because we are nice :)
+						b.energy == 0f
+					) {
+						finishedOrFailedCallback?.Invoke(b);
+					}
 				}
 			);
 		}

@@ -28,7 +28,7 @@
 				<macro.as-host host='config'>
 					<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->
-						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr [bsr code])' apply-on-change='true'/>
+						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr/!chaos [bsr code])' apply-on-change='true'/>
 						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' apply-on-change='true'
 							hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
 						/>
@@ -72,9 +72,6 @@
 						<slider-setting value='queue_requeueLimit' text='Re-queue block' integer-only='true' min='0' max='69' apply-on-change='true'
 							hover-hint='How many different songs must be played before a specific song can be played again? (This value is lowered as necessary depending on the amount of valid songs)'
 						/>
-						<toggle-setting value='queue_pickRandomSongIfEmpty' text='Use random song if nothing queued' apply-on-change='true'
-							hover-hint='Use / Pick a random song if there is no requests? Else it will just stay on silence until something is requested'
-						/>
 					</macro.as-host>
 				</modifier-container>
 				<horizontal pad-top='5' preferred-height='10'>
@@ -85,7 +82,7 @@
 		<tab tags='tabs' tab-name='Misc'>
 			<macro.as-host host='config'>
 				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-					<toggle-setting value='random_prefer_top_diff' text='Always pick highest Difficulty' apply-on-change='true'
+					<toggle-setting value='random_prefer_top_diff' text='Always pick highest valid Difficulty' apply-on-change='true'
 						hover-hint='Always pick the highest diff when selecting a random song'
 					/>
 					<slider-setting value='ramclearer_frequency' text='RAM clearing frequency' apply-on-change='true' min='25' max='50' integer-only='true'

@@ -47,6 +47,7 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
+		public IPreviewBeatmapLevel[] allLevels { get; private set; }
 		public ValidSong[] filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
 
@@ -60,6 +61,7 @@ namespace Shaffuru.AppLogic {
 		public void Clear() {
 			filteredLevels = null;
 			requestableLevels = null;
+			allLevels = null;
 		}
 
 		public void Dispose() => Clear();
@@ -70,8 +72,11 @@ namespace Shaffuru.AppLogic {
 			var maps = beatmapLevelsModel
 				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
 				.Where(x => !(x is PreviewBeatmapLevelPackSO))
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels)
-				.Where(x => x.songDuration - x.songTimeOffset >= minLength);
+				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
+
+			allLevels = maps.ToArray();
+
+			maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minLength);
 
 			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
@@ -248,6 +253,8 @@ namespace Shaffuru.AppLogic {
 
 			return levelid.Substring(13, 40);
 		}
+
+		// Removes WIP etc from the end of the levelID that SongCore happens to add for duplicate songs with the same hash
 		public static string GetLevelIdWithoutUniquenessAddition(string levelid) {
 			if(levelid.Length <= 53)
 				return levelid;

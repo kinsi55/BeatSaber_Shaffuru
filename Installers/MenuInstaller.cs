@@ -1,5 +1,5 @@
 ﻿using Shaffuru.MenuLogic;
-using Shaffuru.UI;
+using Shaffuru.MenuLogic.UI;
 using SiraUtil;
 using Zenject;
 
@@ -8,7 +8,8 @@ namespace Shaffuru.Installers {
 		public override void InstallBindings() {
 			Container.Bind<Anlasser>().AsSingle().NonLazy();
 			Container.Bind<SetupUI>().FromNewComponentAsViewController().AsSingle();
-			Container.Bind<IInitializable>().To<SetupFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+			Container.Bind<ResultUI>().FromNewComponentAsViewController().AsSingle();
+			Container.Bind<IInitializable>().To<ShaffuruFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
 			//Container.Bind<FlowCoordinatorCoordinatorIHateBSUI>().AsSingle().NonLazy();
 		}
 	}
