@@ -8,7 +8,6 @@ namespace Shaffuru {
 
 		public virtual int queue_sizeLimit { get; set; } = 32;
 		public virtual int queue_requeueLimit { get; set; } = 32;
-		public virtual bool queue_pickRandomSongIfEmpty { get; set; } = true;
 
 
 

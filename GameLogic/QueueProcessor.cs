@@ -155,10 +155,6 @@ namespace Shaffuru.GameLogic {
 
 			switchToNextBeatmapAt = audioTimeSyncController.songTime + length;
 
-			// If the queue is otherwise empty, dont cap the last inserted's beatmap length, if pick random isnt active
-			if(songQueueManager.IsEmpty() && !Config.Instance.queue_pickRandomSongIfEmpty)
-				length = 0;
-
 			beatmapSwitcher.SwitchToDifferentBeatmap(outDiff, outBeatmap, startTime, length);
 
 			FIELD_PauseMenuManager_InitData_previewBeatmapLevel.SetValue(pauseMenuManager_InitData, loadedBeatmap.beatmapLevel);
