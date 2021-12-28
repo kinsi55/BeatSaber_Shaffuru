@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Shaffuru.GameLogic {
 	class RamCleaner {
-		static int cleanSkips = 20;
+		static int cleanSkips = 0;
 
 		const string clearingText = "Clearing RAM so your PC\ndoesn't explode <color=#FC5>😁</color>\n\nLag right now is normal <color=#FC5>👍</color>\n";
 
