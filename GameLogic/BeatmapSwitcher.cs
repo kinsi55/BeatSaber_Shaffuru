@@ -162,7 +162,7 @@ namespace Shaffuru.GameLogic {
 
 			HeckOffCutSoundsCrash.enablePatch = true;
 
-			if(!ramCleaner.TrySkip() && audioTimeSyncController.songTime - audioTimeSyncController.songLength >= 30f) {
+			if(!ramCleaner.TrySkip() && audioTimeSyncController.songLength - audioTimeSyncController.songTime >= 30f) {
 				beatmapObjectCallbackController.Pause();
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);
