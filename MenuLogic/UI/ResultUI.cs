@@ -102,7 +102,7 @@ namespace Shaffuru.MenuLogic.UI {
 			var totalnotes = levelCompletionResult.goodCutsCount + levelCompletionResult.badCutsCount + levelCompletionResult.missedCount;
 			songCount.text = $"Songs Played: {playedSongList.list.Count} ({totalnotes} Notes)";
 
-			var maxScore = ScoreModel.MaxRawScoreForNumberOfNotes(totalnotes);
+			float maxScore = ScoreModel.MaxRawScoreForNumberOfNotes(totalnotes);
 			var score = levelCompletionResult.rawScore == 0 ? 0f : levelCompletionResult.rawScore / maxScore;
 
 			sessionAcc.text = string.Format("Overall Accuracy: {0:0.00%}", score);
