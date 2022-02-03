@@ -202,7 +202,7 @@ namespace Shaffuru.AppLogic {
 								if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
 									break;
 
-								var nps = diff.notes / songDetailsSong.songDurationSeconds;
+								var nps = (float)diff.notes / songDetailsSong.songDurationSeconds;
 								if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
 									break;
 
