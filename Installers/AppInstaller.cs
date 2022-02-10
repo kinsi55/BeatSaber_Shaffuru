@@ -9,7 +9,7 @@ namespace Shaffuru.Installers {
 			Container.BindInterfacesAndSelfTo<MapPool>().AsSingle().NonLazy();
 			Container.BindInterfacesAndSelfTo<SongQueueManager>().AsSingle().NonLazy();
 
-			if(IPA.Loader.PluginManager.GetPluginFromId("ChatCore") == null)
+			if(IPA.Loader.PluginManager.GetPluginFromId("CatCore") == null)
 				return;
 
 			Container.BindInterfacesAndSelfTo<RequestManager>().AsSingle().NonLazy();
