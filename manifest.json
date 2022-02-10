@@ -15,6 +15,6 @@
     },
     "loadAfter": [
         "SongCore",
-        "ChatCore"
+        "CatCore"
     ]
 }

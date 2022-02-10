@@ -10,7 +10,7 @@ using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.AppLogic {
 	class RequestManager : IInitializable, IDisposable {
-		static CatCoreInstance chatCore;
+		static CatCoreInstance catCore;
 		static ITwitchService twitch;
 		SongQueueManager songQueueManager;
 
@@ -22,9 +22,9 @@ namespace Shaffuru.AppLogic {
 		}
 
 		public void Initialize() {
-			chatCore ??= CatCoreInstance.Create();
+			catCore ??= CatCoreInstance.Create();
 
-			twitch ??= chatCore.RunTwitchServices();
+			twitch ??= catCore.RunTwitchServices();
 
 			twitch.OnTextMessageReceived += Twitch_OnTextMessageReceived;
 		}
