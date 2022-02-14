@@ -30,6 +30,11 @@ namespace Shaffuru.Util {
             _list.Add(value);
         }
 
+        public void Clear() {
+            if(_list != null)
+                _list.Clear();
+		}
+
         public T this[int index] {
             get {
                 if(index < 0 || index >= Count)

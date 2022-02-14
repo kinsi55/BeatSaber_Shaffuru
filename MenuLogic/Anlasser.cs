@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SiraUtil.Zenject;
+using System;
 using System.Text;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace Shaffuru.MenuLogic {
 		static BeatmapLevelSO beatmapLevel;
 		static BeatmapDataSO beatmapLevelData;
 		static BeatmapLevelSO.DifficultyBeatmap difficultyBeatmap;
+		static UBinder<Plugin, System.Random> rngSource;
 
 
 		static EnvironmentInfoSO defaultEnvironment;
@@ -21,7 +23,8 @@ namespace Shaffuru.MenuLogic {
 			PlayerDataModel playerDataModel,
 			CustomLevelLoader customLevelLoader,
 			MenuTransitionsHelper menuTransitionsHelper,
-			BeatmapCharacteristicCollectionSO beatmapCharacteristicCollectionSO
+			BeatmapCharacteristicCollectionSO beatmapCharacteristicCollectionSO,
+			UBinder<Plugin, System.Random> rng
 		) {
 			this.playerDataModel = playerDataModel;
 			this.menuTransitionsHelper = menuTransitionsHelper;
@@ -30,17 +33,22 @@ namespace Shaffuru.MenuLogic {
 			beatmapLevelData ??= ScriptableObject.CreateInstance<BeatmapDataSO>();
 			difficultyBeatmap ??= new BeatmapLevelSO.DifficultyBeatmap(beatmapLevel, BeatmapDifficulty.ExpertPlus, 0, 10, 0, beatmapLevelData);
 
+			rngSource = rng;
+
 			defaultEnvironment ??= customLevelLoader.LoadEnvironmentInfo("", false);
 			standardCharacteristic = beatmapCharacteristicCollectionSO.GetBeatmapCharacteristicBySerializedName("Standard");
 		}
 
 		public event Action<LevelCompletionResults> finishedOrFailedCallback;
 
-		public void Start(int lengthSeconds) {
+		public void Start(int lengthSeconds, int rngSeed = 0) {
 			beatmapLevel.beatmapLevelData.audioClip?.UnloadAudioData();
 
 			var audioClip = AudioClip.Create("testSound", 1000 * lengthSeconds, 1, 1000, false);
 			// I SetData() an empty float array of matching size before but apparently thats not necessary
+
+			if(rngSeed != 0)
+				rngSource.Value = new System.Random(rngSeed);
 
 			var notes = new StringBuilder();
 
