@@ -272,6 +272,10 @@ namespace Shaffuru.GameLogic {
 			for(var i = 0; i < replacementBeatmapData.beatmapEventsData.Count; i++) {
 				var obj = replacementEvents[i];
 
+				// Me when mappers use 360 events in standard characteristic https://clips.twitch.tv/OddPluckyDootStrawBeary-avHX5W0AD-k9lZ5x
+				if(obj.type == BeatmapEventType.Event14 || obj.type == BeatmapEventType.Event15)
+					continue;
+
 				var x = obj.time - startTime - oldJumpDuration;
 				if(x < 0f || x > audioTimeSyncController.songLength)
 					continue;
