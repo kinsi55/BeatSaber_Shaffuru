@@ -1,5 +1,6 @@
 ﻿using HarmonyLib;
 using Shaffuru.AppLogic;
+using SiraUtil.Zenject;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -14,6 +15,7 @@ namespace Shaffuru.GameLogic {
 		readonly BeatmapSwitcher beatmapSwitcher;
 		readonly SongQueueManager songQueueManager;
 		readonly MapPool mapPool;
+		readonly UBinder<Plugin, System.Random> rngSource;
 
 		readonly AudioTimeSyncController audioTimeSyncController;
 
@@ -32,7 +34,8 @@ namespace Shaffuru.GameLogic {
 			MapPool mapPool,
 			AudioTimeSyncController audioTimeSyncController,
 			PauseMenuManager.InitData pauseMenuManager_InitData,
-			PlayedSongList playedSongList
+			PlayedSongList playedSongList,
+			UBinder<Plugin, System.Random> rngSource
 		) {
 			this.beatmapLoader = beatmapLoader;
 			this.beatmapSwitcher = beatmapSwitcher;
@@ -41,6 +44,7 @@ namespace Shaffuru.GameLogic {
 			this.audioTimeSyncController = audioTimeSyncController;
 			this.pauseMenuManager_InitData = pauseMenuManager_InitData;
 			this.playedSongList = playedSongList;
+			this.rngSource = rngSource;
 		}
 
 		public void Initialize() {
@@ -125,13 +129,16 @@ namespace Shaffuru.GameLogic {
 				if(queuedSong.length > 0) {
 					length = Mathf.Clamp(queuedSong.length, Config.Instance.jumpcut_minSeconds, Config.Instance.jumpcut_maxSeconds);
 				} else if(Config.Instance.jumpcut_maxSeconds > Config.Instance.jumpcut_minSeconds) {
-					length = UnityEngine.Random.Range(Config.Instance.jumpcut_minSeconds, Config.Instance.jumpcut_maxSeconds);
+					length = Config.Instance.jumpcut_minSeconds + (float)(rngSource.Value.NextDouble() * (Config.Instance.jumpcut_maxSeconds - Config.Instance.jumpcut_minSeconds));
 				} else {
 					length = Config.Instance.jumpcut_maxSeconds;
 				}
 
 				if(queuedSong.startTime < 0) {
-					startTime = UnityEngine.Random.Range(songLength * .1f, (songLength - length) * .9f);
+					var min = songLength * .1f;
+					var max = (songLength - length) * .9f;
+
+					startTime = min + (float)(rngSource.Value.NextDouble() * (max - min));
 				} else {
 					startTime = queuedSong.startTime;
 				}

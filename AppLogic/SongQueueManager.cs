@@ -1,4 +1,5 @@
 ﻿using Shaffuru.Util;
+using SiraUtil.Zenject;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +10,11 @@ namespace Shaffuru.AppLogic {
 		public static RollingList<string> requeueBlockList { get; private set; }
 
 		readonly MapPool mapPool;
+		readonly UBinder<Plugin, System.Random> rngSource;
 
-		public SongQueueManager(MapPool mapPool) {
+		public SongQueueManager(MapPool mapPool, UBinder<Plugin, System.Random> rng) {
 			this.mapPool = mapPool;
+			this.rngSource = rng;
 
 			queue ??= new Queue<ShaffuruSong>();
 
@@ -49,10 +52,7 @@ namespace Shaffuru.AppLogic {
 				if(levels.Count() == 0)
 					return null;
 
-				// Basegame always Initializes the RNG with seed 0 on scene change.. That would be kinda not very RNG probably maybe. Cant hurt.
-				UnityEngine.Random.InitState((int)DateTime.Now.Ticks);
-
-				var l = levels.ElementAt(UnityEngine.Random.Range(0, levels.Count()));
+				var l = levels.ElementAt(rngSource.Value.Next(levels.Count()));
 
 				x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff(), -1, -1, null);
 			} else {

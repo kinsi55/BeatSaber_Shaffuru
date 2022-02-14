@@ -2,6 +2,7 @@
 using BeatSaberPlaylistsLib.Legacy;
 using BeatSaberPlaylistsLib.Types;
 using Shaffuru.MenuLogic;
+using SiraUtil.Zenject;
 using SongDetailsCache;
 using System;
 using System.Collections.Generic;
@@ -12,11 +13,13 @@ using System.Threading.Tasks;
 namespace Shaffuru.AppLogic {
 	public class MapPool : IDisposable {
 		readonly BeatmapLevelsModel beatmapLevelsModel;
+		static System.Random rngSource;
 
 		public static SongDetails songDetails;
 
-		public MapPool(BeatmapLevelsModel beatmapLevelsModel) {
+		public MapPool(BeatmapLevelsModel beatmapLevelsModel, UBinder<Plugin, System.Random> rng) {
 			this.beatmapLevelsModel = beatmapLevelsModel;
+			rngSource = rng.Value;
 		}
 
 		public struct ValidSong {
@@ -26,8 +29,7 @@ namespace Shaffuru.AppLogic {
 
 			public BeatmapDifficulty GetRandomValidDiff() {
 				var start =
-					Config.Instance.random_prefer_top_diff ? 0 :
-					UnityEngine.Random.Range(0, (int)BeatmapDifficulty.ExpertPlus);
+					Config.Instance.random_prefer_top_diff ? 0 : rngSource.Next((int)BeatmapDifficulty.ExpertPlus);
 
 				var m = 1 + (int)BeatmapDifficulty.ExpertPlus;
 
