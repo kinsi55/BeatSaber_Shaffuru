@@ -172,6 +172,10 @@ namespace Shaffuru.AppLogic {
 
 						if(songDetailsSong.bpm < Config.Instance.filter_advanced_bpm_min)
 							continue;
+
+						if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
+							songDetailsSong.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
+							continue;
 					}
 
 					var validSonge = new ValidSong() {

@@ -14,6 +14,8 @@ using TMPro;
 using Zenject;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.Components.Settings;
+using UnityEngine;
+using System.Globalization;
 
 namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]
@@ -30,6 +32,16 @@ namespace Shaffuru.MenuLogic.UI {
 		string filter_playlist { get => config.filter_playlist; set => config.filter_playlist = value; }
 		[UIValue("playlists")] List<object> playlists = null;
 		[UIComponent("dropdown_playlist")] DropDownListSetting playlistDropdown = null;
+
+
+		[UIValue("hideOlderThanOptions")] static List<DateTime> hideOlderThanOptions => Config.hideOlderThanOptions;
+		static int hideOlderThanOptionsCount => Config.hideOlderThanOptions.Count - 1;
+
+		[UIAction("DateTimeToStr")] static string DateTimeToStr(int d) => hideOlderThanOptions[d].ToString("MMM yyyy", new CultureInfo("en-US"));
+		internal int _hideOlderThan {
+			get => Mathf.Clamp(Config.Instance.filter_advanced_uploadDate_min, 0, hideOlderThanOptions.Count - 1);
+			set => Config.Instance.filter_advanced_uploadDate_min = Mathf.Clamp(value, 0, hideOlderThanOptions.Count - 1);
+		}
 
 		public void Awake() {
 			config = Config.Instance;

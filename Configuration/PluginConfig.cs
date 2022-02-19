@@ -1,4 +1,6 @@
 ﻿using IPA.Config.Stores;
+using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
@@ -9,6 +11,16 @@ namespace Shaffuru {
 		public virtual int queue_sizeLimit { get; set; } = 32;
 		public virtual int queue_requeueLimit { get; set; } = 32;
 
+
+		public static readonly List<DateTime> hideOlderThanOptions = BuilDateTimeList();
+		static List<DateTime> BuilDateTimeList() {
+			var hideOlderThanOptions = new List<DateTime>();
+
+			for(var x = new DateTime(2018, 5, 1); x < DateTime.Now; x = x.AddMonths(1))
+				hideOlderThanOptions.Add(x);
+
+			return hideOlderThanOptions;
+		}
 
 
 		public virtual bool chat_request_enabled { get; set; } = true;
@@ -28,7 +40,7 @@ namespace Shaffuru {
 		public virtual float filter_advanced_nps_max { get; set; } = 30f;
 		public virtual int filter_advanced_bpm_min { get; set; } = 0;
 		public virtual bool filter_advanced_only_ranked { get; set; } = false;
-
+		public virtual int filter_advanced_uploadDate_min { get; set; } = 0;
 
 
 		public virtual bool jumpcut_enabled { get; set; } = false;

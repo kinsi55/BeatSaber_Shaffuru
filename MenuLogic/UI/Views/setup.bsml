@@ -109,10 +109,10 @@
 		</vertical>
 	</horizontal>
 
-	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='85' size-delta-y='67'>
 		<vertical preferred-width='85' vertical-fit='PreferredSize' pad='2' spacing='2' child-expand-width='true'>
 			<horizontal bg='panel-top-gradient'>
 				<text text="Shaffuru - Advanced Filters" align='Center' font-size='4'/>
+	<modal move-to-center='true' hide-event='CloseAdvancedFiltersModal' show-event='OpenAdvancedFiltersModal' size-delta-x='85' size-delta-y='71'>
 			</horizontal>
 			<horizontal>
 				<modifier-container child-expand-width='true'>
@@ -124,6 +124,7 @@
 						<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' apply-on-change='true' show-buttons='true'/>
 						<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' apply-on-change='true'/>
 					</macro.as-host>
+					<slider-setting value='_hideOlderThan' text='Min. upload date' max='~hideOlderThanOptionsCount' bind-value="true" apply-on-change="true" integer-only='true' formatter='DateTimeToStr'/>
 				</modifier-container>
 			</horizontal>
 			<horizontal>
