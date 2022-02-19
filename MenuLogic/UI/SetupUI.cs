@@ -87,7 +87,6 @@ namespace Shaffuru.MenuLogic.UI {
 		[UIComponent("button_startLevel")] NoTransitionsButton startLevelButton = null;
 
 		async void OpenStartModal() {
-			playlists.Add("HIO");
 			startLevelButton.interactable = false;
 			filteredSongsLabel.text = $"Filtering levels...";
 			parserParams.EmitEvent("OpenStartModal");
@@ -121,14 +120,14 @@ namespace Shaffuru.MenuLogic.UI {
 		}
 
 
-		private readonly string version = $"Version {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} by Kinsi55";
+		readonly string version = $"Version {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} by Kinsi55";
 
 		[UIComponent("sponsorsText")] CurvedTextMeshPro sponsorsText = null;
 		void OpenSponsorsLink() => Process.Start("https://github.com/sponsors/kinsi55");
 		void OpenSponsorsModal() {
 			sponsorsText.text = "Loading...";
 			Task.Run(() => {
-				string desc = "Failed to load";
+				var desc = "Failed to load";
 				try {
 					desc = (new WebClient()).DownloadString("http://kinsi.me/sponsors/bsout.php");
 				} catch { }
