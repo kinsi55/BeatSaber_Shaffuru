@@ -13,7 +13,7 @@ namespace Shaffuru.Installers {
 
 			Container.BindInstance(new UBinder<Plugin, Random>(new Random())).AsSingle();
 
-			if(IPA.Loader.PluginManager.GetPluginFromId("ChatCore") == null)
+			if(IPA.Loader.PluginManager.GetPluginFromId("CatCore") == null)
 				return;
 
 			Container.BindInterfacesAndSelfTo<RequestManager>().AsSingle().NonLazy();

@@ -62,8 +62,8 @@
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
     </Reference>
-    <Reference Include="ChatCore">
-      <HintPath>$(BeatSaberDir)\Libs\ChatCore.dll</HintPath>
+    <Reference Include="CatCore">
+      <HintPath>$(BeatSaberDir)\Libs\CatCore.dll</HintPath>
     </Reference>
     <Reference Include="Colors">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Colors.dll</HintPath>

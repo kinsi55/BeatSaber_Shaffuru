@@ -1,15 +1,17 @@
-﻿using ChatCore;
-using ChatCore.Interfaces;
-using ChatCore.Services.Twitch;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using CatCore;
+using CatCore.Models.Twitch;
+using CatCore.Models.Twitch.IRC;
+using CatCore.Services.Twitch.Interfaces;
 using Zenject;
 using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.AppLogic {
 	class RequestManager : IInitializable, IDisposable {
-		static ChatCoreInstance chatCore;
-		static TwitchService twitch;
+		static CatCoreInstance catCore;
+		static ITwitchService twitch;
 		SongQueueManager songQueueManager;
 
 		MapPool mapPool;
@@ -20,9 +22,9 @@ namespace Shaffuru.AppLogic {
 		}
 
 		public void Initialize() {
-			chatCore ??= ChatCoreInstance.Create();
+			catCore ??= CatCoreInstance.Create();
 
-			twitch ??= chatCore.RunTwitchServices();
+			twitch ??= catCore.RunTwitchServices();
 
 			twitch.OnTextMessageReceived += Twitch_OnTextMessageReceived;
 		}
@@ -31,21 +33,24 @@ namespace Shaffuru.AppLogic {
 			twitch.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 		}
 
-		void Msg(string message, IChatChannel channel) {
-			twitch.SendTextMessage($"! {message}", channel);
+		void Msg(string message, TwitchChannel channel) {
+			channel.SendMessage($"! {message}");
 		}
 
 		static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-		private void Twitch_OnTextMessageReceived(IChatService _, IChatMessage message) {
-			if(Config.Instance.chat_request_enabled && (message.Message.StartsWith("!chaos") || message.Message.StartsWith("!sr"))) {
-				var sender = message.Sender.UserName;
+		private void Twitch_OnTextMessageReceived(ITwitchService __, TwitchMessage message) {
+			if(!Config.Instance.chat_request_enabled || (message.Message.StartsWith("!chaos") && message.Message.StartsWith("!sr")))
+				return;
 
-				if(mapPool.filteredLevels == null) {
-					Msg($"@{sender} Shaffuru is not initialized", message.Channel);
-					return;
-				}
+			var sender = message.Sender.UserName;
 
+			if(mapPool.filteredLevels == null) {
+				Msg($"@{sender} Shaffuru is not initialized", message.Channel);
+				return;
+			}
+
+			Task.Run(() => {
 				var split = message.Message.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
 				if(split.Length < 2)
@@ -137,10 +142,10 @@ namespace Shaffuru.AppLogic {
 					if(queued) {
 						Msg($"@{sender} Queued {split[1]} - {theMappe.level.songName} ({(BeatmapDifficulty)diff})", message.Channel);
 					} else {
-						Msg($"@{sender} Couldnt queue map (Unknown error)", message.Channel);
+						Msg($"@{sender} Couldn't queue map (Unknown error)", message.Channel);
 					}
 				}
-			}
+			});
 		}
 	}
 }
