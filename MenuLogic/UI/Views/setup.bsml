@@ -12,7 +12,7 @@
 					<toggle-setting value='filter_enableAdvancedFilters' text='Enable more Filter settings' apply-on-change='true'
 						hover-hint='When enabled only songs which are uploaded on BeatSaver will be playable'
 					/>
-					<button id='button_advancedFiltersConfig' text='Configure' event-click='OpenAdvancedFiltersModal'/>
+					<button id='button_advancedFiltersConfig' interactable='~filter_enableAdvancedFilters' text='Configure' event-click='OpenAdvancedFiltersModal'/>
 				</horizontal>
 				<macro.as-host host='config'>
 					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'

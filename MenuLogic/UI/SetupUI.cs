@@ -71,13 +71,6 @@ namespace Shaffuru.MenuLogic.UI {
 			}
 		}
 
-		[UIAction("#post-parse")]
-		public void Parsed() {
-			// Trigger setter / set button interactable accordingly
-			filter_enableAdvancedFilters = filter_enableAdvancedFilters;
-			//filteredSongsLabel.text = $"Playable Levels: {(mapPool?.filteredLevels?.Length ?? 0)} ({(mapPool?.requestableLevels?.Count ?? 0)} requestable)";
-		}
-
 		[UIAction("ClearQueue")]
 		void ClearQueue() {
 			songQueueManager.Clear();
