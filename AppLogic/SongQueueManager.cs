@@ -46,7 +46,11 @@ namespace Shaffuru.AppLogic {
 			ShaffuruSong x;
 
 			if(queue.Count == 0) {
-				var levels = mapPool.filteredLevels.Where(x => !SongQueueManager.requeueBlockList.Contains(x.level.levelID));
+				// If the requeueBlockList contains as many levels as we have filtered ones, clear it, because every playable level has already been played
+				if(mapPool.filteredLevels.Length == requeueBlockList.Count)
+					requeueBlockList.Clear();
+
+				var levels = mapPool.filteredLevels.Where(x => !requeueBlockList.Contains(x.level.levelID));
 
 				// Shouldnt ever be the case, failsafe
 				if(levels.Count() == 0)
