@@ -29,7 +29,7 @@ namespace Shaffuru.GameLogic {
 
 		public bool TrySkip() {
 			// TODO: Maybe in addition to requiring at least N maps to have been played, check if free system memory is actually low
-			return cleanSkips++ < Config.Instance.ramclearer_frequency;
+			return cleanSkips++ < Config.Instance.ramclearer_frequency * 2;
 		}
 
 		public IEnumerator ClearRam() {

@@ -68,7 +68,6 @@ namespace Shaffuru.GameLogic {
 		readonly IReadOnlyDictionary<float, CallbacksInTime> beatmapObjectCallbackController_callbacksInTimes;
 		readonly AudioTimeSyncController audioTimeSyncController;
 		readonly GameEnergyCounter gameEnergyCounter;
-		readonly GameSongController gameSongController;
 
 		readonly RamCleaner ramCleaner = new RamCleaner();
 
@@ -91,7 +90,12 @@ namespace Shaffuru.GameLogic {
 			this.beatmapCallbacksController = beatmapCallbacksController;
 			this.audioTimeSyncController = audioTimeSyncController;
 			this.gameEnergyCounter = gameEnergyCounter;
-			this.gameSongController = gameSongController;
+
+			var latency = (FloatSO)FIELD_AudioTimeSyncController_audioLatency.GetValue(audioTimeSyncController);
+
+			customAudioSource = new CustomSyncedAudioSource(audioTimeSyncController, latency.value);
+			// The audio effect when you play, need to apply that onto our custom audio source
+			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController)).SetAudioSource(customAudioSource.source);
 
 			beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
 		}
@@ -105,12 +109,6 @@ namespace Shaffuru.GameLogic {
 		public void Initialize() {
 			beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
 			startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
-
-			var latency = (FloatSO)FIELD_AudioTimeSyncController_audioLatency.GetValue(audioTimeSyncController);
-
-			customAudioSource = new CustomSyncedAudioSource(audioTimeSyncController, latency.value);
-			// The audio effect when you play, need to apply that onto our custom audio source
-			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController)).SetAudioSource(customAudioSource.source);
 
 			// We dont need that to play
 			((AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController)).mute = true;
