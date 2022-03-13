@@ -91,6 +91,7 @@ namespace Shaffuru.MenuLogic {
 				null,
 				"Exit",
 				false,
+				false,
 				null,
 				(a, b) => {
 					// TODO: Handle other cases in some way maybe? Some end stats screen?

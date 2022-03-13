@@ -18,22 +18,21 @@ namespace Shaffuru.GameLogic {
 			return beatmapLevelsModel.GetBeatmapLevelAsync(levelId, CancellationToken.None);
 		}
 
-		public IReadonlyBeatmapData TransformDifficulty(IDifficultyBeatmap difficulty) {
+		public async Task<IReadonlyBeatmapData> TransformDifficulty(IDifficultyBeatmap difficulty) {
 			PlayerSpecificSettings playerSpecificSettings = _sceneSetupData.playerSpecificSettings;
 			GameplayModifiers gameplayModifiers = _sceneSetupData.gameplayModifiers;
 
 			// Process the new beatmap as tho we'd play it so LeftHanded etc is accounted for
 			EnvironmentEffectsFilterPreset environmentEffectsFilterPreset = (difficulty.difficulty == BeatmapDifficulty.ExpertPlus) ? playerSpecificSettings.environmentEffectsFilterExpertPlusPreset : playerSpecificSettings.environmentEffectsFilterDefaultPreset;
 			return BeatmapDataTransformHelper.CreateTransformedBeatmapData(
-				difficulty.beatmapData,
+				await difficulty.GetBeatmapDataAsync(_sceneSetupData.environmentInfo),
 				difficulty.level,
 				gameplayModifiers,
-				null,
 				playerSpecificSettings.leftHanded,
 				environmentEffectsFilterPreset,
 				_sceneSetupData.environmentInfo.environmentIntensityReductionOptions,
 				// This is (currently) only used to decide if to merge walls or not...
-				false
+				_sceneSetupData.mainSettingsModel
 			);
 		}
 	}

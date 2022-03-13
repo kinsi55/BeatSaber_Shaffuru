@@ -109,7 +109,7 @@ namespace Shaffuru.GameLogic {
 				}
 
 				try {
-					outBeatmap = beatmapLoader.TransformDifficulty(outDiff);
+					outBeatmap = await beatmapLoader.TransformDifficulty(outDiff);
 				} catch(Exception ex) {
 					Plugin.Log.Error(string.Format("Tried to queue {0} but failed to transform beatmap: {1}", queuedSong.levelId, ex));
 					return;
