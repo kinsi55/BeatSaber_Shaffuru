@@ -10,20 +10,38 @@ using UnityEngine;
 using Zenject;
 
 namespace Shaffuru.GameLogic {
-	public class BeatmapSwitcher : IInitializable, IDisposable {
-		public static BeatmapSwitcher instance;
+	[HarmonyPatch(typeof(BasicBeatmapObjectManager), nameof(BasicBeatmapObjectManager.Init))]
+	static class BeatmapObjectsPools {
+		static Action<float>[] activeItemPools;
 
-		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_basicGameNotePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_basicGameNotePoolContainer");
-		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_burstSliderHeadGameNotePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_burstSliderHeadGameNotePoolContainer");
-		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_burstSliderGameNotePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_burstSliderGameNotePoolContainer");
-		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_burstSliderFillPoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_burstSliderFillPoolContainer");
-		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_bombNotePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_bombNotePoolContainer");
-		static readonly FieldInfo FIELD_BasicBeatmapObjectManager_obstaclePoolContainer = AccessTools.Field(typeof(BasicBeatmapObjectManager), "_obstaclePoolContainer");
+		static void Postfix(
+			MemoryPoolContainer<GameNoteController> ____basicGameNotePoolContainer,
+			MemoryPoolContainer<GameNoteController> ____burstSliderHeadGameNotePoolContainer,
+			MemoryPoolContainer<BurstSliderGameNoteController> ____burstSliderGameNotePoolContainer,
+			MemoryPoolContainer<BurstSliderGameNoteController> ____burstSliderFillPoolContainer,
+			MemoryPoolContainer<BombNoteController> ____bombNotePoolContainer,
+			MemoryPoolContainer<ObstacleController> ____obstaclePoolContainer
+		) {
+			activeItemPools = new Action<float>[] {
+					(a) => ____basicGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+					(a) => ____burstSliderHeadGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+					(a) => ____burstSliderGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+					(a) => ____burstSliderFillPoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+					(a) => ____bombNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+					(a) => ____obstaclePoolContainer.activeItems.ForEach(x => x.Dissolve(a))
+				};
+		}
 
+		public static void DissolveAll(float dissolveTime) {
+			foreach(var x in activeItemPools)
+				x(dissolveTime);
+		}
+	}
+
+	class BeatmapSwitcher : IInitializable, IDisposable {
 		static readonly FieldInfo FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData = AccessTools.Field(typeof(BeatmapObjectSpawnController), "_beatmapObjectSpawnMovementData");
 		
 		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_callbacksInTimes = AccessTools.Field(typeof(BeatmapCallbacksController), "_callbacksInTimes");
-		//static readonly FieldInfo FIELD_BeatmapObjectCallbackController_nextEventIndex = AccessTools.Field(typeof(BeatmapObjectCallbackController), "_nextEventIndex");
 
 		static readonly FieldInfo FIELD_AudioTimeSyncController_audioLatency = AccessTools.Field(typeof(AudioTimeSyncController), "_audioLatency");
 		static readonly FieldInfo FIELD_AudioTimeSyncController_audioSource = AccessTools.Field(typeof(AudioTimeSyncController), "_audioSource");
@@ -34,9 +52,8 @@ namespace Shaffuru.GameLogic {
 
 		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), nameof(GameEnergyCounter.noFail));
 
-		static Action<BeatmapDataItem, float> SETTER_BeatmapDataItem_time;
-		static Action<BeatmapDataCallbackWrapper, float> SETTER_BeatmapDataCallbackWrapper_aheadTime;
-
+		static IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time = IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor("_time");
+		static IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime = IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("_aheadTime");
 
 		readonly GameplayCoreSceneSetupData _sceneSetupData;
 
@@ -45,8 +62,6 @@ namespace Shaffuru.GameLogic {
 		readonly IJumpOffsetYProvider jumpOffsetYProvider;
 
 		readonly IReadonlyBeatmapData readonlyBeatmapData;
-
-		readonly BasicBeatmapObjectManager basicBeatmapObjectManager;
 
 		readonly BeatmapObjectSpawnController beatmapObjectSpawnController;
 		readonly BeatmapCallbacksController beatmapCallbacksController;
@@ -62,20 +77,16 @@ namespace Shaffuru.GameLogic {
 			BeatmapObjectSpawnController.InitData BeatmapObjectSpawnController_InitData,
 			IJumpOffsetYProvider jumpOffsetYProvider,
 			IReadonlyBeatmapData readonlyBeatmapData,
-			BasicBeatmapObjectManager basicBeatmapObjectManager,
 			BeatmapObjectSpawnController beatmapObjectSpawnController,
 			BeatmapCallbacksController beatmapCallbacksController,
 			AudioTimeSyncController audioTimeSyncController,
 			GameEnergyCounter gameEnergyCounter,
 			GameSongController gameSongController
 		) {
-			instance = this;
-
 			this._sceneSetupData = _sceneSetupData;
 			this.BeatmapObjectSpawnController_InitData = BeatmapObjectSpawnController_InitData;
 			this.jumpOffsetYProvider = jumpOffsetYProvider;
 			this.readonlyBeatmapData = readonlyBeatmapData;
-			this.basicBeatmapObjectManager = basicBeatmapObjectManager;
 			this.beatmapObjectSpawnController = beatmapObjectSpawnController;
 			this.beatmapCallbacksController = beatmapCallbacksController;
 			this.audioTimeSyncController = audioTimeSyncController;
@@ -83,61 +94,15 @@ namespace Shaffuru.GameLogic {
 			this.gameSongController = gameSongController;
 
 			beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
-			
-			if(SETTER_BeatmapDataItem_time == null) {
-				var dm = new DynamicMethod("BeatmapDataItem_time_SETTER", null, new[] { typeof(BeatmapDataItem), typeof(float) }, true);
-
-				var il = dm.GetILGenerator(5);
-				il.Emit(OpCodes.Ldarg_0);
-				il.Emit(OpCodes.Ldarg_1);
-				il.Emit(OpCodes.Stfld, AccessTools.Field(typeof(BeatmapDataItem), $"<{nameof(BeatmapDataItem.time)}>k__BackingField"));
-				il.Emit(OpCodes.Ret);
-
-				SETTER_BeatmapDataItem_time = (Action<BeatmapDataItem, float>)dm.CreateDelegate(typeof(Action<BeatmapDataItem, float>));
-			}
-
-			if(SETTER_BeatmapDataCallbackWrapper_aheadTime == null) {
-				var dm = new DynamicMethod("FIELD_BeatmapDataCallbackWrapper_aheadTime_SETTER", null, new[] { typeof(BeatmapDataCallbackWrapper), typeof(float) }, true);
-
-				var il = dm.GetILGenerator(5);
-				il.Emit(OpCodes.Ldarg_0);
-				il.Emit(OpCodes.Ldarg_1);
-				il.Emit(OpCodes.Stfld, AccessTools.Field(typeof(BeatmapDataCallbackWrapper), nameof(BeatmapDataCallbackWrapper.aheadTime)));
-				il.Emit(OpCodes.Ret);
-
-				SETTER_BeatmapDataCallbackWrapper_aheadTime = (Action<BeatmapDataCallbackWrapper, float>)dm.CreateDelegate(typeof(Action<BeatmapDataCallbackWrapper, float>));
-			}
 		}
 
 		internal CustomSyncedAudioSource customAudioSource { get; private set; }
-
-		Action<float>[] beatmapObjectDissolvers;
 
 		//List<BeatmapObjectCallbackData> BeatmapObjectCallbackData_nextObjectIndexInLine;
 
 		BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
 
 		public void Initialize() {
-			beatmapObjectDissolvers = new Action<float>[] {
-				(d) => {
-					foreach(var x in ((MemoryPoolContainer<GameNoteController>)FIELD_BasicBeatmapObjectManager_basicGameNotePoolContainer.GetValue(basicBeatmapObjectManager)).activeItems)
-						x.Dissolve(d);
-				}, (d) => {
-					foreach(var x in ((MemoryPoolContainer<GameNoteController>)FIELD_BasicBeatmapObjectManager_burstSliderHeadGameNotePoolContainer.GetValue(basicBeatmapObjectManager)).activeItems)
-						x.Dissolve(d);
-				}, (d) => {
-					foreach(var x in ((MemoryPoolContainer<BurstSliderGameNoteController>)FIELD_BasicBeatmapObjectManager_burstSliderGameNotePoolContainer.GetValue(basicBeatmapObjectManager)).activeItems)
-						x.Dissolve(d);
-				}, (d) => {
-					foreach(var x in ((MemoryPoolContainer<BombNoteController>)FIELD_BasicBeatmapObjectManager_bombNotePoolContainer.GetValue(basicBeatmapObjectManager)).activeItems)
-						x.Dissolve(d);
-				}, (d) => {
-					foreach(var x in ((MemoryPoolContainer<ObstacleController>)FIELD_BasicBeatmapObjectManager_obstaclePoolContainer.GetValue(basicBeatmapObjectManager)).activeItems)
-						x.Dissolve(d);
-				}
-			};
-
-
 			beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
 			startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
 
@@ -186,13 +151,8 @@ namespace Shaffuru.GameLogic {
 			var reactionTime = Config.Instance.transition_reactionTime;
 			var dissolveTime = reactionTime * 0.3f;
 
-			void DissolveAll(float dissolveTime) {
-				foreach(var x in beatmapObjectDissolvers)
-					x(dissolveTime);
-			}
-
 			// We are switching to the new map... Dissolve everything thats active right now
-			DissolveAll(dissolveTime);
+			BeatmapObjectsPools.DissolveAll(dissolveTime);
 
 			HeckOffCutSoundsCrash.enablePatch = true;
 
@@ -264,12 +224,15 @@ namespace Shaffuru.GameLogic {
 				}
 
 				// Change the nodes time to be at the right time in the modified context
-				SETTER_BeatmapDataItem_time(x, t + currentAudioTime + reactionTime);
+				var j = x;
+				SETTER_BeatmapDataItem_time(ref j) = t + currentAudioTime + reactionTime;
 			}
 
 			// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
-			for(var i = prevNode.Next; i != null; i = i.Next)
-				SETTER_BeatmapDataItem_time(i.Value, float.MaxValue);
+			while((prevNode = prevNode.Next) != null) {
+				var iv = prevNode.Value;
+				SETTER_BeatmapDataItem_time(ref iv) = float.MaxValue;
+			}
 
 			// Update to the new maps stuffs
 			var njs = replacementDifficultyBeatmap.noteJumpMovementSpeed;
@@ -284,9 +247,9 @@ namespace Shaffuru.GameLogic {
 				// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
 				if(x.Key == startBeatmapCallbackAheadTime) {
 					var cbs = (Dictionary<Type, List<BeatmapDataCallbackWrapper>>)FIELD_CallbacksInTime_callbacks.GetValue(v);
-					foreach(var cbl in cbs.Values)
-						foreach(var cb in cbl)
-							SETTER_BeatmapDataCallbackWrapper_aheadTime(cb, beatmapObjectSpawnMovementData.spawnAheadTime);
+					foreach(var cbl in cbs.Values) {
+						cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = beatmapObjectSpawnMovementData.spawnAheadTime; });
+					}
 				}
 
 				while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time <= currentAudioTime)
@@ -294,7 +257,7 @@ namespace Shaffuru.GameLogic {
 			}
 
 			// Dissolve again to be sure because Beat Saber™
-			DissolveAll(dissolveTime);
+			BeatmapObjectsPools.DissolveAll(dissolveTime);
 
 
 			var timePre = audioTimeSyncController.songTime;
