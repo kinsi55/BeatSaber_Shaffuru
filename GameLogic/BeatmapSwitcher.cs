@@ -38,7 +38,7 @@ namespace Shaffuru.GameLogic {
 		}
 	}
 
-	class BeatmapSwitcher : IInitializable, IDisposable {
+	class BeatmapSwitcher : IDisposable {
 		static readonly FieldInfo FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData = AccessTools.Field(typeof(BeatmapObjectSpawnController), "_beatmapObjectSpawnMovementData");
 		
 		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_callbacksInTimes = AccessTools.Field(typeof(BeatmapCallbacksController), "_callbacksInTimes");
@@ -52,24 +52,26 @@ namespace Shaffuru.GameLogic {
 
 		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), nameof(GameEnergyCounter.noFail));
 
-		static IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time = IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor("_time");
-		static IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime = IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("_aheadTime");
+		static IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time = IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor($"<{nameof(BeatmapDataItem.time)}>k__BackingField");
+		static IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime = IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("aheadTime");
 
 		readonly GameplayCoreSceneSetupData _sceneSetupData;
 
 		readonly BeatmapObjectSpawnController.InitData BeatmapObjectSpawnController_InitData;
-		float startBeatmapCallbackAheadTime;
+		readonly float startBeatmapCallbackAheadTime;
 		readonly IJumpOffsetYProvider jumpOffsetYProvider;
 
 		readonly IReadonlyBeatmapData readonlyBeatmapData;
 
-		readonly BeatmapObjectSpawnController beatmapObjectSpawnController;
 		readonly BeatmapCallbacksController beatmapCallbacksController;
 		readonly IReadOnlyDictionary<float, CallbacksInTime> beatmapObjectCallbackController_callbacksInTimes;
 		readonly AudioTimeSyncController audioTimeSyncController;
 		readonly GameEnergyCounter gameEnergyCounter;
 
+		readonly BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
+
 		readonly RamCleaner ramCleaner = new RamCleaner();
+		internal CustomSyncedAudioSource customAudioSource { get; private set; }
 
 		public BeatmapSwitcher(
 			GameplayCoreSceneSetupData _sceneSetupData,
@@ -86,7 +88,6 @@ namespace Shaffuru.GameLogic {
 			this.BeatmapObjectSpawnController_InitData = BeatmapObjectSpawnController_InitData;
 			this.jumpOffsetYProvider = jumpOffsetYProvider;
 			this.readonlyBeatmapData = readonlyBeatmapData;
-			this.beatmapObjectSpawnController = beatmapObjectSpawnController;
 			this.beatmapCallbacksController = beatmapCallbacksController;
 			this.audioTimeSyncController = audioTimeSyncController;
 			this.gameEnergyCounter = gameEnergyCounter;
@@ -98,21 +99,13 @@ namespace Shaffuru.GameLogic {
 			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController)).SetAudioSource(customAudioSource.source);
 
 			beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
-		}
 
-		internal CustomSyncedAudioSource customAudioSource { get; private set; }
-
-		//List<BeatmapObjectCallbackData> BeatmapObjectCallbackData_nextObjectIndexInLine;
-
-		BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
-
-		public void Initialize() {
 			beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
 			startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
 
 			// We dont need that to play
 			((AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController)).mute = true;
-			Plugin.Log.Debug("BeatmapSwitcher loaded");
+			Plugin.Log.Debug("BeatmapSwitcher Created");
 		}
 
 		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset) {
