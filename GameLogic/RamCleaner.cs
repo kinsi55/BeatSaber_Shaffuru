@@ -13,7 +13,7 @@ namespace Shaffuru.GameLogic {
 		TextMeshPro cleanLabel;
 
 		public RamCleaner() {
-			cleanInfoText = new GameObject($"Label", new[] { typeof(Canvas), typeof(TextMeshPro) });
+			cleanInfoText = new GameObject($"Label", typeof(Canvas), typeof(TextMeshPro));
 
 			cleanLabel = cleanInfoText.GetComponent<TextMeshPro>();
 			cleanLabel.richText = true;

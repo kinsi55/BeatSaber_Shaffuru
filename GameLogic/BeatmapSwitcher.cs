@@ -27,7 +27,7 @@ namespace Shaffuru.GameLogic {
 		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect = AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
 
 
-		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), "noFail");
+		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), nameof(GameEnergyCounter.noFail));
 
 		static Action<BeatmapEventData, float> FIELD_BeatmapEventData_time_SETTER;
 
@@ -46,7 +46,7 @@ namespace Shaffuru.GameLogic {
 		readonly GameEnergyCounter gameEnergyCounter;
 		readonly GameSongController gameSongController;
 
-		RamCleaner ramCleaner;
+		readonly RamCleaner ramCleaner = new RamCleaner();
 
 		public BeatmapSwitcher(
 			GameplayCoreSceneSetupData _sceneSetupData,
@@ -82,7 +82,7 @@ namespace Shaffuru.GameLogic {
 			}
 		}
 
-		public CustomSyncedAudioSource customAudioSource { get; private set; }
+		internal CustomSyncedAudioSource customAudioSource { get; private set; }
 
 		MemoryPoolContainer<GameNoteController> _gameNotePoolContainer;
 		MemoryPoolContainer<BombNoteController> _bombNotePoolContainer;
@@ -94,8 +94,6 @@ namespace Shaffuru.GameLogic {
 		BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
 
 		public void Initialize() {
-			ramCleaner = new RamCleaner();
-
 			_gameNotePoolContainer = (MemoryPoolContainer<GameNoteController>)FIELD_BasicBeatmapObjectManager_gameNotePoolContainer.GetValue(beatmapObjectManager);
 			_bombNotePoolContainer = (MemoryPoolContainer<BombNoteController>)FIELD_BasicBeatmapObjectManager_bombNotePoolContainer.GetValue(beatmapObjectManager);
 			_obstaclePoolContainer = (MemoryPoolContainer<ObstacleController>)FIELD_BasicBeatmapObjectManager_obstaclePoolContainer.GetValue(beatmapObjectManager);

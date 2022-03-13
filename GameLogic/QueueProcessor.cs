@@ -20,8 +20,8 @@ namespace Shaffuru.GameLogic {
 		readonly AudioTimeSyncController audioTimeSyncController;
 
 
-		static readonly FieldInfo FIELD_PauseMenuManager_InitData_previewBeatmapLevel = AccessTools.Field(typeof(PauseMenuManager.InitData), "previewBeatmapLevel");
-		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapDifficulty = AccessTools.Field(typeof(PauseMenuManager.InitData), "beatmapDifficulty");
+		static readonly FieldInfo FIELD_PauseMenuManager_InitData_previewBeatmapLevel = AccessTools.Field(typeof(PauseMenuManager.InitData), nameof(PauseMenuManager.InitData.previewBeatmapLevel));
+		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapDifficulty = AccessTools.Field(typeof(PauseMenuManager.InitData), nameof(PauseMenuManager.InitData.beatmapDifficulty));
 		readonly PauseMenuManager.InitData pauseMenuManager_InitData;
 
 
@@ -122,8 +122,8 @@ namespace Shaffuru.GameLogic {
 			}
 
 			var songLength = outDiff.level.beatmapLevelData.audioClip.length - outDiff.level.songTimeOffset;
-			float startTime = 0;
-			float length = songLength;
+			var startTime = 0f;
+			var length = songLength;
 
 			if(Config.Instance.jumpcut_enabled) {
 				if(queuedSong.length > 0) {
