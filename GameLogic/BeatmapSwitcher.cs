@@ -156,10 +156,10 @@ namespace Shaffuru.GameLogic {
 				yield return ramCleaner.ClearRam();
 
 				// Make sure we have had at least 20 frames, not just half a second
-				var s = audioTimeSyncController.songTime;
+				var s = Time.time;
 				for(var i = 0; i < 20; i++)
 					yield return null;
-				yield return new WaitUntil(() => audioTimeSyncController == null || audioTimeSyncController.songTime - s >= 0.5f);
+				yield return new WaitUntil(() => audioTimeSyncController == null || Time.time - s >= 0.5f);
 				audioSource.UnPause();
 			} else {
 				// Force this to execute after Behaviour Update()'s so the TimeSyncController is up-to-date
