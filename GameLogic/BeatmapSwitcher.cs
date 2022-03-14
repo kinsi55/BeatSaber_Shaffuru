@@ -173,17 +173,11 @@ namespace Shaffuru.GameLogic {
 
 			LinkedListNode<BeatmapDataItem> prevNode = null;
 
-			float preadd = 0;
-
 			// Find the newest node processed by any callback (biggest aheadTime)
 			foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
 				if(prevNode == null || prevNode.Value.time < x.Value.lastProcessedNode.Value.time)
 					prevNode = x.Value.lastProcessedNode.Next;
-
-				preadd = Math.Max(preadd, x.Value.lastProcessedNode.Value.time - audioTimeSyncController.songTime);
 			}
-
-			//var preadd = (prevNode?.Value.time ?? currentAudioTime) - currentAudioTime;
 
 			foreach(var x in replacementBeatmapData.allBeatmapDataItems) {
 				var relativeSongTime = x.time - startTime;
