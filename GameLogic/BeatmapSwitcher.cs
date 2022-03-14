@@ -140,7 +140,7 @@ namespace Shaffuru.GameLogic {
 			var audioSource = (AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController);
 
 			var reactionTime = Config.Instance.transition_reactionTime;
-			var dissolveTime = reactionTime * 0.3f;
+			var dissolveTime = reactionTime * 0.6f;
 
 			// We are switching to the new map... Dissolve everything thats active right now
 			BeatmapObjectsPools.DissolveAll(dissolveTime);
@@ -173,39 +173,46 @@ namespace Shaffuru.GameLogic {
 
 			LinkedListNode<BeatmapDataItem> prevNode = null;
 
+			float preadd = 0;
+
 			// Find the newest node processed by any callback (biggest aheadTime)
 			foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
 				if(prevNode == null || prevNode.Value.time < x.Value.lastProcessedNode.Value.time)
-					prevNode = x.Value.lastProcessedNode;
+					prevNode = x.Value.lastProcessedNode.Next;
+
+				preadd = Math.Max(preadd, x.Value.lastProcessedNode.Value.time - audioTimeSyncController.songTime);
 			}
 
-			var preadd = (prevNode?.Value.time ?? currentAudioTime) - currentAudioTime;
+			//var preadd = (prevNode?.Value.time ?? currentAudioTime) - currentAudioTime;
 
 			foreach(var x in replacementBeatmapData.allBeatmapDataItems) {
-				var t = x.time - startTime;
+				var relativeSongTime = x.time - startTime;
 
 				// If we are past the time which we want to add / replace in, break
-				if(insertBeatmapUntilTime > 0 && t > insertBeatmapUntilTime + 1)
+				if(insertBeatmapUntilTime > 0 && relativeSongTime > insertBeatmapUntilTime + 1)
 					break;
 
 				// If the current nodes (start) is in the past...
-				if(t < 0) {
+				if(relativeSongTime < 0) {
 					// Ignore it if its not a wall
 					if(x.type != BeatmapDataItem.BeatmapDataItemType.BeatmapObject || !(x is ObstacleData woll))
 						continue;
 
 					// If it is a wall, modify the start time and length so that its start is `reactionTime`ms in the future
-					var newLength = woll.duration - reactionTime + t;
+					var newLength = woll.duration + relativeSongTime - reactionTime;
 
 					if(newLength < 0)
 						continue;
 
 					woll.UpdateDuration(newLength);
 
-					t = 0f;
+					relativeSongTime = reactionTime;
 				}
 
-				prevNode = prevNode.Next;
+				// If its not an event, only insert new items that are at least reactionTime in the future
+				if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && relativeSongTime < reactionTime)
+					continue;
+
 				// Was there already a new / unused node we can overwrite to save on allocations?
 				if(prevNode != null) {
 					prevNode.Value = x;
@@ -213,14 +220,15 @@ namespace Shaffuru.GameLogic {
 				} else {
 					prevNode = readonlyBeatmapData.allBeatmapDataItems.AddLast(x);
 				}
+				prevNode = prevNode.Next;
 
 				// Change the nodes time to be at the right time in the modified context
 				var j = x;
-				SETTER_BeatmapDataItem_time(ref j) = t + currentAudioTime + reactionTime;
+				SETTER_BeatmapDataItem_time(ref j) = relativeSongTime + currentAudioTime;
 			}
 
 			// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
-			while((prevNode = prevNode.Next) != null) {
+			for(; prevNode != null; prevNode = prevNode.Next) {
 				var iv = prevNode.Value;
 				SETTER_BeatmapDataItem_time(ref iv) = float.MaxValue;
 			}
@@ -235,15 +243,17 @@ namespace Shaffuru.GameLogic {
 
 			foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
 				var v = x.Value;
+				var aheadTime = v.aheadTime;
 				// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
 				if(x.Key == startBeatmapCallbackAheadTime) {
 					var cbs = (Dictionary<Type, List<BeatmapDataCallbackWrapper>>)FIELD_CallbacksInTime_callbacks.GetValue(v);
+					aheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
 					foreach(var cbl in cbs.Values) {
-						cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = beatmapObjectSpawnMovementData.spawnAheadTime; });
+						cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = aheadTime; });
 					}
 				}
 
-				while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time <= currentAudioTime)
+				while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time - aheadTime < currentAudioTime)
 					v.lastProcessedNode = v.lastProcessedNode.Next;
 			}
 
@@ -261,7 +271,7 @@ namespace Shaffuru.GameLogic {
 			// New audio
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
-			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime - reactionTime + (audioTimeSyncController.songTime - timePre));
+			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime + (audioTimeSyncController.songTime - timePre));
 
 			HeckOffCutSoundsCrash.enablePatch = false;
 
