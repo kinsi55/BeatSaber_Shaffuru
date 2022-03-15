@@ -18,6 +18,13 @@ namespace Shaffuru.Installers {
 			Container.BindInterfacesAndSelfTo<QueueProcessor>().AsSingle();
 
 			Container.BindInterfacesAndSelfTo<IntroPlayer>().AsSingle().NonLazy();
+
+			if(Config.Instance.filter_AllowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null)
+				EnableME();
+		}
+
+		static void EnableME() {
+			MappingExtensions.Plugin.ForceActivateForSong();
 		}
 	}
 }

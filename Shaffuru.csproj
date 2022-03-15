@@ -71,6 +71,9 @@
     <Reference Include="GameplayCore">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\GameplayCore.dll</HintPath>
     </Reference>
+    <Reference Include="MappingExtensions">
+      <HintPath>$(BeatSaberDir)\Plugins\MappingExtensions.dll</HintPath>
+    </Reference>
     <Reference Include="SiraUtil">
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
     </Reference>

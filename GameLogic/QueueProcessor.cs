@@ -14,7 +14,6 @@ namespace Shaffuru.GameLogic {
 		readonly BeatmapLoader beatmapLoader;
 		readonly BeatmapSwitcher beatmapSwitcher;
 		readonly SongQueueManager songQueueManager;
-		readonly MapPool mapPool;
 		readonly UBinder<Plugin, System.Random> rngSource;
 
 		readonly AudioTimeSyncController audioTimeSyncController;
@@ -31,7 +30,6 @@ namespace Shaffuru.GameLogic {
 			BeatmapLoader beatmapLoader,
 			BeatmapSwitcher beatmapSwitcher,
 			SongQueueManager songQueueManager,
-			MapPool mapPool,
 			AudioTimeSyncController audioTimeSyncController,
 			PauseMenuManager.InitData pauseMenuManager_InitData,
 			PlayedSongList playedSongList,
@@ -40,7 +38,6 @@ namespace Shaffuru.GameLogic {
 			this.beatmapLoader = beatmapLoader;
 			this.beatmapSwitcher = beatmapSwitcher;
 			this.songQueueManager = songQueueManager;
-			this.mapPool = mapPool;
 			this.audioTimeSyncController = audioTimeSyncController;
 			this.pauseMenuManager_InitData = pauseMenuManager_InitData;
 			this.playedSongList = playedSongList;

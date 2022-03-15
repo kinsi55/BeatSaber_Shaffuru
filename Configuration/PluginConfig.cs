@@ -33,6 +33,8 @@ namespace Shaffuru {
 		public virtual bool filter_playlist_onlyHighlighted { get; set; } = true;
 		public virtual int filter_minSeconds { get; set; } = 15;
 
+		public virtual bool filter_AllowME { get; set; } = true;
+
 		public virtual bool filter_enableAdvancedFilters { get; set; } = false;
 		public virtual float filter_advanced_njs_min { get; set; } = 0f;
 		public virtual float filter_advanced_njs_max { get; set; } = 30f;

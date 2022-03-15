@@ -15,6 +15,9 @@
 					<button id='button_advancedFiltersConfig' interactable='~filter_enableAdvancedFilters' text='Configure' event-click='OpenAdvancedFiltersModal'/>
 				</horizontal>
 				<macro.as-host host='config'>
+					<toggle-setting value='filter_AllowME' text='Allow Mapping Extensions' apply-on-change='true'
+						hover-hint='Should Mapping Extensions maps be playable? This should be obvious but... This only has a function if you have it installed'
+					/>
 					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
 						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
 					/>
