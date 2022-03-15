@@ -193,7 +193,7 @@ namespace Shaffuru.AppLogic {
 								continue;
 
 							// I have a feeling any requirements in the map would be BAAAD
-							if(extradata.additionalDifficultyData._requirements.All(x => x != "Mapping Extensions"))
+							if(extradata.additionalDifficultyData._requirements.Any(x => x != "Mapping Extensions"))
 								continue;
 						}
 
