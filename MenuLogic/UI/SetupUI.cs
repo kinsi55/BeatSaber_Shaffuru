@@ -31,7 +31,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 		string filter_playlist { get => config.filter_playlist; set => config.filter_playlist = value; }
 		[UIValue("playlists")] List<object> playlists = null;
-		[UIComponent("dropdown_playlist")] DropDownListSetting playlistDropdown = null;
+		[UIComponent("dropdown_playlist")] readonly DropDownListSetting playlistDropdown = null;
 
 
 		[UIValue("hideOlderThanOptions")] static List<DateTime> hideOlderThanOptions => Config.hideOlderThanOptions;
@@ -60,7 +60,7 @@ namespace Shaffuru.MenuLogic.UI {
 			}
 		}
 
-		[UIComponent("button_advancedFiltersConfig")] NoTransitionsButton advancedFiltersConfigButton = null;
+		[UIComponent("button_advancedFiltersConfig")] readonly NoTransitionsButton advancedFiltersConfigButton = null;
 
 		bool filter_enableAdvancedFilters {
 			get => config.filter_enableAdvancedFilters;
@@ -76,8 +76,8 @@ namespace Shaffuru.MenuLogic.UI {
 			songQueueManager.Clear();
 		}
 
-		[UIComponent("label_songCount")] TextMeshProUGUI filteredSongsLabel = null;
-		[UIComponent("button_startLevel")] NoTransitionsButton startLevelButton = null;
+		[UIComponent("label_songCount")] readonly TextMeshProUGUI filteredSongsLabel = null;
+		[UIComponent("button_startLevel")] readonly NoTransitionsButton startLevelButton = null;
 
 		async void OpenStartModal() {
 			startLevelButton.interactable = false;
@@ -115,7 +115,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 		readonly string version = $"Version {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)} by Kinsi55";
 
-		[UIComponent("sponsorsText")] CurvedTextMeshPro sponsorsText = null;
+		[UIComponent("sponsorsText")] readonly CurvedTextMeshPro sponsorsText = null;
 		void OpenSponsorsLink() => Process.Start("https://github.com/sponsors/kinsi55");
 		void OpenSponsorsModal() {
 			sponsorsText.text = "Loading...";

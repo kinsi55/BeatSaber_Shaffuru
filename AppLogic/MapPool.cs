@@ -165,7 +165,7 @@ namespace Shaffuru.AppLogic {
 					if(beatmapSet.beatmapCharacteristic != Anlasser.standardCharacteristic)
 						continue;
 
-					SongDetailsCache.Structs.Song songDetailsSong = SongDetailsCache.Structs.Song.none;
+					var songDetailsSong = SongDetailsCache.Structs.Song.none;
 
 					// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
 					if(Config.Instance.filter_enableAdvancedFilters) {
@@ -201,7 +201,7 @@ namespace Shaffuru.AppLogic {
 
 						if(Config.Instance.filter_enableAdvancedFilters) {
 							var diffIsValid = false;
-							for(int i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
+							for(var i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
 								var diff = songDetails.difficulties[i];
 
 								if((int)diff.difficulty != (int)beatmapDiff)

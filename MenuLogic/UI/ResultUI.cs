@@ -23,15 +23,15 @@ namespace Shaffuru.MenuLogic.UI {
 		[UIAction("closexd")] void closexd() => closed.Invoke();
 
 
-		[UIComponent("sessionResult")] TextMeshProUGUI sessionResult = null;
-		[UIComponent("sessionLength")] TextMeshProUGUI sessionLength = null;
-		[UIComponent("songCount")] TextMeshProUGUI songCount = null;
-		[UIComponent("sessionAcc")] TextMeshProUGUI sessionAcc = null;
+		[UIComponent("sessionResult")] readonly TextMeshProUGUI sessionResult = null;
+		[UIComponent("sessionLength")] readonly TextMeshProUGUI sessionLength = null;
+		[UIComponent("songCount")] readonly TextMeshProUGUI songCount = null;
+		[UIComponent("sessionAcc")] readonly TextMeshProUGUI sessionAcc = null;
 
 		[UIComponent("songList")] public CustomCellListTableData songList = null;
 
 		SongListSong lastSelectedSong;
-		void SongSelected(TableView tableView, SongListSong row) {
+		void SongSelected(TableView _, SongListSong row) {
 			lastSelectedSong = row;
 		}
 
@@ -40,14 +40,14 @@ namespace Shaffuru.MenuLogic.UI {
 		}
 
 		class SongListSong {
-			[UIComponent("cover")] ImageView cover = null;
+			[UIComponent("cover")] readonly ImageView cover = null;
 
-			ShaffuruSong song = null;
+			readonly ShaffuruSong song;
 			internal IPreviewBeatmapLevel preview { get; private set; }
 
-			string songName = "";
-			string playTime = "";
-			string diffAndSource = "";
+			readonly string songName = "";
+			readonly string playTime = "";
+			readonly string diffAndSource = "";
 
 
 			public SongListSong(ShaffuruSong song) {
@@ -65,7 +65,7 @@ namespace Shaffuru.MenuLogic.UI {
 				}
 			}
 
-			[UIComponent("bgContainer")] ImageView bg = null;
+			[UIComponent("bgContainer")] readonly ImageView bg = null;
 
 			[UIAction("#post-parse")]
 			void Parsed() {

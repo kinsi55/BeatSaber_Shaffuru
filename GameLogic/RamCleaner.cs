@@ -9,8 +9,8 @@ namespace Shaffuru.GameLogic {
 
 		const string clearingText = "Clearing RAM so your PC\ndoesn't explode <color=#FC5>😁</color>\n\nLag right now is normal <color=#FC5>👍</color>\n";
 
-		GameObject cleanInfoText;
-		TextMeshPro cleanLabel;
+		readonly GameObject cleanInfoText;
+		readonly TextMeshPro cleanLabel;
 
 		public RamCleaner() {
 			cleanInfoText = new GameObject($"Label", typeof(Canvas), typeof(TextMeshPro));

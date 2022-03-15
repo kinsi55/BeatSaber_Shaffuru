@@ -7,8 +7,8 @@ namespace Shaffuru.MenuLogic {
 	class Anlasser {
 		public const string LevelId = "___Shaffuru";
 
-		PlayerDataModel playerDataModel;
-		MenuTransitionsHelper menuTransitionsHelper;
+		readonly PlayerDataModel playerDataModel;
+		readonly MenuTransitionsHelper menuTransitionsHelper;
 
 		static BeatmapLevelSO beatmapLevel;
 		static BeatmapDataSO beatmapLevelData;
@@ -49,8 +49,6 @@ namespace Shaffuru.MenuLogic {
 
 			if(rngSeed != 0)
 				rngSource.Value = new System.Random(rngSeed);
-
-			var notes = new StringBuilder();
 
 			var bpm = 13.37f;
 

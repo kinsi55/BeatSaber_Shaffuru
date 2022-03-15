@@ -19,11 +19,11 @@ namespace Shaffuru.GameLogic {
 		}
 
 		public async Task<IReadonlyBeatmapData> TransformDifficulty(IDifficultyBeatmap difficulty) {
-			PlayerSpecificSettings playerSpecificSettings = _sceneSetupData.playerSpecificSettings;
-			GameplayModifiers gameplayModifiers = _sceneSetupData.gameplayModifiers;
+			var playerSpecificSettings = _sceneSetupData.playerSpecificSettings;
+			var gameplayModifiers = _sceneSetupData.gameplayModifiers;
 
 			// Process the new beatmap as tho we'd play it so LeftHanded etc is accounted for
-			EnvironmentEffectsFilterPreset environmentEffectsFilterPreset = (difficulty.difficulty == BeatmapDifficulty.ExpertPlus) ? playerSpecificSettings.environmentEffectsFilterExpertPlusPreset : playerSpecificSettings.environmentEffectsFilterDefaultPreset;
+			var environmentEffectsFilterPreset = (difficulty.difficulty == BeatmapDifficulty.ExpertPlus) ? playerSpecificSettings.environmentEffectsFilterExpertPlusPreset : playerSpecificSettings.environmentEffectsFilterDefaultPreset;
 			return BeatmapDataTransformHelper.CreateTransformedBeatmapData(
 				await difficulty.GetBeatmapDataAsync(_sceneSetupData.environmentInfo),
 				difficulty.level,
