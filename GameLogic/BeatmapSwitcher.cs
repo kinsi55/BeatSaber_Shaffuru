@@ -149,8 +149,9 @@ namespace Shaffuru.GameLogic {
 
 			if(!ramCleaner.TrySkip() && audioTimeSyncController.songLength - audioTimeSyncController.songTime >= 30f) {
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);
-				customAudioSource.SetAudio(null);
 				audioSource.Pause();
+
+				customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.2f);
 				yield return ramCleaner.ClearRam();
@@ -247,7 +248,7 @@ namespace Shaffuru.GameLogic {
 					}
 				}
 
-				while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time - aheadTime < currentAudioTime)
+				while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time < currentAudioTime)
 					v.lastProcessedNode = v.lastProcessedNode.Next;
 			}
 
@@ -265,7 +266,8 @@ namespace Shaffuru.GameLogic {
 			// New audio
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
-			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip, startTime + (audioTimeSyncController.songTime - timePre));
+			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
+			customAudioSource.Play(startTime + (audioTimeSyncController.songTime - timePre));
 
 			HeckOffCutSoundsCrash.enablePatch = false;
 
@@ -311,12 +313,18 @@ namespace Shaffuru.GameLogic {
 			this.audioLatency = audioLatency;
 		}
 
-		public void SetAudio(AudioClip clip, float songStart = 0) {
+		public void SetAudio(AudioClip clip) {
+			if(source.clip == clip)
+				return;
+
 			source.Stop();
 			//source.clip?.UnloadAudioData();
 			source.time = 0f;
 			source.clip = clip;
-			if(clip != null) {
+		}
+
+		public void Play(float songStart = 0) {
+			if(source.clip != null) {
 				source.time = songStart + audioLatency;
 				source.Play();
 				//Console.WriteLine("{0} {1}", source.isPlaying, source.clip.length);
