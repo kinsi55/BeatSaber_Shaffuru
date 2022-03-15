@@ -97,7 +97,9 @@ namespace Shaffuru.MenuLogic.UI {
 			sessionResult.color = passed ? Color.green : Color.red;
 			sessionResult.text = passed ? "Passed PogU" : "Failed FeelsBadMan";
 
-			sessionLength.text = $"Session Length: {TimeSpan.FromSeconds(levelCompletionResult.endSongTime).ToString(@"mm\:ss")}";
+			var ts = TimeSpan.FromSeconds(levelCompletionResult.endSongTime);
+
+			sessionLength.text = $"Session Length: {ts.TotalMinutes}:{ts.Seconds}";
 
 			var totalnotes = levelCompletionResult.goodCutsCount + levelCompletionResult.badCutsCount + levelCompletionResult.missedCount;
 			songCount.text = $"Songs Played: {playedSongList.list.Count} ({totalnotes} Notes)";
