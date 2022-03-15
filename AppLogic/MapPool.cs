@@ -124,6 +124,8 @@ namespace Shaffuru.AppLogic {
 			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
 				FilterInPlaylist();
 
+			var mappingExtensionInstalled = IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
+
 			var newFilteredLevels = new List<ValidSong>();
 
 			foreach(var map in maps) {
@@ -193,7 +195,7 @@ namespace Shaffuru.AppLogic {
 								continue;
 
 							// I have a feeling any requirements in the map would be BAAAD
-							if(extradata.additionalDifficultyData._requirements.Length > 0)
+							if(extradata.additionalDifficultyData._requirements.Any(x => !mappingExtensionInstalled || x != "Mapping Extensions"))
 								continue;
 						}
 
