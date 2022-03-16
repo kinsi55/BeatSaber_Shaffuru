@@ -2,7 +2,6 @@
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using Shaffuru.AppLogic;
-using Shaffuru.MenuLogic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -47,17 +46,29 @@ namespace Shaffuru.MenuLogic.UI {
 			config = Config.Instance;
 		}
 
-		public void OnEnable() {
-			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
+		[UIAction("#post-parse")] void Parsed() => PreparePlaylistStuff(false);
+
+		public void OnEnable() => PreparePlaylistStuff();
+
+		void PreparePlaylistStuff(bool rebuild = true) {
+			var hasLib = IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null;
+			if(playlistDropdown != null)
+				playlistDropdown.interactable = hasLib;
+
+			if(!rebuild)
+				return;
+
+			playlists = new List<object>() { "None (All Songs)" };
+
+			if(hasLib)
 				LoadPlaylistsList();
 		}
 
 		void LoadPlaylistsList() {
-			playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.packName).Prepend("None (All Songs)").Distinct().ToList<object>();
-			if(playlistDropdown != null) {
-				playlistDropdown.values = playlists;
+			playlists.AddRange(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.packName).Distinct());
+
+			if(playlistDropdown != null)
 				playlistDropdown.UpdateChoices();
-			}
 		}
 
 		[UIComponent("button_advancedFiltersConfig")] readonly NoTransitionsButton advancedFiltersConfigButton = null;
