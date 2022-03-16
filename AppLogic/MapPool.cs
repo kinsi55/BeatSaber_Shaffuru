@@ -1,7 +1,4 @@
-﻿using BeatSaberPlaylistsLib.Blist;
-using BeatSaberPlaylistsLib.Legacy;
-using BeatSaberPlaylistsLib.Types;
-using Shaffuru.MenuLogic;
+﻿using Shaffuru.MenuLogic;
 using SiraUtil.Zenject;
 using SongDetailsCache;
 using System;
@@ -68,38 +65,25 @@ namespace Shaffuru.AppLogic {
 
 		public void Dispose() => Clear();
 
-		public async Task ProcessBeatmapPool() {
-			var minLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
-
-			var maps = beatmapLevelsModel
-				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
-				.Where(x => !(x is PreviewBeatmapLevelPackSO))
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
-
-			allLevels = maps.ToArray();
-
-			maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minLength);
-
-			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
-
-			// Wrapping this to prevent missing symbol stuff if no bsplaylistlib
-			void FilterInPlaylist() {
+		// Wrapping this to prevent missing symbol stuff if no bsplaylistlib
+		static class TheJ {
+			public static ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> GetAllSongsInSelectedPlaylist() {
 				// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
 				var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
 					.GetAllPlaylists(true)
 					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
 
-				IEnumerable<IGrouping<IPreviewBeatmapLevel, PlaylistSong>> theThing = null;
+				IEnumerable<IGrouping<IPreviewBeatmapLevel, BeatSaberPlaylistsLib.Types.PlaylistSong>> theThing = null;
 
-				if(x is LegacyPlaylist l) {
-					theThing = l.BeatmapLevels.Cast<PlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
-				} else if(x is BlistPlaylist bl) {
-					theThing = bl.BeatmapLevels.Cast<BlistPlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
+				if(x is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist l) {
+					theThing = l.BeatmapLevels.Cast<BeatSaberPlaylistsLib.Types.PlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
+				} else if(x is BeatSaberPlaylistsLib.Blist.BlistPlaylist bl) {
+					theThing = bl.BeatmapLevels.Cast<BeatSaberPlaylistsLib.Blist.BlistPlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
 				} else {
-					return;
+					return null;
 				}
 
-				playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
+				var playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
 
 				foreach(var xy in theThing) {
 					if(!Config.Instance.filter_playlist_onlyHighlighted) {
@@ -119,10 +103,26 @@ namespace Shaffuru.AppLogic {
 					);
 				}
 
+				return playlistSongs;
 			}
+		}
+
+		public async Task ProcessBeatmapPool() {
+			var minLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
+
+			var maps = beatmapLevelsModel
+				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
+				.Where(x => !(x is PreviewBeatmapLevelPackSO))
+				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
+
+			allLevels = maps.ToArray();
+
+			maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minLength);
+
+			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
 			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
-				FilterInPlaylist();
+				playlistSongs = TheJ.GetAllSongsInSelectedPlaylist();
 
 			var allowME = Config.Instance.filter_AllowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 
