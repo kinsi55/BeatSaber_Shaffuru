@@ -51,7 +51,7 @@ namespace Shaffuru.GameLogic {
 			//songQueueManager.EnqueueSong("custom_level_9F783CE7F810062852795F4CBDF8335245FD044A", BeatmapDifficulty.ExpertPlus, 137);
 		}
 
-		public float switchToNextBeatmapAt = 1f;
+		public float switchToNextBeatmapAt = 1.3f;
 		bool isQueueingNewSong = false;
 
 		public async void Tick() {
