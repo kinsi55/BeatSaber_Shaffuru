@@ -22,7 +22,7 @@ For now - **Make sure to not use any mods that disable score submission** as tha
 - **SiraUtil**
 - **BeatSaberMarkupLanguage**
 - **SongDetailsCache**
-- **CatCore** (Optional, only needed if you want Chat requests to work)
+- **CatCore** or **ChatCore** (Optional, only needed if you want Chat requests to work)
 - **BeatSaberPlaylistsLib** (Optional, only needed for playlist filtering)
 
 ## How to Play
