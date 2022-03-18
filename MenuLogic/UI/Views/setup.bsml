@@ -27,7 +27,7 @@
 		</tab>
 		<tab tags='tabs' tab-name='Chat Commands'>
 			<vertical pad-top='5'>
-				<text text='Chat Integration requires you to have CatCore installed and configured to work!' color='grey' font-size='3.5' align='Center'/>
+				<text text='You need to have CatCore or ChatCore installed and configured for Chat Commands to work!' color='grey' font-size='3.5' align='Center'/>
 				<macro.as-host host='config'>
 					<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->

@@ -1,4 +1,5 @@
 ﻿using Shaffuru.AppLogic;
+using Shaffuru.Util;
 using SiraUtil.Zenject;
 using System;
 using Zenject;
@@ -13,10 +14,14 @@ namespace Shaffuru.Installers {
 
 			Container.BindInstance(new UBinder<Plugin, Random>(new Random())).AsSingle();
 
-			if(IPA.Loader.PluginManager.GetPluginFromId("CatCore") == null)
-				return;
+			if(IPA.Loader.PluginManager.GetPluginFromId("CatCore") != null) {
+				Container.BindInterfacesAndSelfTo<CatCoreSource>().AsSingle();
+			} else if(IPA.Loader.PluginManager.GetPluginFromId("ChatCore") != null) {
+				Container.BindInterfacesAndSelfTo<ChatCoreSource>().AsSingle();
+			}
 
-			Container.BindInterfacesAndSelfTo<RequestManager>().AsSingle().NonLazy();
+			if(Container.HasBinding<IChatMessageSource>())
+				Container.BindInterfacesAndSelfTo<RequestManager>().AsSingle().NonLazy();
 		}
 	}
 }
