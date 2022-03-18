@@ -24,8 +24,8 @@ namespace Shaffuru.Util {
 	class ChatCoreSource : IChatMessageSource {
 		public event IChatMessageSource.IncomingChatMessage OnTextMessageReceived;
 
-		ChatCoreInstance chatCore;
-		TwitchService twitch;
+		static ChatCoreInstance chatCore;
+		static TwitchService twitch;
 
 		ChatCoreSource() {
 			chatCore ??= ChatCoreInstance.Create();
