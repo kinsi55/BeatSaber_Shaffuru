@@ -76,7 +76,7 @@ namespace Shaffuru.Util {
 	class BeatSaberPlusSource : IChatMessageSource {
 		public event IChatMessageSource.IncomingChatMessage OnTextMessageReceived;
 
-		private BeatSaberPlus.SDK.Chat.Services.ChatServiceMultiplexer multiplexer;
+		BeatSaberPlus.SDK.Chat.Services.ChatServiceMultiplexer multiplexer;
 
 		BeatSaberPlusSource() {
 			BeatSaberPlus.SDK.Chat.Service.Acquire();
@@ -84,7 +84,7 @@ namespace Shaffuru.Util {
 			multiplexer.OnTextMessageReceived += Twitch_OnTextMessageReceived;
 		}
 
-		private void Twitch_OnTextMessageReceived(BeatSaberPlus.SDK.Chat.Interfaces.IChatService _, BeatSaberPlus.SDK.Chat.Interfaces.IChatMessage msg) {
+		void Twitch_OnTextMessageReceived(BeatSaberPlus.SDK.Chat.Interfaces.IChatService _, BeatSaberPlus.SDK.Chat.Interfaces.IChatMessage msg) {
 			OnTextMessageReceived?.Invoke(msg.Sender.UserName, msg.Message, msg.Channel);
 		}
 
