@@ -59,6 +59,9 @@
     <Reference Include="BeatSaberPlaylistsLib">
       <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
     </Reference>
+    <Reference Include="BeatSaberPlus">
+      <HintPath>Refs\BeatSaberPlus.dll</HintPath>
+    </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
     </Reference>
