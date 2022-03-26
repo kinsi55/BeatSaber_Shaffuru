@@ -72,4 +72,27 @@ namespace Shaffuru.Util {
 		~CatCoreSource() => Dispose();
 		public void Dispose() => twitch.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 	}
+
+	class BeatSaberPlusSource : IChatMessageSource {
+		public event IChatMessageSource.IncomingChatMessage OnTextMessageReceived;
+
+		private BeatSaberPlus.SDK.Chat.Services.ChatServiceMultiplexer multiplexer;
+
+		BeatSaberPlusSource() {
+			BeatSaberPlus.SDK.Chat.Service.Acquire();
+			multiplexer = BeatSaberPlus.SDK.Chat.Service.Multiplexer;
+			multiplexer.OnTextMessageReceived += Twitch_OnTextMessageReceived;
+		}
+
+		private void Twitch_OnTextMessageReceived(BeatSaberPlus.SDK.Chat.Interfaces.IChatService _, BeatSaberPlus.SDK.Chat.Interfaces.IChatMessage msg) {
+			OnTextMessageReceived?.Invoke(msg.Sender.UserName, msg.Message, msg.Channel);
+		}
+
+		public void SendChatMessage(string message, object channel) {
+			multiplexer.SendTextMessage((BeatSaberPlus.SDK.Chat.Interfaces.IChatChannel)channel, message);
+		}
+
+		~BeatSaberPlusSource() => Dispose();
+		public void Dispose() => multiplexer.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
+	}
 }
