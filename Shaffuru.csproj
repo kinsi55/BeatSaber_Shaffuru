@@ -81,7 +81,7 @@
       <HintPath>E:\SteamLibrary\steamapps\common\Beat Saber\Libs\Hive.Versioning.dll</HintPath>
     </Reference>
     <Reference Include="MappingExtensions">
-      <HintPath>$(BeatSaberDir)\Plugins\MappingExtensions.dll</HintPath>
+      <HintPath>Refs\MappingExtensions.dll</HintPath>
     </Reference>
     <Reference Include="SiraUtil">
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
