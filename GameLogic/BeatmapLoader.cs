@@ -25,7 +25,7 @@ namespace Shaffuru.GameLogic {
 			// Process the new beatmap as tho we'd play it so LeftHanded etc is accounted for
 			var environmentEffectsFilterPreset = (difficulty.difficulty == BeatmapDifficulty.ExpertPlus) ? playerSpecificSettings.environmentEffectsFilterExpertPlusPreset : playerSpecificSettings.environmentEffectsFilterDefaultPreset;
 			return BeatmapDataTransformHelper.CreateTransformedBeatmapData(
-				await difficulty.GetBeatmapDataAsync(_sceneSetupData.environmentInfo),
+				await difficulty.GetBeatmapDataAsync(_sceneSetupData.environmentInfo, playerSpecificSettings),
 				difficulty.level,
 				gameplayModifiers,
 				playerSpecificSettings.leftHanded,
