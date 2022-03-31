@@ -2,9 +2,9 @@
     "id": "Shaffuru",
     "name": "Shaffuru",
     "author": "Kinsi55",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "description": "Endless Mode evolved - Allows you to play a randomly* picked list of songs in various different ways",
-    "gameVersion": "1.20.0",
+    "gameVersion": "1.21.0",
     "dependsOn": {
         "BSIPA": "^4.0.5",
         "SongCore": "^3.9.0",
