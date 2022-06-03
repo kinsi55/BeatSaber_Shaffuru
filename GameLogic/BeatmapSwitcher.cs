@@ -20,16 +20,18 @@ namespace Shaffuru.GameLogic {
 			MemoryPoolContainer<BurstSliderGameNoteController> ____burstSliderGameNotePoolContainer,
 			MemoryPoolContainer<BurstSliderGameNoteController> ____burstSliderFillPoolContainer,
 			MemoryPoolContainer<BombNoteController> ____bombNotePoolContainer,
-			MemoryPoolContainer<ObstacleController> ____obstaclePoolContainer
+			MemoryPoolContainer<ObstacleController> ____obstaclePoolContainer,
+			Dictionary<SliderController.LengthType, MemoryPoolContainer<SliderController>> ____sliderNotePoolContainersDictionary
 		) {
 			activeItemPools = new Action<float>[] {
-					(a) => ____basicGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
-					(a) => ____burstSliderHeadGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
-					(a) => ____burstSliderGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
-					(a) => ____burstSliderFillPoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
-					(a) => ____bombNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
-					(a) => ____obstaclePoolContainer.activeItems.ForEach(x => x.Dissolve(a))
-				};
+				(a) => ____basicGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+				(a) => ____burstSliderHeadGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+				(a) => ____burstSliderGameNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+				(a) => ____burstSliderFillPoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+				(a) => ____bombNotePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+				(a) => ____obstaclePoolContainer.activeItems.ForEach(x => x.Dissolve(a)),
+				(a) => ____sliderNotePoolContainersDictionary.Values.Do(x => x.activeItems.ForEach(x => x.Dissolve(a)))
+			};
 		}
 
 		public static void DissolveAll(float dissolveTime) {
@@ -53,6 +55,8 @@ namespace Shaffuru.GameLogic {
 		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), nameof(GameEnergyCounter.noFail));
 
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time = IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor($"<{nameof(BeatmapDataItem.time)}>k__BackingField");
+		static readonly IPA.Utilities.FieldAccessor<SliderData, float>.Accessor SETTER_SliderData_tailTime = IPA.Utilities.FieldAccessor<SliderData, float>.GetAccessor($"<{nameof(SliderData.tailTime)}>k__BackingField");
+		
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime = IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("aheadTime");
 
 		readonly GameplayCoreSceneSetupData _sceneSetupData;
@@ -219,7 +223,13 @@ namespace Shaffuru.GameLogic {
 
 				// Change the nodes time to be at the right time in the modified context
 				var j = x;
-				SETTER_BeatmapDataItem_time(ref j) = relativeSongTime + currentAudioTime;
+				var bmot = relativeSongTime + currentAudioTime;
+
+				// Sliders and arcs have an end time that we need to correct also
+				if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && x is SliderData xSlider)
+					SETTER_SliderData_tailTime(ref xSlider) = bmot + xSlider.tailTime - x.time;
+
+				SETTER_BeatmapDataItem_time(ref j) = bmot;
 			}
 
 			// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
