@@ -134,7 +134,11 @@ namespace Shaffuru.AppLogic {
 					));
 
 					if(queued) {
-						Msg($"@{sender} Queued {split[1]} - {theMappe.level.songName} ({(BeatmapDifficulty)diff})", channel);
+						if(Config.Instance.chat_request_show_name) {
+							Msg($"@{sender} Queued {split[1]} - {theMappe.level.songName} ({(BeatmapDifficulty)diff})", channel);
+						} else {
+							Msg($"@{sender} Queued {split[1]} ({(BeatmapDifficulty)diff})", channel);
+						}
 					} else {
 						Msg($"@{sender} Couldn't queue map (Unknown error)", channel);
 					}
