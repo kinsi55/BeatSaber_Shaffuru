@@ -20,18 +20,9 @@ namespace Shaffuru {
 			Log = logger;
 
 			Config.Instance = conf.Generated<Config>();
-#if PRE1_19
-			zenjector.OnApp<Installers.AppInstaller>();
-			zenjector.OnMenu<Installers.MenuInstaller>();
-			zenjector.OnGame<Installers.GameInstaller>()
-				.ShortCircuitForMultiplayer()
-				.ShortCircuitForTutorial()
-				.ShortCircuitForCampaign();
-#else
 			zenjector.Install<Installers.AppInstaller>(Location.App);
 			zenjector.Install<Installers.MenuInstaller>(Location.Menu);
 			zenjector.Install<Installers.GameInstaller>(Location.StandardPlayer);
-#endif
 		}
 
 		[OnStart]
