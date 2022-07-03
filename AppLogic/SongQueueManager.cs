@@ -47,7 +47,7 @@ namespace Shaffuru.AppLogic {
 
 			if(queue.Count == 0) {
 				// If the requeueBlockList contains as many levels as we have filtered ones, clear it, because every playable level has already been played
-				if(mapPool.filteredLevels.Length == requeueBlockList.Count)
+				if(mapPool.filteredLevels.Count == requeueBlockList.Count)
 					requeueBlockList.Clear();
 
 				var levels = mapPool.filteredLevels.Where(x => !requeueBlockList.Contains(x.level.levelID));
