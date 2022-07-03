@@ -46,7 +46,6 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
-		public IPreviewBeatmapLevel[] allLevels { get; private set; }
 		public ValidSong[] filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
 
@@ -60,7 +59,6 @@ namespace Shaffuru.AppLogic {
 		public void Clear() {
 			filteredLevels = null;
 			requestableLevels = null;
-			allLevels = null;
 		}
 
 		public void Dispose() => Clear();
@@ -115,7 +113,6 @@ namespace Shaffuru.AppLogic {
 				.Where(x => !(x is PreviewBeatmapLevelPackSO))
 				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
 
-			allLevels = maps.ToArray();
 
 			maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minLength);
 
