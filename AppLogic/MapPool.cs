@@ -162,14 +162,14 @@ namespace Shaffuru.AppLogic {
 					// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
 					if(Config.Instance.filter_enableAdvancedFilters) {
 						if(songHash == null || !songDetails.songs.FindByHash(songHash, out songDetailsSong))
-							continue;
+							break;
 
 						if(songDetailsSong.bpm < Config.Instance.filter_advanced_bpm_min)
-							continue;
+							break;
 
 						if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
 							songDetailsSong.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
-							continue;
+							break;
 					}
 
 					var validSonge = new ValidSong() {
