@@ -97,7 +97,7 @@ namespace Shaffuru.MenuLogic.UI {
 			var playable = 0;
 			try {
 				await Task.Run(mapPool.ProcessBeatmapPool);
-				playable = (mapPool?.filteredLevels?.Length ?? 0);
+				playable = (mapPool?.filteredLevels?.Count ?? 0);
 				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} on BeatSaver / requestable)";
 			} catch(Exception ex) {
 				filteredSongsLabel.text = $"Failed to build map pool";

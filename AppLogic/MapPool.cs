@@ -33,21 +33,22 @@ namespace Shaffuru.AppLogic {
 				var start =
 					Config.Instance.random_prefer_top_diff ? 0 : rngSource.Next((int)BeatmapDifficulty.ExpertPlus);
 
+				// I wish I commented how this works when I wrote it
 				var m = 1 + (int)BeatmapDifficulty.ExpertPlus;
 
 				for(var i = m; i-- > 0;) {
 					var x = (start + i) % m;
 
-					if((validDiffs & (int)Math.Pow(2, x)) != 0)
+					if((validDiffs & (1 << x)) != 0)
 						return (BeatmapDifficulty)x;
 				}
 				return BeatmapDifficulty.Easy;
 			}
 
-			public bool IsDiffValid(BeatmapDifficulty diff) => (validDiffs & (int)Math.Pow(2, (int)diff)) != 0;
+			public bool IsDiffValid(BeatmapDifficulty diff) => (validDiffs & (1 << (int)diff)) != 0;
 
 			public void SetDiffValid(BeatmapDifficulty diff) {
-				validDiffs |= (int)Math.Pow(2, (int)diff);
+				validDiffs |= (1 << (int)diff);
 			}
 		}
 
@@ -110,9 +111,13 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
+		int minSongLength = 0;
 		bool allowMappingExtensions = false;
 
-		ValidSong LevelFilterCheck(IPreviewBeatmapLevel level, ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null) {
+		ValidSong LevelFilterCheck(IPreviewBeatmapLevel level, ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null, bool forceNoFilters = false) {
+			if(!forceNoFilters && level.songDuration - level.songTimeOffset < minSongLength)
+				return default;
+
 			BeatmapDifficulty[] playlistDiffs = null;
 
 			if(playlistSongs?.TryGetValue(level, out playlistDiffs) == false)
@@ -145,7 +150,7 @@ namespace Shaffuru.AppLogic {
 				var songDetailsSong = SongDetailsCache.Structs.Song.none;
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
-				if(Config.Instance.filter_enableAdvancedFilters) {
+				if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
 					if(songHash == null || !songDetails.songs.FindByHash(songHash, out songDetailsSong))
 						break;
 
@@ -174,7 +179,7 @@ namespace Shaffuru.AppLogic {
 							continue;
 					}
 
-					if(Config.Instance.filter_enableAdvancedFilters) {
+					if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
 						var diffIsValid = false;
 						for(var i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
 							var diff = songDetails.difficulties[i];
@@ -204,19 +209,35 @@ namespace Shaffuru.AppLogic {
 
 				return validSonge;
 			}
+
 			return default;
 		}
 
+		public bool AddRequestableLevel(IPreviewBeatmapLevel level, string beatsaverId, bool forceNoFilters = false) {
+			var levelCheck = LevelFilterCheck(level, forceNoFilters: forceNoFilters);
+
+			if(levelCheck.validDiffs == 0)
+				return false;
+
+			if(requestableLevels.ContainsKey(beatsaverId))
+				return false;
+
+			filteredLevels.Add(levelCheck);
+
+			((Dictionary<string, int>)requestableLevels)[beatsaverId] = filteredLevels.Count - 1;
+
+			return true;
+		}
+
 		public async Task ProcessBeatmapPool() {
-			var minLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
+			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
 
 			var maps = beatmapLevelsModel
 				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
 				.Where(x => !(x is PreviewBeatmapLevelPackSO))
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
+				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels)
+				.Where(x => x.songDuration - x.songTimeOffset >= minSongLength);
 
-
-			maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minLength);
 
 			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
