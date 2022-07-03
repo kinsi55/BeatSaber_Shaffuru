@@ -24,6 +24,11 @@ namespace Shaffuru.AppLogic {
 			// I really didnt want a ref type per song just to store the valid diffs, so I store all valid diffs as a bitsum
 			public int validDiffs;
 
+			public ValidSong(IPreviewBeatmapLevel level) {
+				this.level = level;
+				validDiffs = 0;
+			}
+
 			public BeatmapDifficulty GetRandomValidDiff() {
 				var start =
 					Config.Instance.random_prefer_top_diff ? 0 : rngSource.Next((int)BeatmapDifficulty.ExpertPlus);
@@ -172,9 +177,7 @@ namespace Shaffuru.AppLogic {
 							break;
 					}
 
-					var validSonge = new ValidSong() {
-						level = map
-					};
+					var validSonge = new ValidSong(map);
 
 					foreach(var beatmapDiff in beatmapSet.beatmapDifficulties) {
 						// playlistDiffs is only created if the playlist entry actually has any highlit diffs (And the option is enabled)
