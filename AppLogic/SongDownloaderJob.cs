@@ -19,10 +19,16 @@ using UnityEngine.Networking;
 
 namespace Shaffuru.AppLogic {
 	public struct SongDownloaderJob : IJob {
+		public static readonly HashSet<uint> downloadingMaps = new HashSet<uint>();
+
 		uint beatsaverId;
+		public bool succeeded;
 
 		public SongDownloaderJob(uint beatsaverId) {
 			this.beatsaverId = beatsaverId;
+			succeeded = false;
+
+			downloadingMaps.Add(beatsaverId);
 		}
 
 		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.Accessor BeatmapLevelsModel_loadedPreviewBeatmapLevels =
@@ -34,43 +40,38 @@ namespace Shaffuru.AppLogic {
 
 		static readonly string UserAgent = "Shaffuru/" + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 		public unsafe void Execute() {
-			if(!SongDetailsUtil.instance.songs.FindByMapId(beatsaverId, out var song))
-				return;
-
-			var downloadUrl = $"https://r2cdn.beatsaver.com/{song.hash.ToLowerInvariant()}.zip";
-			var folderName = string.Concat($"{song.key} ({song.songName} - {song.levelAuthorName})".Split(Path.GetInvalidFileNameChars())).Trim();
-
-			Console.WriteLine("Downloading map");
-
-			using(var m = DownloadMap(downloadUrl)) {
-				if(m == null)
+			try {
+				if(!SongDetailsUtil.instance.songs.FindByMapId(beatsaverId, out var song))
 					return;
 
-				Console.WriteLine("Downloaded map");
+				var downloadUrl = $"https://r2cdn.beatsaver.com/{song.hash.ToLowerInvariant()}.zip";
+				var folderName = string.Concat($"{song.key} ({song.songName} - {song.levelAuthorName})".Split(Path.GetInvalidFileNameChars())).Trim();
 
-				var p = SaveMap(m, folderName);
+				using(var m = DownloadMap(downloadUrl)) {
+					if(m == null)
+						return;
 
-				Console.WriteLine("Saved map to {0}", p);
+					var p = SaveMap(m, folderName);
 
-				if(p == null)
-					return;
+					if(p == null)
+						return;
 
-				var data = SongCore.Loader.Instance.LoadCustomLevelSongData(p);
+					var data = SongCore.Loader.Instance.LoadCustomLevelSongData(p);
 
-				//var preview = SongCore.Loader.LoadSong(data.SaveData, p, out var hash);
-				var preview = (CustomPreviewBeatmapLevel)SongCore_LoadSongAndAddToDictionaries.Invoke(SongCore.Loader.Instance, new object[] {
-					CancellationToken.None, data, p, null
-				});
+					var preview = (CustomPreviewBeatmapLevel)SongCore_LoadSongAndAddToDictionaries.Invoke(SongCore.Loader.Instance, new object[] {
+						CancellationToken.None, data, p, null
+					});
 
-				var hash = MapPool.GetHashOfPreview(preview);
+					var hash = MapPool.GetHashOfPreview(preview);
 
-				Console.WriteLine("Loaded hash: {0}", hash);
+					var x = SongCore.Loader.BeatmapLevelsModelSO;
+					// Adding it to this Dict so that beatmapLevelsModel.GetBeatmapLevelAsync can load this custom beatmap
+					BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref x)[$"custom_level_{hash}"] = preview;
 
-				var x = SongCore.Loader.BeatmapLevelsModelSO;
-				BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref x)[$"custom_level_{hash}"] = preview;
-
-				if(MapPool.instance.AddRequestableLevel(preview, true))
-					Console.WriteLine("Added map to requestable levels (key {0}!", song.key);
+					succeeded = MapPool.instance.AddRequestableLevel(preview, true);
+				}
+			} finally {
+				downloadingMaps.Remove(beatsaverId);
 			}
 		}
 

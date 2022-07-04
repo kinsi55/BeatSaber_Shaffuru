@@ -87,6 +87,9 @@ namespace Shaffuru.AppLogic {
 					} else if(!Config.Instance.request_allowDownloading) {
 						Msg($"@{sender} The map is not downloaded", channel);
 						return;
+					} else if(SongDownloaderJob.downloadingMaps.Contains(song.mapId)) {
+						Msg($"@{sender} The map is currently being downloaded", channel);
+						return;
 					} else {
 						mapNeedsDownload = true;
 					}
