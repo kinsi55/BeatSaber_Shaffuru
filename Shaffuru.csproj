@@ -44,11 +44,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <None Remove="Assets\triangle" />
-    <None Remove="MenuLogic\UI\setup.bsml" />
-    <None Remove="MenuLogic\UI\Views\result.bsml" />
-  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="0Harmony">
@@ -127,6 +122,9 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
@@ -150,6 +148,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Assets\SongCoreFolder.png" />
     <EmbeddedResource Include="Assets\triangle" />
     <EmbeddedResource Include="manifest.json" />
     <EmbeddedResource Include="MenuLogic\UI\Views\result.bsml" />

@@ -21,6 +21,7 @@ using UnityEngine.Networking;
 namespace Shaffuru.AppLogic {
 	public struct SongDownloaderJob : IJob {
 		public static readonly HashSet<uint> downloadingMaps = new HashSet<uint>();
+		public static readonly string ShaffuruDownloadPath = Path.Combine(Directory.GetCurrentDirectory(), CustomLevelPathHelper.customLevelsDirectoryPath, "SHAFFURU_DOWNLOADS");
 
 		uint beatsaverId;
 
@@ -128,7 +129,7 @@ namespace Shaffuru.AppLogic {
 				if(files.Count < 3 || !files.Keys.Any(x => x.Equals("info.dat", StringComparison.OrdinalIgnoreCase)))
 					throw new InvalidDataException();
 
-				var path = Path.Combine(Directory.GetCurrentDirectory(), CustomLevelPathHelper.customLevelsDirectoryPath, folderName);
+				var path = Path.Combine(ShaffuruDownloadPath, folderName);
 
 				if(path.Length > 253 - longestFileNameLength)
 					path = $"{path.Substring(0, 253 - longestFileNameLength - 7)}..";

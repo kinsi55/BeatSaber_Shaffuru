@@ -1,8 +1,11 @@
-﻿using HarmonyLib;
+﻿using BeatSaberMarkupLanguage;
+using HarmonyLib;
 using IPA;
 using IPA.Config.Stores;
+using Shaffuru.AppLogic;
 using SiraUtil.Zenject;
 using System.Reflection;
+using UnityEngine;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Shaffuru {
@@ -29,6 +32,13 @@ namespace Shaffuru {
 		public void OnApplicationStart() {
 			harmony = new Harmony("Kinsi55.BeatSaber.Shaffuru");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
+
+			var Tex2D = new Texture2D(2, 2);
+			Tex2D.LoadImage(Utilities.GetResource(Assembly.GetExecutingAssembly(), "Shaffuru.Assets.SongCoreFolder.png"));
+
+			var sp = Sprite.Create(Tex2D, new Rect(0, 0, Tex2D.width, Tex2D.height), Vector2.zero, 100);
+
+			SongCore.Collections.AddSeperateSongFolder("Shaffuru Downloads", SongDownloaderJob.ShaffuruDownloadPath, SongCore.Data.FolderLevelPack.NewPack, sp);
 		}
 
 		[OnExit]
