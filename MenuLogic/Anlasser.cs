@@ -1,4 +1,5 @@
-﻿using SiraUtil.Zenject;
+﻿using Shaffuru.GameLogic;
+using SiraUtil.Zenject;
 using System;
 using System.Text;
 using UnityEngine;
@@ -101,7 +102,12 @@ namespace Shaffuru.MenuLogic {
 					// TODO: Handle other cases in some way maybe? Some end stats screen?
 					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
 						Start(lengthSeconds);
-					} else if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared || 
+						return;
+					}
+
+					BeatmapLoader.RefrehsLevelPacksIfNecessary();
+
+					if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared || 
 						b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed ||
 						// If user is dum dum and plays with nofail and then backs out to menu we show this too because we are nice :)
 						b.energy == 0f
