@@ -80,7 +80,7 @@ namespace Shaffuru.AppLogic {
 					Msg($"@{sender} Unknown map ID", channel);
 
 					return;
-				} else if(!mapPool.HasLevelHash(hash)) {
+				} else if(!mapPool.LevelHashRequestable(hash)) {
 					if(SongCore.Collections.hashForLevelID(levelId) != string.Empty) {
 						Msg($"@{sender} The map does not match the configured filters", channel);
 						return;
@@ -115,6 +115,12 @@ namespace Shaffuru.AppLogic {
 							Thread.Sleep(100);
 
 						dl.Complete();
+
+						if(mapPool.LevelHashRequestable(hash)) {
+							Msg($"@{sender} Map download failed", channel);
+
+							return;
+						}
 					}
 					
 					var theMappe = mapPool.filteredLevels[mapPool.requestableLevels[hash]];

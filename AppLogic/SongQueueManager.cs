@@ -33,7 +33,7 @@ namespace Shaffuru.AppLogic {
 			if(IsFull())
 				return false;
 
-			if(!mapPool.HasLevelHash(MapPool.GetHashOfLevelid(queuedSong.levelId)))
+			if(!mapPool.LevelHashRequestable(MapPool.GetHashOfLevelid(queuedSong.levelId)))
 				return false;
 
 			lock(queue)

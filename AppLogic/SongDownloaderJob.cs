@@ -22,11 +22,9 @@ namespace Shaffuru.AppLogic {
 		public static readonly HashSet<uint> downloadingMaps = new HashSet<uint>();
 
 		uint beatsaverId;
-		public bool succeeded;
 
 		public SongDownloaderJob(uint beatsaverId) {
 			this.beatsaverId = beatsaverId;
-			succeeded = false;
 
 			downloadingMaps.Add(beatsaverId);
 		}
@@ -68,7 +66,7 @@ namespace Shaffuru.AppLogic {
 					// Adding it to this Dict so that beatmapLevelsModel.GetBeatmapLevelAsync can load this custom beatmap
 					BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref x)[$"custom_level_{hash}"] = preview;
 
-					succeeded = MapPool.instance.AddRequestableLevel(preview, true);
+					MapPool.instance.AddRequestableLevel(preview, true);
 				}
 			} finally {
 				downloadingMaps.Remove(beatsaverId);

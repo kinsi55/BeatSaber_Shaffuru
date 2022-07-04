@@ -59,7 +59,7 @@ namespace Shaffuru.AppLogic {
 		public List<ValidSong> filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
 
-		public bool HasLevelHash(string hash) => requestableLevels.ContainsKey(hash);
+		public bool LevelHashRequestable(string hash) => requestableLevels.ContainsKey(hash);
 		public string GetHashFromBeatsaverId(string mapKey) {
 			if(SongDetailsUtil.instance != null && SongDetailsUtil.instance.songs.FindByMapId(mapKey, out var song))
 				return song.hash;
