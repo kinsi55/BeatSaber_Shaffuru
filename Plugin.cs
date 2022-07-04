@@ -1,10 +1,10 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System.Reflection;
+using BeatSaberMarkupLanguage;
 using HarmonyLib;
 using IPA;
 using IPA.Config.Stores;
 using Shaffuru.AppLogic;
 using SiraUtil.Zenject;
-using System.Reflection;
 using UnityEngine;
 using IPALogger = IPA.Logging.Logger;
 

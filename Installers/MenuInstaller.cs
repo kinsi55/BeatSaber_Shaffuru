@@ -1,6 +1,5 @@
 ﻿using Shaffuru.MenuLogic;
 using Shaffuru.MenuLogic.UI;
-using SiraUtil;
 using Zenject;
 
 namespace Shaffuru.Installers {

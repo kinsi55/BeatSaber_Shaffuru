@@ -1,20 +1,20 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.ViewControllers;
-using HMUI;
-using Shaffuru.AppLogic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Linq;
-using TMPro;
-using Zenject;
-using BeatSaberMarkupLanguage.Parser;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
+using BeatSaberMarkupLanguage.Parser;
+using BeatSaberMarkupLanguage.ViewControllers;
+using HMUI;
+using Shaffuru.AppLogic;
+using TMPro;
 using UnityEngine;
-using System.Globalization;
+using Zenject;
 
 namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]

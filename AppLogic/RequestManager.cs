@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Shaffuru.Util;
 using Unity.Jobs;
 using Zenject;
-using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.AppLogic {
 	class RequestManager : IInitializable, IDisposable {
@@ -38,7 +37,7 @@ namespace Shaffuru.AppLogic {
 		static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
 		private void Twitch_OnTextMessageReceived(string sender, string message, object channel) {
-			if(!Config.Instance.chat_request_enabled || (!message.StartsWith("!chaos") && !message.StartsWith("!sr")))
+			if(!Config.Instance.chat_request_enabled || (!message.StartsWith("!chaos", StringComparison.OrdinalIgnoreCase) && !message.StartsWith("!sr", StringComparison.OrdinalIgnoreCase)))
 				return;
 
 			if(mapPool.filteredLevels == null || SongDetailsUtil.instance == null) {
@@ -61,7 +60,7 @@ namespace Shaffuru.AppLogic {
 				var startTime = -1;
 				string hash = null;
 				string levelId = null;
-				SongDetailsCache.Structs.Song song = SongDetailsCache.Structs.Song.none;
+				var song = SongDetailsCache.Structs.Song.none;
 
 				// https://github.com/kinsi55/BeatSaber_SongDetails/commit/7c85cee7849794c8670ef960bc6a583ba9c68e9c 💀
 				var key = split[1].ToLower();
@@ -98,9 +97,9 @@ namespace Shaffuru.AppLogic {
 
 						mapNeedsDownload = true;
 					}
-				} 
-				
-				
+				}
+
+
 				if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
 					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} maps in the queue", channel);
 
@@ -127,7 +126,7 @@ namespace Shaffuru.AppLogic {
 							return;
 						}
 					}
-					
+
 					var theMappe = mapPool.filteredLevels[mapPool.requestableLevels[hash]];
 
 					if(split.Length > 2 && (Config.Instance.request_allowSpecificDiff || Config.Instance.request_allowSpecificTime)) {

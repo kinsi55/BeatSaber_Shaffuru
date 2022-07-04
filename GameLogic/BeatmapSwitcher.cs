@@ -1,13 +1,11 @@
-﻿using HarmonyLib;
-using Shaffuru.HarmonyPatches;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
+using HarmonyLib;
+using Shaffuru.HarmonyPatches;
 using UnityEngine;
-using Zenject;
 
 namespace Shaffuru.GameLogic {
 	[HarmonyPatch(typeof(BasicBeatmapObjectManager), nameof(BasicBeatmapObjectManager.Init))]
@@ -42,7 +40,7 @@ namespace Shaffuru.GameLogic {
 
 	class BeatmapSwitcher : IDisposable {
 		static readonly FieldInfo FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData = AccessTools.Field(typeof(BeatmapObjectSpawnController), "_beatmapObjectSpawnMovementData");
-		
+
 		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_callbacksInTimes = AccessTools.Field(typeof(BeatmapCallbacksController), "_callbacksInTimes");
 
 		static readonly FieldInfo FIELD_AudioTimeSyncController_audioLatency = AccessTools.Field(typeof(AudioTimeSyncController), "_audioLatency");
@@ -56,7 +54,7 @@ namespace Shaffuru.GameLogic {
 
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time = IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor($"<{nameof(BeatmapDataItem.time)}>k__BackingField");
 		static readonly IPA.Utilities.FieldAccessor<SliderData, float>.Accessor SETTER_SliderData_tailTime = IPA.Utilities.FieldAccessor<SliderData, float>.GetAccessor($"<{nameof(SliderData.tailTime)}>k__BackingField");
-		
+
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime = IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("aheadTime");
 
 		readonly GameplayCoreSceneSetupData _sceneSetupData;
@@ -215,7 +213,7 @@ namespace Shaffuru.GameLogic {
 				// Was there already a new / unused node we can overwrite to save on allocations?
 				if(prevNode != null) {
 					prevNode.Value = x;
-				// No :(
+					// No :(
 				} else {
 					prevNode = readonlyBeatmapData.allBeatmapDataItems.AddLast(x);
 				}

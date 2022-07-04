@@ -1,7 +1,7 @@
-﻿using Shaffuru.AppLogic;
+﻿using System;
+using Shaffuru.AppLogic;
 using Shaffuru.Util;
 using SiraUtil.Zenject;
-using System;
 using Zenject;
 
 namespace Shaffuru.Installers {

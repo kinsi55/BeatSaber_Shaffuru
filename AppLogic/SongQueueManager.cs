@@ -1,8 +1,8 @@
-﻿using Shaffuru.Util;
-using SiraUtil.Zenject;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Shaffuru.Util;
+using SiraUtil.Zenject;
 
 namespace Shaffuru.AppLogic {
 	class SongQueueManager {

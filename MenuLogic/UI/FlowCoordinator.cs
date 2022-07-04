@@ -1,12 +1,11 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System;
+using System.Collections;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 using HMUI;
-using Zenject;
-using System;
-using Shaffuru.MenuLogic.UI;
 using Shaffuru.AppLogic;
-using System.Collections;
 using UnityEngine;
+using Zenject;
 using static SelectLevelCategoryViewController;
 
 namespace Shaffuru.MenuLogic.UI {
@@ -49,7 +48,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 			levelSearchViewController?.ResetCurrentFilterParams();
 			levelFilteringNavigationController.UpdateCustomSongs();
-			
+
 			if(levelFilteringNavigationController.selectedLevelCategory.ToString() != nameof(LevelCategory.All))
 				levelFilteringNavigationController.UpdateSecondChildControllerContent((LevelCategory)Enum.Parse(typeof(LevelCategory), nameof(LevelCategory.All)));
 

@@ -1,13 +1,11 @@
-﻿using HarmonyLib;
-using Shaffuru.AppLogic;
-using SiraUtil.Zenject;
-using System;
-using System.Linq;
+﻿using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using HarmonyLib;
+using Shaffuru.AppLogic;
+using SiraUtil.Zenject;
 using UnityEngine;
 using Zenject;
-using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.GameLogic {
 	class QueueProcessor : IInitializable, ITickable {

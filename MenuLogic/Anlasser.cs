@@ -1,7 +1,6 @@
-﻿using Shaffuru.GameLogic;
+﻿using System;
+using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
-using System;
-using System.Text;
 using UnityEngine;
 
 namespace Shaffuru.MenuLogic {
@@ -107,7 +106,7 @@ namespace Shaffuru.MenuLogic {
 
 					BeatmapLoader.RefrehsLevelPacksIfNecessary();
 
-					if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared || 
+					if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared ||
 						b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed ||
 						// If user is dum dum and plays with nofail and then backs out to menu we show this too because we are nice :)
 						b.energy == 0f

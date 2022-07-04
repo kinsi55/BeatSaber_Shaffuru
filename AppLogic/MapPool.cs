@@ -1,12 +1,11 @@
-﻿using Shaffuru.MenuLogic;
-using Shaffuru.Util;
-using SiraUtil.Zenject;
-using SongDetailsCache;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Shaffuru.MenuLogic;
+using Shaffuru.Util;
+using SiraUtil.Zenject;
 
 namespace Shaffuru.AppLogic {
 	public class MapPool : IDisposable {
