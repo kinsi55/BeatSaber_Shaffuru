@@ -116,7 +116,7 @@ namespace Shaffuru.AppLogic {
 
 						dl.Complete();
 
-						if(mapPool.LevelHashRequestable(hash)) {
+						if(!mapPool.LevelHashRequestable(hash)) {
 							Msg($"@{sender} Map download failed", channel);
 
 							return;

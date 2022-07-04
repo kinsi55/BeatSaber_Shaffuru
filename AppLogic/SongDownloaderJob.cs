@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using HarmonyLib;
+using Shaffuru.GameLogic;
 using Shaffuru.Util;
 using SongCore.Data;
 using Unity.Collections;
@@ -28,9 +29,6 @@ namespace Shaffuru.AppLogic {
 
 			downloadingMaps.Add(beatsaverId);
 		}
-
-		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.Accessor BeatmapLevelsModel_loadedPreviewBeatmapLevels =
-			IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.GetAccessor("_loadedPreviewBeatmapLevels");
 
 		static readonly MethodInfo SongCore_LoadSongAndAddToDictionaries = IPA.Loader.PluginManager.GetPluginFromId("SongCore")?
 			.Assembly.GetType("SongCore.Loader")?
@@ -60,13 +58,9 @@ namespace Shaffuru.AppLogic {
 						CancellationToken.None, data, p, null
 					});
 
-					var hash = MapPool.GetHashOfPreview(preview);
+					BeatmapLoader.AddBeatmapToLoadedPreviewBeatmaps(preview.levelID, preview);
 
-					var x = SongCore.Loader.BeatmapLevelsModelSO;
-					// Adding it to this Dict so that beatmapLevelsModel.GetBeatmapLevelAsync can load this custom beatmap
-					BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref x)[$"custom_level_{hash}"] = preview;
-
-					MapPool.instance.AddRequestableLevel(preview, true);
+					MapPool.instance.AddRequestableLevel(preview);
 				}
 			} finally {
 				downloadingMaps.Remove(beatsaverId);

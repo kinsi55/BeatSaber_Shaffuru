@@ -3,6 +3,7 @@ using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
 using HMUI;
 using Shaffuru.AppLogic;
+using Shaffuru.GameLogic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -53,7 +54,7 @@ namespace Shaffuru.MenuLogic.UI {
 			public SongListSong(ShaffuruSong song) {
 				this.song = song;
 
-				preview = SongCore.Loader.BeatmapLevelsModelSO.GetLevelPreviewForLevelId(song.levelId);
+				preview = BeatmapLoader.GetPreviewBeatmapFromLevelId(song.levelId);
 
 				songName = preview?.songName ?? "Unknown song";
 				playTime = string.Format(@" {0:mm\:ss} - {1:mm\:ss}", TimeSpan.FromSeconds(song.startTime), TimeSpan.FromSeconds(song.startTime + song.length));
@@ -72,7 +73,7 @@ namespace Shaffuru.MenuLogic.UI {
 				bg.color = new Color(0, 0, 0, 0.55f);
 
 				cover.sprite = SongCore.Loader.defaultCoverImage;
-				preview.GetCoverImageAsync(CancellationToken.None).ContinueWith(x => {
+				preview?.GetCoverImageAsync(CancellationToken.None).ContinueWith(x => {
 					cover.sprite = x.Result;
 				}, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.FromCurrentSynchronizationContext());
 			}

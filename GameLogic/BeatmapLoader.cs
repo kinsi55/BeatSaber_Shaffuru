@@ -1,18 +1,41 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using static BeatmapLevelsModel;
 
 namespace Shaffuru.GameLogic {
 	class BeatmapLoader {
 		readonly GameplayCoreSceneSetupData _sceneSetupData;
-		readonly BeatmapLevelsModel beatmapLevelsModel;
+		static BeatmapLevelsModel beatmapLevelsModel;
+
+		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.Accessor BeatmapLevelsModel_loadedPreviewBeatmapLevels =
+			IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.GetAccessor("_loadedPreviewBeatmapLevels");
+
 		public BeatmapLoader(
 			GameplayCoreSceneSetupData _sceneSetupData,
 			BeatmapLevelsModel beatmapLevelsModel
 		) {
 			this._sceneSetupData = _sceneSetupData;
-			this.beatmapLevelsModel = beatmapLevelsModel;
+			BeatmapLoader.beatmapLevelsModel = beatmapLevelsModel;
 		}
+
+		public static void AddBeatmapToLoadedPreviewBeatmaps(string levelId, IPreviewBeatmapLevel level) {
+			if(beatmapLevelsModel == null)
+				return;
+
+			BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref beatmapLevelsModel)[levelId] = level;
+		}
+
+		public static IPreviewBeatmapLevel GetPreviewBeatmapFromLevelId(string levelId) {
+			if(beatmapLevelsModel == null)
+				return null;
+
+			if(BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref beatmapLevelsModel).TryGetValue(levelId, out var map))
+				return map;
+
+			return null;
+		}
+
 
 		public Task<GetBeatmapLevelResult> LoadBeatmap(string levelId) {
 			return beatmapLevelsModel.GetBeatmapLevelAsync(levelId, CancellationToken.None);
