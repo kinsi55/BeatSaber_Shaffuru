@@ -188,6 +188,9 @@ namespace Shaffuru.AppLogic {
 						for(var i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
 							ref var diff = ref SongDetailsUtil.instance.difficulties[i];
 
+							if(diff.characteristic != SongDetailsCache.Structs.MapCharacteristic.Standard)
+								continue;
+
 							if((int)diff.difficulty != (int)beatmapDiff)
 								continue;
 
