@@ -3,15 +3,12 @@ using System.Reflection;
 using HarmonyLib;
 
 namespace Shaffuru.HarmonyPatches {
-	[HarmonyPatch]
+	[HarmonyPatch(typeof(NoteCutSoundEffectManager))]
 	static class HeckOffCutSoundsCrash {
 		public static bool enablePatch = false;
 
-		static IEnumerable<MethodBase> TargetMethods() {
-			yield return AccessTools.Method(typeof(NoteCutSoundEffectManager), nameof(NoteCutSoundEffectManager.HandleNoteWasSpawned));
-			yield return AccessTools.Method(typeof(NoteCutSoundEffectManager), nameof(NoteCutSoundEffectManager.HandleNoteWasCut));
-		}
-
+		[HarmonyPatch(nameof(NoteCutSoundEffectManager.HandleNoteWasSpawned))]
+		[HarmonyPatch(nameof(NoteCutSoundEffectManager.HandleNoteWasCut))]
 		static bool Prefix() => !enablePatch;
 	}
 }
