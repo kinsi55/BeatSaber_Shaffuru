@@ -159,7 +159,7 @@ namespace Shaffuru.AppLogic {
 					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out songDetailsSong))
 						break;
 
-					if(!SongdetailsFilterCheck(songDetailsSong, out validDiffsSongdetailsFilterCheck))
+					if(!SongdetailsFilterCheck(songDetailsSong, out validDiffsSongdetailsFilterCheck, false))
 						break;
 				}
 
@@ -191,7 +191,8 @@ namespace Shaffuru.AppLogic {
 			return default;
 		}
 
-		public bool SongdetailsFilterCheck(in SongDetailsCache.Structs.Song song, out int validDiffs, bool fullCheck = false) {
+		/// <param name="fullCheck">Can be used to disable some checks that would be redundant when called from LevelFilterCheck</param>
+		public bool SongdetailsFilterCheck(in SongDetailsCache.Structs.Song song, out int validDiffs, bool fullCheck = true) {
 			validDiffs = int.MaxValue;
 
 			if(!Config.Instance.filter_enableAdvancedFilters)
@@ -199,10 +200,8 @@ namespace Shaffuru.AppLogic {
 
 			validDiffs = 0;
 
-			if(fullCheck) {
-				if(song.songDurationSeconds < minSongLength)
-					return false;
-			}
+			if(fullCheck && song.songDurationSeconds < minSongLength)
+				return false;
 
 			if(song.bpm < Config.Instance.filter_advanced_bpm_min)
 				return false;

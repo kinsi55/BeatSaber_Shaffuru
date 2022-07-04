@@ -91,7 +91,7 @@ namespace Shaffuru.AppLogic {
 						Msg($"@{sender} The map is currently being downloaded", channel);
 						return;
 					} else {
-						if(!mapPool.SongdetailsFilterCheck(song, out var __, true)) {
+						if(!mapPool.SongdetailsFilterCheck(song, out var _)) {
 							Msg($"@{sender} The map does not match the configured filters", channel);
 							return;
 						}
