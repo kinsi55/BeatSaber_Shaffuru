@@ -152,7 +152,7 @@ namespace Shaffuru.AppLogic {
 					continue;
 
 				var songDetailsSong = SongDetailsCache.Structs.Song.none;
-				var validDiffsSongdetailsFilterCheck = 0;
+				var validDiffsSongdetailsFilterCheck = int.MaxValue;
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
 				if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
