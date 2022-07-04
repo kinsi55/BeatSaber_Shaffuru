@@ -5,6 +5,7 @@ using HMUI;
 using Shaffuru.AppLogic;
 using Shaffuru.GameLogic;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -109,12 +110,29 @@ namespace Shaffuru.MenuLogic.UI {
 
 			sessionAcc.text = string.Format("Score: {0:n0}", levelCompletionResult.multipliedScore);
 
-			songList.data = playedSongList.list.Select(x => new SongListSong(x)).ToList<object>();
+			songList.data.Clear();
 			songList.tableView.ReloadData();
 
-			songList.tableView.SelectCellWithIdx(0, true);
-		}
 
+			void SpawnTable() {
+				songList.data = playedSongList.list.Select(x => new SongListSong(x)).ToList<object>();
+				songList.tableView.ReloadData();
+
+				songList.tableView.SelectCellWithIdx(0, true);
+			}
+
+			void SpawnTableWhenSongsLoaded(SongCore.Loader _, ConcurrentDictionary<string, CustomPreviewBeatmapLevel> _2) {
+				SongCore.Loader.SongsLoadedEvent -= SpawnTableWhenSongsLoaded;
+				SpawnTable();
+			}
+
+			if(!SongCore.Loader.AreSongsLoading) {
+				SpawnTable();
+				return;
+			}
+
+			SongCore.Loader.SongsLoadedEvent += SpawnTableWhenSongsLoaded;
+		}
 
 
 		internal void Setup(LevelCompletionResults levelCompletionResults, PlayedSongList playedSongList) {
