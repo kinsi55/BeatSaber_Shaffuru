@@ -152,17 +152,14 @@ namespace Shaffuru.AppLogic {
 					continue;
 
 				var songDetailsSong = SongDetailsCache.Structs.Song.none;
+				var validDiffsSongdetailsFilterCheck = 0;
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
 				if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
 					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out songDetailsSong))
 						break;
 
-					if(songDetailsSong.bpm < Config.Instance.filter_advanced_bpm_min)
-						break;
-
-					if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
-						songDetailsSong.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
+					if(!SongdetailsFilterCheck(songDetailsSong, out validDiffsSongdetailsFilterCheck))
 						break;
 				}
 
@@ -183,42 +180,71 @@ namespace Shaffuru.AppLogic {
 							continue;
 					}
 
-					if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
-						var diffIsValid = false;
-						for(var i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
-							ref var diff = ref SongDetailsUtil.instance.difficulties[i];
-
-							if(diff.characteristic != SongDetailsCache.Structs.MapCharacteristic.Standard)
-								continue;
-
-							if((int)diff.difficulty != (int)beatmapDiff)
-								continue;
-
-							if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
-								break;
-
-							var nps = (float)diff.notes / songDetailsSong.songDurationSeconds;
-							if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
-								break;
-
-							if(Config.Instance.filter_advanced_only_ranked && !diff.ranked)
-								break;
-
-							diffIsValid = true;
-						}
-
-						if(!diffIsValid)
-							continue;
-					}
-
 					validSonge.SetDiffValid(beatmapDiff);
 				}
+
+				validSonge.validDiffs &= validDiffsSongdetailsFilterCheck;
 
 				return validSonge;
 			}
 
 			return default;
 		}
+
+		public bool SongdetailsFilterCheck(in SongDetailsCache.Structs.Song song, out int validDiffs, bool fullCheck = false) {
+			validDiffs = int.MaxValue;
+
+			if(!Config.Instance.filter_enableAdvancedFilters)
+				return true;
+
+			validDiffs = 0;
+
+			if(fullCheck) {
+				if(song.songDurationSeconds < minSongLength)
+					return false;
+			}
+
+			if(song.bpm < Config.Instance.filter_advanced_bpm_min)
+				return false;
+
+			if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
+				song.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
+				return false;
+
+
+			var v = new ValidSong();
+
+			for(var i = (int)song.diffOffset + song.diffCount; --i >= song.diffOffset;) {
+				ref var diff = ref SongDetailsUtil.instance.difficulties[i];
+
+				if(diff.characteristic != SongDetailsCache.Structs.MapCharacteristic.Standard)
+					continue;
+
+				if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
+					continue;
+
+				var nps = (float)diff.notes / song.songDurationSeconds;
+				if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
+					continue;
+
+				if(Config.Instance.filter_advanced_only_ranked && !diff.ranked)
+					continue;
+
+				if(fullCheck) {
+					if(!Config.Instance.filter_AllowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
+						continue;
+
+					if((diff.mods & SongDetailsCache.Structs.MapMods.NoodleExtensions) != 0)
+						continue;
+				}
+
+				v.SetDiffValid((BeatmapDifficulty)diff.difficulty);
+			}
+
+			validDiffs = v.validDiffs;
+			return validDiffs != 0;
+		}
+
 
 		public bool AddRequestableLevel(IPreviewBeatmapLevel level, bool forceNoFilters = false) {
 			var hash = GetHashOfPreview(level);
