@@ -90,11 +90,6 @@ namespace Shaffuru.AppLogic {
 						Msg($"@{sender} The map is currently being downloaded", channel);
 						return;
 					} else {
-						if(!mapPool.SongdetailsFilterCheck(song, out var _)) {
-							Msg($"@{sender} The map does not match the configured filters", channel);
-							return;
-						}
-
 						mapNeedsDownload = true;
 					}
 				}
@@ -111,6 +106,11 @@ namespace Shaffuru.AppLogic {
 
 				} else {
 					if(mapNeedsDownload) {
+						if(!mapPool.SongdetailsFilterCheck(song, out var _)) {
+							Msg($"@{sender} The map does not match the configured filters", channel);
+							return;
+						}
+
 						Msg($"@{sender} The map will be downloaded and queued when done", channel);
 
 						var dl = new SongDownloaderJob(song.mapId).Schedule();
