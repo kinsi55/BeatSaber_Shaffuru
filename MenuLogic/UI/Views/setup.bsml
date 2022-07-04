@@ -33,6 +33,9 @@
 						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->
 						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr/!chaos [bsr code])' apply-on-change='true'/>
 						<toggle-setting value='chat_request_show_name' text='Show name of request song in Chat' apply-on-change='true'/>
+						<toggle-setting value='request_allowDownloading' text='Allow downloading of requested songs' apply-on-change='true'
+							hover-hint='When a user requests a song that you have not downloaded yet should they be downloaded?'
+						/>
 						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' apply-on-change='true'
 							hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
 						/>

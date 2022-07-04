@@ -33,10 +33,12 @@ namespace Shaffuru.AppLogic {
 			if(IsFull())
 				return false;
 
-			if(mapPool.HasLevelId(queuedSong.levelId))
+			if(!mapPool.HasLevelHash(MapPool.GetHashOfLevelid(queuedSong.levelId)))
 				return false;
 
-			queue.Enqueue(queuedSong);
+			lock(queue)
+				queue.Enqueue(queuedSong);
+
 			return true;
 		}
 
@@ -60,7 +62,8 @@ namespace Shaffuru.AppLogic {
 
 				x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff(), -1, -1, null);
 			} else {
-				x = queue.Dequeue();
+				lock(queue)
+					x = queue.Dequeue();
 			}
 
 			requeueBlockList.Add(MapPool.GetLevelIdWithoutUniquenessAddition(x.levelId));

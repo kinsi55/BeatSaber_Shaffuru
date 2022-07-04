@@ -1,4 +1,5 @@
 ﻿using Shaffuru.MenuLogic;
+using Shaffuru.Util;
 using SiraUtil.Zenject;
 using SongDetailsCache;
 using System;
@@ -12,11 +13,14 @@ namespace Shaffuru.AppLogic {
 		readonly BeatmapLevelsModel beatmapLevelsModel;
 		static System.Random rngSource;
 
-		public static SongDetails songDetails;
+		// This is for the SongDownloaderJob. Yes Unity says you should not access static variables. I have to
+		public static MapPool instance;
 
 		public MapPool(BeatmapLevelsModel beatmapLevelsModel, UBinder<Plugin, System.Random> rng) {
 			this.beatmapLevelsModel = beatmapLevelsModel;
 			rngSource = rng.Value;
+
+			instance = this;
 		}
 
 		public struct ValidSong {
@@ -55,9 +59,9 @@ namespace Shaffuru.AppLogic {
 		public List<ValidSong> filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
 
-		public bool HasLevelId(string levelId) => requestableLevels.ContainsKey(levelId);
+		public bool HasLevelHash(string hash) => requestableLevels.ContainsKey(hash);
 		public string GetHashFromBeatsaverId(string mapKey) {
-			if(songDetails != null && songDetails.songs.FindByMapId(mapKey, out var song) == true)
+			if(SongDetailsUtil.instance != null && SongDetailsUtil.instance.songs.FindByMapId(mapKey, out var song))
 				return song.hash;
 			return null;
 		}
@@ -151,7 +155,7 @@ namespace Shaffuru.AppLogic {
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
 				if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
-					if(songHash == null || !songDetails.songs.FindByHash(songHash, out songDetailsSong))
+					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out songDetailsSong))
 						break;
 
 					if(songDetailsSong.bpm < Config.Instance.filter_advanced_bpm_min)
@@ -182,7 +186,7 @@ namespace Shaffuru.AppLogic {
 					if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
 						var diffIsValid = false;
 						for(var i = (int)songDetailsSong.diffOffset + songDetailsSong.diffCount; --i >= songDetailsSong.diffOffset;) {
-							var diff = songDetails.difficulties[i];
+							ref var diff = ref SongDetailsUtil.instance.difficulties[i];
 
 							if((int)diff.difficulty != (int)beatmapDiff)
 								continue;
@@ -213,18 +217,23 @@ namespace Shaffuru.AppLogic {
 			return default;
 		}
 
-		public bool AddRequestableLevel(IPreviewBeatmapLevel level, string beatsaverId, bool forceNoFilters = false) {
+		public bool AddRequestableLevel(IPreviewBeatmapLevel level, bool forceNoFilters = false) {
+			var hash = GetHashOfPreview(level);
+
+			if(hash == null)
+				return false;
+
 			var levelCheck = LevelFilterCheck(level, forceNoFilters: forceNoFilters);
 
 			if(levelCheck.validDiffs == 0)
 				return false;
 
-			if(requestableLevels.ContainsKey(beatsaverId))
+			if(requestableLevels.ContainsKey(hash))
 				return false;
 
-			filteredLevels.Add(levelCheck);
+			((Dictionary<string, int>)requestableLevels)[hash] = filteredLevels.Count;
 
-			((Dictionary<string, int>)requestableLevels)[beatsaverId] = filteredLevels.Count - 1;
+			filteredLevels.Add(levelCheck);
 
 			return true;
 		}
@@ -248,7 +257,7 @@ namespace Shaffuru.AppLogic {
 
 			var newFilteredLevels = new List<ValidSong>();
 
-			songDetails ??= await SongDetails.Init();
+			await SongDetailsUtil.Init();
 
 			foreach(var map in maps) {
 				var mapCheck = LevelFilterCheck(map, playlistSongs);
@@ -264,7 +273,7 @@ namespace Shaffuru.AppLogic {
 			for(var i = 0; i < filteredLevels.Count; i++) {
 				var mapHash = GetHashOfPreview(filteredLevels[i].level);
 
-				if(mapHash == null || !songDetails.songs.FindByHash(mapHash, out var song))
+				if(mapHash == null || !SongDetailsUtil.instance.songs.FindByHash(mapHash, out var song))
 					continue;
 
 				requestableLevels[mapHash] = i;

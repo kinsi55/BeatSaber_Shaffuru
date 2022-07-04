@@ -11,6 +11,7 @@ using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.GameLogic {
 	class QueueProcessor : IInitializable, ITickable {
+		readonly MapPool mapPool;
 		readonly BeatmapLoader beatmapLoader;
 		readonly BeatmapSwitcher beatmapSwitcher;
 		readonly SongQueueManager songQueueManager;
@@ -27,6 +28,7 @@ namespace Shaffuru.GameLogic {
 		readonly PlayedSongList playedSongList;
 
 		public QueueProcessor(
+			MapPool mapPool,
 			BeatmapLoader beatmapLoader,
 			BeatmapSwitcher beatmapSwitcher,
 			SongQueueManager songQueueManager,
@@ -35,6 +37,7 @@ namespace Shaffuru.GameLogic {
 			PlayedSongList playedSongList,
 			UBinder<Plugin, System.Random> rngSource
 		) {
+			this.mapPool = mapPool;
 			this.beatmapLoader = beatmapLoader;
 			this.beatmapSwitcher = beatmapSwitcher;
 			this.songQueueManager = songQueueManager;
@@ -74,6 +77,20 @@ namespace Shaffuru.GameLogic {
 			BeatmapLevelsModel.GetBeatmapLevelResult loadedBeatmap = default;
 
 			await Task.Run(async () => {
+				var diffIndex = queuedSong.diffIndex;
+
+				if(diffIndex == -1) {
+					var h = MapPool.GetHashOfLevelid(queuedSong.levelId);
+
+					if(h == null)
+						return;
+
+					if(!mapPool.requestableLevels.TryGetValue(h, out var theMappe))
+						return;
+
+					diffIndex = (int)mapPool.filteredLevels[theMappe].GetRandomValidDiff();
+				}
+
 				try {
 					loadedBeatmap = await beatmapLoader.LoadBeatmap(queuedSong.levelId);
 
@@ -83,8 +100,6 @@ namespace Shaffuru.GameLogic {
 					Plugin.Log.Error(string.Format("Tried to queue {0} but failed to load it: {1}", queuedSong.levelId, ex));
 					return;
 				}
-
-				var diffIndex = queuedSong.diffIndex;
 
 				foreach(var d in loadedBeatmap.beatmapLevel.beatmapLevelData.difficultyBeatmapSets) {
 					if(d.beatmapCharacteristic.serializedName != "Standard")

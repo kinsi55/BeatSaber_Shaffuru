@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Shaffuru.Util;
+using Unity.Jobs;
 using Zenject;
 using static Shaffuru.AppLogic.SongQueueManager;
 
 namespace Shaffuru.AppLogic {
 	class RequestManager : IInitializable, IDisposable {
-		SongQueueManager songQueueManager;
+		readonly SongQueueManager songQueueManager;
 
-		MapPool mapPool;
-		IChatMessageSource chatSource;
+		readonly MapPool mapPool;
+		readonly IChatMessageSource chatSource;
 
 		public RequestManager(SongQueueManager songQueueManager, MapPool mapPool, IChatMessageSource chatSource) {
 			this.songQueueManager = songQueueManager;
@@ -39,7 +41,7 @@ namespace Shaffuru.AppLogic {
 			if(!Config.Instance.chat_request_enabled || (!message.StartsWith("!chaos") && !message.StartsWith("!sr")))
 				return;
 
-			if(mapPool.filteredLevels == null) {
+			if(mapPool.filteredLevels == null || SongDetailsUtil.instance == null) {
 				Msg($"@{sender} Shaffuru is not initialized", channel);
 				return;
 			}
@@ -58,31 +60,60 @@ namespace Shaffuru.AppLogic {
 				var diff = -1;
 				var startTime = -1;
 				string hash = null;
+				string levelId = null;
+				SongDetailsCache.Structs.Song song = SongDetailsCache.Structs.Song.none;
 
 				// https://github.com/kinsi55/BeatSaber_SongDetails/commit/7c85cee7849794c8670ef960bc6a583ba9c68e9c 💀
 				var key = split[1].ToLower();
 				if(key.Length < 10) {
 					try {
-						hash = mapPool.GetHashFromBeatsaverId(key);
+						if(SongDetailsUtil.instance.songs.FindByMapId(key, out song)) {
+							hash = song.hash;
+							levelId = $"custom_level_{hash}";
+						}
 					} catch { }
 				}
+
+				bool mapNeedsDownload = false;
 
 				if(hash == null) {
 					Msg($"@{sender} Unknown map ID", channel);
 
-				} else if(!mapPool.HasLevelId(hash)) {
-					Msg($"@{sender} The map is not downloaded or does not match the configured filters", channel);
-
-				} else if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
+					return;
+				} else if(!mapPool.HasLevelHash(hash)) {
+					if(SongCore.Collections.hashForLevelID(levelId) != string.Empty) {
+						Msg($"@{sender} The map does not match the configured filters", channel);
+						return;
+					} else if(!Config.Instance.request_allowDownloading) {
+						Msg($"@{sender} The map is not downloaded", channel);
+						return;
+					} else {
+						mapNeedsDownload = true;
+					}
+				} 
+				
+				
+				if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
 					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} maps in the queue", channel);
 
 				} else if(songQueueManager.Contains(x => MapPool.GetHashOfLevelid(x.levelId) == hash)) {
 					Msg($"@{sender} This map is already in the queue", channel);
 
-				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory($"custom_level_{hash}")) {
+				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory(levelId)) {
 					Msg($"@{sender} The map has already been played recently", channel);
 
 				} else {
+					if(mapNeedsDownload) {
+						Msg($"@{sender} The map will be downloaded and queued when done", channel);
+
+						var dl = new SongDownloaderJob(song.mapId).Schedule();
+
+						while(!dl.IsCompleted)
+							Thread.Sleep(100);
+
+						dl.Complete();
+					}
+					
 					var theMappe = mapPool.filteredLevels[mapPool.requestableLevels[hash]];
 
 					if(split.Length > 2 && (Config.Instance.request_allowSpecificDiff || Config.Instance.request_allowSpecificTime)) {
@@ -126,7 +157,7 @@ namespace Shaffuru.AppLogic {
 						diff = (int)theMappe.GetRandomValidDiff();
 
 					var queued = songQueueManager.EnqueueSong(new ShaffuruSong(
-						$"custom_level_{hash}",
+						levelId,
 						diff,
 						startTime,
 						-1,
@@ -135,12 +166,12 @@ namespace Shaffuru.AppLogic {
 
 					if(queued) {
 						if(Config.Instance.chat_request_show_name) {
-							Msg($"@{sender} Queued {split[1]} - {theMappe.level.songName} ({(BeatmapDifficulty)diff})", channel);
+							Msg($"@{sender} Queued {split[1]} - {song.songName} ({(BeatmapDifficulty)diff})", channel);
 						} else {
 							Msg($"@{sender} Queued {split[1]} ({(BeatmapDifficulty)diff})", channel);
 						}
 					} else {
-						Msg($"@{sender} Couldn't queue map (Unknown error)", channel);
+						Msg($"@{sender} Couldn't queue {split[1]} (Unknown error)", channel);
 					}
 				}
 			});

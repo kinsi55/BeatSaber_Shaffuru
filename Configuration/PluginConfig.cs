@@ -26,6 +26,7 @@ namespace Shaffuru {
 		public virtual bool chat_request_enabled { get; set; } = true;
 		public virtual bool chat_request_show_name { get; set; } = true;
 		//public virtual bool chat_currentmap_enabled { get; set; } = false;
+		public virtual bool request_allowDownloading { get; set; } = false;
 		public virtual bool request_allowSpecificDiff { get; set; } = false;
 		public virtual bool request_allowSpecificTime { get; set; } = false;
 		public virtual int request_limitPerUser { get; set; } = 2;
