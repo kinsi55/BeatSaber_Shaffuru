@@ -100,7 +100,7 @@ namespace Shaffuru.AppLogic {
 					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} maps in the queue", channel);
 
 				} else if(songQueueManager.Contains(x => MapPool.GetHashOfLevelid(x.levelId) == hash)) {
-					Msg($"@{sender} This map is already in the queue", channel);
+					Msg($"@{sender} The map is already in the queue", channel);
 
 				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory(levelId)) {
 					Msg($"@{sender} The map has already been played recently", channel);
@@ -108,7 +108,7 @@ namespace Shaffuru.AppLogic {
 				} else {
 					if(mapNeedsDownload) {
 						if(!mapPool.SongdetailsFilterCheck(song, out var _)) {
-							Msg($"@{sender} The map does not match the configured filters", channel);
+							Msg($"@{sender} The map doesn't match the configured filters", channel);
 							return;
 						}
 
@@ -149,7 +149,7 @@ namespace Shaffuru.AppLogic {
 							Enum.TryParse<BeatmapDifficulty>(m.Groups["diff"].Value, true, out var requestedDiff)
 						) {
 							if(!theMappe.IsDiffValid(requestedDiff)) {
-								Msg($"@{sender} The {requestedDiff} difficulty does not match the configured filters", channel);
+								Msg($"@{sender} The {requestedDiff} difficulty doesn't match the configured filters", channel);
 								return;
 							}
 
