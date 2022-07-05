@@ -46,7 +46,8 @@ namespace Shaffuru.AppLogic {
 			}
 
 			Task.Run(() => {
-				var split = message.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+				// When passing null, Split assumes you want to split by whitespace
+				var split = message.Split((char[])null, StringSplitOptions.RemoveEmptyEntries);
 
 				if(split.Length < 2)
 					return;
