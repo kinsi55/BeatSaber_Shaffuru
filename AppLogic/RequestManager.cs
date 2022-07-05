@@ -81,7 +81,7 @@ namespace Shaffuru.AppLogic {
 
 					return;
 				} else if(!mapPool.LevelHashRequestable(hash)) {
-					if(SongCore.Collections.hashForLevelID(levelId) != string.Empty) {
+					if(SongCore.Collections.hashForLevelID(levelId) != string.Empty || mapPool.isFilteredByPlaylist) {
 						Msg($"@{sender} The map does not match the configured filters", channel);
 						return;
 					} else if(!Config.Instance.request_allowDownloading) {

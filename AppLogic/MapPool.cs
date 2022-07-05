@@ -57,6 +57,7 @@ namespace Shaffuru.AppLogic {
 
 		public List<ValidSong> filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
+		public bool isFilteredByPlaylist { get; private set; } = false;
 
 		public bool LevelHashRequestable(string hash) => requestableLevels.ContainsKey(hash);
 		public string GetHashFromBeatsaverId(string mapKey) {
@@ -283,6 +284,7 @@ namespace Shaffuru.AppLogic {
 			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
 				playlistSongs = TheJ.GetAllSongsInSelectedPlaylist();
 
+			isFilteredByPlaylist = playlistSongs != null;
 			allowMappingExtensions = Config.Instance.filter_AllowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 
 			var newFilteredLevels = new List<ValidSong>();
