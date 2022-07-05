@@ -192,23 +192,22 @@ namespace Shaffuru.AppLogic {
 
 		/// <param name="fullCheck">Can be used to disable some checks that would be redundant when called from LevelFilterCheck</param>
 		public bool SongdetailsFilterCheck(in SongDetailsCache.Structs.Song song, out int validDiffs, bool fullCheck = true) {
-			validDiffs = int.MaxValue;
-
-			if(!Config.Instance.filter_enableAdvancedFilters)
-				return true;
-
 			validDiffs = 0;
 
 			if(fullCheck && song.songDurationSeconds < minSongLength)
 				return false;
 
-			if(song.bpm < Config.Instance.filter_advanced_bpm_min)
-				return false;
+			if(Config.Instance.filter_enableAdvancedFilters) {
+				if(song.bpm < Config.Instance.filter_advanced_bpm_min)
+					return false;
 
-			if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
-				song.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
-				return false;
-
+				if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
+					song.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
+					return false;
+			} else if(!fullCheck) {
+				validDiffs = int.MaxValue;
+				return true;
+			}
 
 			var v = new ValidSong();
 
@@ -218,15 +217,17 @@ namespace Shaffuru.AppLogic {
 				if(diff.characteristic != SongDetailsCache.Structs.MapCharacteristic.Standard)
 					continue;
 
-				if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
-					continue;
+				if(Config.Instance.filter_enableAdvancedFilters) {
+					if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
+						continue;
 
-				var nps = (float)diff.notes / song.songDurationSeconds;
-				if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
-					continue;
+					var nps = (float)diff.notes / song.songDurationSeconds;
+					if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
+						continue;
 
-				if(Config.Instance.filter_advanced_only_ranked && !diff.ranked)
-					continue;
+					if(Config.Instance.filter_advanced_only_ranked && !diff.ranked)
+						continue;
+				}
 
 				if(fullCheck) {
 					if(!Config.Instance.filter_AllowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
