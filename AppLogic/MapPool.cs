@@ -256,12 +256,14 @@ namespace Shaffuru.AppLogic {
 			if(levelCheck.validDiffs == 0)
 				return false;
 
-			if(requestableLevels.ContainsKey(hash))
-				return false;
+			lock(filteredLevels) {
+				if(requestableLevels.ContainsKey(hash))
+					return false;
 
-			((Dictionary<string, int>)requestableLevels)[hash] = filteredLevels.Count;
+				((Dictionary<string, int>)requestableLevels)[hash] = filteredLevels.Count;
 
-			filteredLevels.Add(levelCheck);
+				filteredLevels.Add(levelCheck);
+			}
 
 			return true;
 		}
