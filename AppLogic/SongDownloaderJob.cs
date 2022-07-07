@@ -100,20 +100,21 @@ namespace Shaffuru.AppLogic {
 								throw new InvalidDataException();
 
 							// Dont extract directories / sub-files
-							if(entry.FullName.IndexOf("/", StringComparison.Ordinal) == -1) {
-								using(var str = entry.Open()) {
-									var file = new NativeArray<byte>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
-									var x = new UnmanagedMemoryStream((byte*)NativeArrayUnsafeUtility.GetUnsafePtr(file), len, len, FileAccess.ReadWrite);
+							if(entry.FullName.IndexOf("/", StringComparison.Ordinal) != -1)
+								continue;
+								
+							using(var str = entry.Open()) {
+								var file = new NativeArray<byte>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+								var x = new UnmanagedMemoryStream((byte*)NativeArrayUnsafeUtility.GetUnsafePtr(file), len, len, FileAccess.ReadWrite);
 
-									str.CopyTo(x);
+								str.CopyTo(x);
 
-									x.Position = 0;
+								x.Position = 0;
 
-									files.Add(entry.Name, (file, x));
+								files.Add(entry.Name, (file, x));
 
-									if(entry.Name.Length > longestFileNameLength)
-										longestFileNameLength = entry.Name.Length;
-								}
+								if(entry.Name.Length > longestFileNameLength)
+									longestFileNameLength = entry.Name.Length;
 							}
 						}
 					}
@@ -150,7 +151,6 @@ namespace Shaffuru.AppLogic {
 				foreach(var item in files)
 					item.Value.ptr.Dispose();
 			}
-			return null;
 		}
 	}
 }

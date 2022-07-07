@@ -106,13 +106,15 @@ namespace Shaffuru.AppLogic {
 					Msg($"@{sender} The map has already been played recently", channel);
 
 				} else {
+					var theKeyAndPossiblyMapName = !Config.Instance.chat_request_show_name ? split[1] : $"{split[1]} - {song.songName}";
+
 					if(mapNeedsDownload) {
 						if(!mapPool.SongdetailsFilterCheck(song, out var _)) {
 							Msg($"@{sender} The map doesn't match the configured filters", channel);
 							return;
 						}
 
-						Msg($"@{sender} The map will be downloaded and queued when done", channel);
+						Msg($"@{sender} {theKeyAndPossiblyMapName} will be downloaded and queued when done", channel);
 
 						var dl = new SongDownloaderJob(song.mapId).Schedule();
 
@@ -179,11 +181,8 @@ namespace Shaffuru.AppLogic {
 					));
 
 					if(queued) {
-						if(Config.Instance.chat_request_show_name) {
-							Msg($"@{sender} Queued {split[1]} - {song.songName} ({(BeatmapDifficulty)diff})", channel);
-						} else {
-							Msg($"@{sender} Queued {split[1]} ({(BeatmapDifficulty)diff})", channel);
-						}
+						if(!mapNeedsDownload)
+							Msg($"@{sender} Queued {theKeyAndPossiblyMapName} ({(BeatmapDifficulty)diff})", channel);
 					} else {
 						Msg($"@{sender} Couldn't queue {split[1]} (Unknown error)", channel);
 					}
