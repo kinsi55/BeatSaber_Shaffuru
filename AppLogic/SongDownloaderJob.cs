@@ -100,7 +100,7 @@ namespace Shaffuru.AppLogic {
 								throw new InvalidDataException();
 
 							// Dont extract directories / sub-files
-							if(entry.FullName.IndexOf("/", StringComparison.Ordinal) != -1)
+							if(entry.FullName.IndexOf('/') != -1)
 								continue;
 								
 							using(var str = entry.Open()) {
