@@ -8,7 +8,7 @@ namespace Shaffuru.Installers {
 			Container.Bind<Anlasser>().AsSingle().NonLazy();
 			Container.Bind<SetupUI>().FromNewComponentAsViewController().AsSingle();
 			Container.Bind<ResultUI>().FromNewComponentAsViewController().AsSingle();
-			Container.Bind<IInitializable>().To<ShaffuruFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+			Container.BindInterfacesAndSelfTo<ShaffuruFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
 			//Container.Bind<FlowCoordinatorCoordinatorIHateBSUI>().AsSingle().NonLazy();
 		}
 	}

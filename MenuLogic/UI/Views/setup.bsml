@@ -18,7 +18,9 @@
 					<toggle-setting value='allowME' text='Allow Mapping Extensions' apply-on-change='true'
 						hover-hint='Should Mapping Extensions maps be playable? This should be obvious but... This only has a function if you have it installed'
 					/>
-					<toggle-setting value='playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
+				</macro.as-host>
+				<macro.as-host host='config'>
+					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
 						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
 					/>
 				</macro.as-host>
@@ -110,7 +112,7 @@
 			<text text="~version" align="Center" font-size="3" font-color="#CC6E3B"/>
 		</vertical>
 		<vertical preferred-width='33.3'>
-			<primary-button on-click='OpenStartModal' text='Play' vertical-fit='Unconstrained' horizontal-fit='Unconstrained'/>
+			<primary-button on-click='PlayClicked' text='Play' vertical-fit='Unconstrained' horizontal-fit='Unconstrained'/>
 		</vertical>
 		<vertical preferred-width='33.3'>
 			<clickable-text text='♥ Donate' font-size="4" align="Center" click-event="OpenSponsorModal" on-click="OpenSponsorsModal"/>

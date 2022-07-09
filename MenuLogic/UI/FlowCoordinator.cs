@@ -89,9 +89,12 @@ namespace Shaffuru.MenuLogic.UI {
 			instance = this;
 		}
 
-		public static void ShowSetupView() {
+		public void ShowSetupView() => ShowSetupView(null);
+		public void ShowSetupView(Action playButtonHandler) {
 			if(instance == null)
 				return;
+
+			ui.SetPlayHandler(playButtonHandler);
 
 			var _parentFlow = BeatSaberUI.MainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 

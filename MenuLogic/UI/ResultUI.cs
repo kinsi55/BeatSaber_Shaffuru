@@ -15,7 +15,7 @@ using UnityEngine;
 namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/result.bsml")]
 	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.result.bsml")]
-	public class ResultUI : BSMLAutomaticViewController {
+	class ResultUI : BSMLAutomaticViewController {
 		public event Action closed;
 		public event Action<IPreviewBeatmapLevel> playSong;
 

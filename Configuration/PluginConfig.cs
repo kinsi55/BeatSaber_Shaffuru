@@ -7,8 +7,6 @@ using IPA.Config.Stores.Attributes;
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace Shaffuru {
 	public class SongFilteringConfig {
-		public string playlist = "None (All Songs)";
-		public bool playlist_onlyHighlighted = true;
 		public int minSeconds = 15;
 
 		public bool allowME = true;
@@ -49,9 +47,11 @@ namespace Shaffuru {
 		public virtual int request_limitPerUser { get; set; } = 2;
 
 
-		[UseConverter, NonNullable]
+		[NonNullable]
 		public SongFilteringConfig songFilteringConfig = new SongFilteringConfig();
 
+		public string filter_playlist = "None (All Songs)";
+		public bool filter_playlist_onlyHighlighted = true;
 
 		public virtual bool jumpcut_enabled { get; set; } = false;
 		// Maybe at some point. I feel like this would be a massive pain

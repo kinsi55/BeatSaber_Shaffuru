@@ -19,7 +19,7 @@ using Zenject;
 namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]
 	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.setup.bsml")]
-	class SetupUI : BSMLAutomaticViewController {
+	public class SetupUI : BSMLAutomaticViewController {
 		Config config => Config.Instance;
 		SongFilteringConfig songFilterConfig => Config.Instance.songFilteringConfig;
 
@@ -28,9 +28,9 @@ namespace Shaffuru.MenuLogic.UI {
 		[Inject] readonly Anlasser anlasser = null;
 		[Inject] readonly PlayedSongList playedSongList = null;
 
-		[UIParams] readonly BSMLParserParams parserParams = null;
+		[UIParams] public readonly BSMLParserParams parserParams = null;
 
-		string filter_playlist { get => config.songFilteringConfig.playlist; set => config.songFilteringConfig.playlist = value; }
+		string filter_playlist { get => Config.Instance.filter_playlist; set => Config.Instance.filter_playlist = value; }
 		[UIValue("playlists")] List<object> playlists = null;
 		[UIComponent("dropdown_playlist")] readonly DropDownListSetting playlistDropdown = null;
 
@@ -88,7 +88,17 @@ namespace Shaffuru.MenuLogic.UI {
 		[UIComponent("label_songCount")] readonly TextMeshProUGUI filteredSongsLabel = null;
 		[UIComponent("button_startLevel")] readonly NoTransitionsButton startLevelButton = null;
 
-		async void OpenStartModal() {
+
+		Action playButtonHandler;
+		internal void SetPlayHandler(Action playButtonHandler) => this.playButtonHandler = playButtonHandler;
+
+		[UIAction("PlayClicked")]
+		async void PlayClicked() {
+			if(playButtonHandler != null) {
+				playButtonHandler();
+				return;
+			}
+
 			startLevelButton.interactable = false;
 			filteredSongsLabel.text = $"Filtering levels...";
 			parserParams.EmitEvent("OpenStartModal");

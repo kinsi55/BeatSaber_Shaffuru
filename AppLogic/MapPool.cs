@@ -80,7 +80,7 @@ namespace Shaffuru.AppLogic {
 				// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
 				var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
 					.GetAllPlaylists(true)
-					.FirstOrDefault(x => x.packName == songFilterConfig.playlist);
+					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
 
 				IEnumerable<IGrouping<IPreviewBeatmapLevel, BeatSaberPlaylistsLib.Types.PlaylistSong>> theThing = null;
 
@@ -95,7 +95,7 @@ namespace Shaffuru.AppLogic {
 				var playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
 
 				foreach(var xy in theThing) {
-					if(!songFilterConfig.playlist_onlyHighlighted) {
+					if(!Config.Instance.filter_playlist_onlyHighlighted) {
 						playlistSongs.Add(xy.First().PreviewBeatmapLevel, null);
 						continue;
 					}
