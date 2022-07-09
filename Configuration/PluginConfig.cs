@@ -2,15 +2,29 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using IPA.Config.Stores;
+using IPA.Config.Stores.Attributes;
 
 [assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace Shaffuru {
+	public class SongFilteringConfig {
+		public string playlist = "None (All Songs)";
+		public bool playlist_onlyHighlighted = true;
+		public int minSeconds = 15;
+
+		public bool allowME = true;
+
+		public bool enableAdvancedFilters = false;
+		public float advanced_njs_min = 0f;
+		public float advanced_njs_max = 30f;
+		public float advanced_nps_min = 0f;
+		public float advanced_nps_max = 30f;
+		public int advanced_bpm_min = 0;
+		public bool advanced_only_ranked = false;
+		public int advanced_uploadDate_min = 0;
+	}
+
 	internal class Config {
-		public static Config Instance { get; set; }
-
-		public virtual int queue_sizeLimit { get; set; } = 32;
-		public virtual int queue_requeueLimit { get; set; } = 32;
-
+		public static Config Instance;
 
 		public static readonly List<DateTime> hideOlderThanOptions = BuilDateTimeList();
 		static List<DateTime> BuilDateTimeList() {
@@ -23,6 +37,9 @@ namespace Shaffuru {
 		}
 
 
+		public virtual int queue_sizeLimit { get; set; } = 32;
+		public virtual int queue_requeueLimit { get; set; } = 32;
+
 		public virtual bool chat_request_enabled { get; set; } = true;
 		public virtual bool chat_request_show_name { get; set; } = true;
 		//public virtual bool chat_currentmap_enabled { get; set; } = false;
@@ -31,20 +48,9 @@ namespace Shaffuru {
 		public virtual bool request_allowSpecificTime { get; set; } = false;
 		public virtual int request_limitPerUser { get; set; } = 2;
 
-		public virtual string filter_playlist { get; set; } = "None (All Songs)";
-		public virtual bool filter_playlist_onlyHighlighted { get; set; } = true;
-		public virtual int filter_minSeconds { get; set; } = 15;
 
-		public virtual bool filter_AllowME { get; set; } = true;
-
-		public virtual bool filter_enableAdvancedFilters { get; set; } = false;
-		public virtual float filter_advanced_njs_min { get; set; } = 0f;
-		public virtual float filter_advanced_njs_max { get; set; } = 30f;
-		public virtual float filter_advanced_nps_min { get; set; } = 0f;
-		public virtual float filter_advanced_nps_max { get; set; } = 30f;
-		public virtual int filter_advanced_bpm_min { get; set; } = 0;
-		public virtual bool filter_advanced_only_ranked { get; set; } = false;
-		public virtual int filter_advanced_uploadDate_min { get; set; } = 0;
+		[UseConverter, NonNullable]
+		public SongFilteringConfig songFilteringConfig = new SongFilteringConfig();
 
 
 		public virtual bool jumpcut_enabled { get; set; } = false;
@@ -70,8 +76,8 @@ namespace Shaffuru {
 		/// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
 		/// </summary>
 		public virtual void Changed() {
-			if(filter_minSeconds < 15)
-				filter_minSeconds = 15;
+			if(songFilteringConfig.minSeconds < 15)
+				songFilteringConfig.minSeconds = 15;
 
 			if(jumpcut_minSeconds < 5)
 				jumpcut_minSeconds = 5;

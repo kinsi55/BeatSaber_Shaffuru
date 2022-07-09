@@ -9,7 +9,7 @@ using Zenject;
 using static SelectLevelCategoryViewController;
 
 namespace Shaffuru.MenuLogic.UI {
-	class ShaffuruFlowCoordinator : FlowCoordinator, IInitializable {
+	public class ShaffuruFlowCoordinator : FlowCoordinator, IInitializable {
 		[Inject] readonly SetupUI ui = null;
 		[Inject] readonly ResultUI resultui = null;
 		[Inject] readonly GameplaySetupViewController gameplaySetupViewController = null;
@@ -68,12 +68,6 @@ namespace Shaffuru.MenuLogic.UI {
 			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
 		}
 
-		public void ShowSetupView() {
-			var _parentFlow = BeatSaberUI.MainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
-
-			BeatSaberUI.PresentFlowCoordinator(_parentFlow, this);
-		}
-
 		// HAHABALLS
 		void ReopenHack() {
 			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
@@ -87,12 +81,21 @@ namespace Shaffuru.MenuLogic.UI {
 			ReopenHack();
 		}
 
-		static Action show;
+		static ShaffuruFlowCoordinator instance;
 
 		public void Initialize() {
-			if(show == null)
-				MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", () => show(), true));
-			show = ShowSetupView;
+			if(instance == null)
+				MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", ShowSetupView, true));
+			instance = this;
+		}
+
+		public static void ShowSetupView() {
+			if(instance == null)
+				return;
+
+			var _parentFlow = BeatSaberUI.MainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+
+			BeatSaberUI.PresentFlowCoordinator(_parentFlow, instance);
 		}
 	}
 }

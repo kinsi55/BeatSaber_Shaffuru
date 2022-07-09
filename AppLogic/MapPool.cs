@@ -55,6 +55,7 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
+		static SongFilteringConfig songFilterConfig;
 		public List<ValidSong> filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
 		public bool isFilteredByPlaylist { get; private set; } = false;
@@ -79,7 +80,7 @@ namespace Shaffuru.AppLogic {
 				// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
 				var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
 					.GetAllPlaylists(true)
-					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
+					.FirstOrDefault(x => x.packName == songFilterConfig.playlist);
 
 				IEnumerable<IGrouping<IPreviewBeatmapLevel, BeatSaberPlaylistsLib.Types.PlaylistSong>> theThing = null;
 
@@ -94,7 +95,7 @@ namespace Shaffuru.AppLogic {
 				var playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
 
 				foreach(var xy in theThing) {
-					if(!Config.Instance.filter_playlist_onlyHighlighted) {
+					if(!songFilterConfig.playlist_onlyHighlighted) {
 						playlistSongs.Add(xy.First().PreviewBeatmapLevel, null);
 						continue;
 					}
@@ -155,7 +156,7 @@ namespace Shaffuru.AppLogic {
 				var validDiffsSongdetailsFilterCheck = int.MaxValue;
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
-				if(!forceNoFilters && Config.Instance.filter_enableAdvancedFilters) {
+				if(!forceNoFilters && songFilterConfig.enableAdvancedFilters) {
 					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out songDetailsSong))
 						break;
 
@@ -198,12 +199,12 @@ namespace Shaffuru.AppLogic {
 			if(fullCheck && song.songDurationSeconds < minSongLength)
 				return false;
 
-			if(Config.Instance.filter_enableAdvancedFilters) {
-				if(song.bpm < Config.Instance.filter_advanced_bpm_min)
+			if(songFilterConfig.enableAdvancedFilters) {
+				if(song.bpm < songFilterConfig.advanced_bpm_min)
 					return false;
 
-				if(Config.Instance.filter_advanced_uploadDate_min > 0 &&
-					song.uploadTime < Config.hideOlderThanOptions[Config.Instance.filter_advanced_uploadDate_min])
+				if(songFilterConfig.advanced_uploadDate_min > 0 &&
+					song.uploadTime < Config.hideOlderThanOptions[songFilterConfig.advanced_uploadDate_min])
 					return false;
 			} else if(!fullCheck) {
 				validDiffs = int.MaxValue;
@@ -218,20 +219,20 @@ namespace Shaffuru.AppLogic {
 				if(diff.characteristic != SongDetailsCache.Structs.MapCharacteristic.Standard)
 					continue;
 
-				if(Config.Instance.filter_enableAdvancedFilters) {
-					if(diff.njs < Config.Instance.filter_advanced_njs_min || diff.njs > Config.Instance.filter_advanced_njs_max)
+				if(songFilterConfig.enableAdvancedFilters) {
+					if(diff.njs < songFilterConfig.advanced_njs_min || diff.njs > songFilterConfig.advanced_njs_max)
 						continue;
 
 					var nps = (float)diff.notes / song.songDurationSeconds;
-					if(nps < Config.Instance.filter_advanced_nps_min || nps > Config.Instance.filter_advanced_nps_max)
+					if(nps < songFilterConfig.advanced_nps_min || nps > songFilterConfig.advanced_nps_max)
 						continue;
 
-					if(Config.Instance.filter_advanced_only_ranked && !diff.ranked)
+					if(songFilterConfig.advanced_only_ranked && !diff.ranked)
 						continue;
 				}
 
 				if(fullCheck) {
-					if(!Config.Instance.filter_AllowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
+					if(!songFilterConfig.allowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
 						continue;
 
 					if((diff.mods & SongDetailsCache.Structs.MapMods.NoodleExtensions) != 0)
@@ -269,30 +270,34 @@ namespace Shaffuru.AppLogic {
 			return true;
 		}
 
-		public async Task ProcessBeatmapPool() {
-			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(Config.Instance.filter_minSeconds, Config.Instance.jumpcut_minSeconds) : Config.Instance.filter_minSeconds;
+		public async Task ProcessBeatmapPool(SongFilteringConfig config = null, bool forceNoFilters = false) {
+			songFilterConfig = config ?? Config.Instance.songFilteringConfig;
+
+			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(songFilterConfig.minSeconds, Config.Instance.jumpcut_minSeconds) : songFilterConfig.minSeconds;
 
 			var maps = beatmapLevelsModel
 				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
 				.Where(x => !(x is PreviewBeatmapLevelPackSO))
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels)
-				.Where(x => x.songDuration - x.songTimeOffset >= minSongLength);
+				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
+
+			if(!forceNoFilters)
+				maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minSongLength);
 
 
 			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
-			if(IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
+			if(!forceNoFilters && IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
 				playlistSongs = TheJ.GetAllSongsInSelectedPlaylist();
 
 			isFilteredByPlaylist = playlistSongs != null;
-			allowMappingExtensions = Config.Instance.filter_AllowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
+			allowMappingExtensions = (forceNoFilters || songFilterConfig.allowME) && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 
 			var newFilteredLevels = new List<ValidSong>();
 
 			await SongDetailsUtil.Init();
 
 			foreach(var map in maps) {
-				var mapCheck = LevelFilterCheck(map, playlistSongs);
+				var mapCheck = LevelFilterCheck(map, playlistSongs, forceNoFilters);
 
 				if(mapCheck.validDiffs != 0)
 					newFilteredLevels.Add(mapCheck);

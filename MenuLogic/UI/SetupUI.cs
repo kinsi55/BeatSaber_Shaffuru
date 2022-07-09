@@ -20,7 +20,9 @@ namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]
 	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.setup.bsml")]
 	class SetupUI : BSMLAutomaticViewController {
-		Config config;
+		Config config => Config.Instance;
+		SongFilteringConfig songFilterConfig => Config.Instance.songFilteringConfig;
+
 		[Inject] readonly MapPool mapPool = null;
 		[Inject] readonly SongQueueManager songQueueManager = null;
 		[Inject] readonly Anlasser anlasser = null;
@@ -28,7 +30,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 		[UIParams] readonly BSMLParserParams parserParams = null;
 
-		string filter_playlist { get => config.filter_playlist; set => config.filter_playlist = value; }
+		string filter_playlist { get => config.songFilteringConfig.playlist; set => config.songFilteringConfig.playlist = value; }
 		[UIValue("playlists")] List<object> playlists = null;
 		[UIComponent("dropdown_playlist")] readonly DropDownListSetting playlistDropdown = null;
 
@@ -38,12 +40,8 @@ namespace Shaffuru.MenuLogic.UI {
 
 		[UIAction("DateTimeToStr")] static string DateTimeToStr(int d) => hideOlderThanOptions[d].ToString("MMM yyyy", new CultureInfo("en-US"));
 		internal int _hideOlderThan {
-			get => Mathf.Clamp(Config.Instance.filter_advanced_uploadDate_min, 0, hideOlderThanOptions.Count - 1);
-			set => Config.Instance.filter_advanced_uploadDate_min = Mathf.Clamp(value, 0, hideOlderThanOptions.Count - 1);
-		}
-
-		public void Awake() {
-			config = Config.Instance;
+			get => Mathf.Clamp(config.songFilteringConfig.advanced_uploadDate_min, 0, hideOlderThanOptions.Count - 1);
+			set => config.songFilteringConfig.advanced_uploadDate_min = Mathf.Clamp(value, 0, hideOlderThanOptions.Count - 1);
 		}
 
 		[UIAction("#post-parse")] void Parsed() => PreparePlaylistStuff(false);
@@ -74,11 +72,11 @@ namespace Shaffuru.MenuLogic.UI {
 		[UIComponent("button_advancedFiltersConfig")] readonly NoTransitionsButton advancedFiltersConfigButton = null;
 
 		bool filter_enableAdvancedFilters {
-			get => config.filter_enableAdvancedFilters;
+			get => config.songFilteringConfig.enableAdvancedFilters;
 			set {
 				if(advancedFiltersConfigButton != null)
 					advancedFiltersConfigButton.interactable = value;
-				config.filter_enableAdvancedFilters = value;
+				config.songFilteringConfig.enableAdvancedFilters = value;
 			}
 		}
 
@@ -96,7 +94,7 @@ namespace Shaffuru.MenuLogic.UI {
 			parserParams.EmitEvent("OpenStartModal");
 			var playable = 0;
 			try {
-				await Task.Run(mapPool.ProcessBeatmapPool);
+				await Task.Run(() => mapPool.ProcessBeatmapPool(Config.Instance.songFilteringConfig));
 				playable = (mapPool?.filteredLevels?.Count ?? 0);
 				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} on BeatSaver / requestable)";
 			} catch(Exception ex) {

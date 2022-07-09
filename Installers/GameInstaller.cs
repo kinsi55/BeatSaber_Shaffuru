@@ -19,7 +19,7 @@ namespace Shaffuru.Installers {
 
 			Container.BindInterfacesAndSelfTo<IntroPlayer>().AsSingle().NonLazy();
 
-			if(Config.Instance.filter_AllowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null)
+			if(Config.Instance.songFilteringConfig.allowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null)
 				EnableME();
 		}
 

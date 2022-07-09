@@ -3,8 +3,8 @@
 	<vertical vertical-fit="PreferredSize" preferred-height="62" pad-bottom="2">
 		<tab tags='tabs' tab-name='Song Filtering'>
 			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-				<macro.as-host host='config'>
-					<slider-setting value='filter_minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' apply-on-change='true'
+				<macro.as-host host='songFilterConfig'>
+					<slider-setting value='minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' apply-on-change='true'
 						hover-hint='Songs must be at least this long to be allowed'
 					/>
 				</macro.as-host>
@@ -14,11 +14,11 @@
 					/>
 					<button id='button_advancedFiltersConfig' interactable='~filter_enableAdvancedFilters' text='Configure' event-click='OpenAdvancedFiltersModal'/>
 				</horizontal>
-				<macro.as-host host='config'>
-					<toggle-setting value='filter_AllowME' text='Allow Mapping Extensions' apply-on-change='true'
+				<macro.as-host host='songFilterConfig'>
+					<toggle-setting value='allowME' text='Allow Mapping Extensions' apply-on-change='true'
 						hover-hint='Should Mapping Extensions maps be playable? This should be obvious but... This only has a function if you have it installed'
 					/>
-					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
+					<toggle-setting value='playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
 						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
 					/>
 				</macro.as-host>
@@ -124,13 +124,13 @@
 			</horizontal>
 			<horizontal>
 				<modifier-container child-expand-width='true'>
-					<macro.as-host host='config'>
-						<slider-setting value='filter_advanced_njs_min' text='Min. NJS' min='0' max='25' increment='0.25' apply-on-change='true' show-buttons='true'/>
-						<slider-setting value='filter_advanced_njs_max' text='Max. NJS' min='10' max='40' increment='0.25' apply-on-change='true' show-buttons='true'/>
-						<slider-setting value='filter_advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' apply-on-change='true' show-buttons='true'/>
-						<slider-setting value='filter_advanced_nps_max' text='Max. Note/s' min='2' max='25' increment='0.2' apply-on-change='true' show-buttons='true'/>
-						<slider-setting value='filter_advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' apply-on-change='true' show-buttons='true'/>
-						<toggle-setting value='filter_advanced_only_ranked' text='Must be ranked' apply-on-change='true'/>
+					<macro.as-host host='songFilterConfig'>
+						<slider-setting value='advanced_njs_min' text='Min. NJS' min='0' max='25' increment='0.25' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='advanced_njs_max' text='Max. NJS' min='10' max='40' increment='0.25' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='advanced_nps_max' text='Max. Note/s' min='2' max='25' increment='0.2' apply-on-change='true' show-buttons='true'/>
+						<slider-setting value='advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' apply-on-change='true' show-buttons='true'/>
+						<toggle-setting value='advanced_only_ranked' text='Must be ranked' apply-on-change='true'/>
 					</macro.as-host>
 					<slider-setting value='_hideOlderThan' text='Min. upload date' max='~hideOlderThanOptionsCount' bind-value="true" apply-on-change="true" integer-only='true' formatter='DateTimeToStr'/>
 				</modifier-container>
