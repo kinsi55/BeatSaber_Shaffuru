@@ -8,7 +8,7 @@ using Shaffuru.Util;
 using SiraUtil.Zenject;
 
 namespace Shaffuru.AppLogic {
-	public class MapPool : IDisposable {
+	class MapPool : IDisposable {
 		readonly BeatmapLevelsModel beatmapLevelsModel;
 		static System.Random rngSource;
 

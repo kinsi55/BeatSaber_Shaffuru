@@ -9,7 +9,7 @@ using Zenject;
 using static SelectLevelCategoryViewController;
 
 namespace Shaffuru.MenuLogic.UI {
-	public class ShaffuruFlowCoordinator : FlowCoordinator, IInitializable {
+	class ShaffuruFlowCoordinator : FlowCoordinator, IInitializable {
 		[Inject] readonly SetupUI ui = null;
 		[Inject] readonly ResultUI resultui = null;
 		[Inject] readonly GameplaySetupViewController gameplaySetupViewController = null;

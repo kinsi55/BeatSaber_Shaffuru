@@ -2,7 +2,7 @@
 using System.Linq;
 
 namespace Shaffuru.AppLogic {
-	public class ShaffuruSong {
+	class ShaffuruSong {
 		public string levelId { get; protected set; }
 		public int diffIndex { get; protected set; } = -1;
 		public float startTime { get; protected set; }

@@ -13,7 +13,7 @@ using Unity.Jobs;
 using UnityEngine.Networking;
 
 namespace Shaffuru.AppLogic {
-	public struct SongDownloaderJob : IJob {
+	struct SongDownloaderJob : IJob {
 		public static readonly HashSet<uint> downloadingMaps = new HashSet<uint>();
 		public static readonly string ShaffuruDownloadPath = Path.Combine(Directory.GetCurrentDirectory(), CustomLevelPathHelper.customLevelsDirectoryPath, "SHAFFURU_DOWNLOADS");
 

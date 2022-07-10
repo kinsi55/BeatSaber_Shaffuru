@@ -2,7 +2,7 @@
 using SongDetailsCache;
 
 namespace Shaffuru.Util {
-	public static class SongDetailsUtil {
+	static class SongDetailsUtil {
 		public static SongDetails instance = null;
 
 		public static async Task<SongDetails> Init() => instance ??= await SongDetails.Init();

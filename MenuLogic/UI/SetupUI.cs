@@ -19,7 +19,7 @@ using Zenject;
 namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]
 	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.setup.bsml")]
-	public class SetupUI : BSMLAutomaticViewController {
+	class SetupUI : BSMLAutomaticViewController {
 		Config config => Config.Instance;
 		SongFilteringConfig songFilterConfig => Config.Instance.songFilteringConfig;
 
