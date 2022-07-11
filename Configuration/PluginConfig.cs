@@ -10,20 +10,20 @@ using ProtoBuf;
 using Zenject;
 
 namespace Shaffuru {
-	[ProtoContract]
+	[ProtoContract(SkipConstructor = true)]
 	class SongFilteringConfig {
-		[ProtoMember(0)] public int minSeconds = 15;
+		[ProtoMember(1)] public int minSeconds = 15;
 
-		[ProtoMember(1)] public bool allowME = true;
+		[ProtoMember(2)] public bool allowME = true;
 
-		[ProtoMember(2)] public bool enableAdvancedFilters = false;
-		[ProtoMember(3)] public float advanced_njs_min = 0f;
-		[ProtoMember(4)] public float advanced_njs_max = 30f;
-		[ProtoMember(5)] public float advanced_nps_min = 0f;
-		[ProtoMember(6)] public float advanced_nps_max = 30f;
-		[ProtoMember(7)] public int advanced_bpm_min = 0;
-		[ProtoMember(8)] public bool advanced_only_ranked = false;
-		[ProtoMember(9)] public int advanced_uploadDate_min = 0;
+		[ProtoMember(3)] public bool enableAdvancedFilters = false;
+		[ProtoMember(4)] public float advanced_njs_min = 0f;
+		[ProtoMember(5)] public float advanced_njs_max = 30f;
+		[ProtoMember(6)] public float advanced_nps_min = 0f;
+		[ProtoMember(7)] public float advanced_nps_max = 30f;
+		[ProtoMember(8)] public int advanced_bpm_min = 0;
+		[ProtoMember(9)] public bool advanced_only_ranked = false;
+		[ProtoMember(10)] public int advanced_uploadDate_min = 0;
 	}
 
 	class Config {

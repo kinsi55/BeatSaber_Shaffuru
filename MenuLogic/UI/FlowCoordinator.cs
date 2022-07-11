@@ -67,12 +67,13 @@ namespace Shaffuru.MenuLogic.UI {
 
 		protected override void BackButtonWasPressed(ViewController topViewController) {
 			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
+			
 			config.Save();
 		}
 
 		// HAHABALLS
 		void ReopenHack() {
-			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
+			_parentFlow.DismissFlowCoordinator(this, immediately: true);
 			ShowSetupView();
 		}
 
@@ -91,6 +92,7 @@ namespace Shaffuru.MenuLogic.UI {
 			instance = this;
 		}
 
+		static FlowCoordinator _parentFlow;
 		public void ShowSetupView() => ShowSetupView(null);
 		public void ShowSetupView(Action playButtonHandler) {
 			if(instance == null)
@@ -98,7 +100,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 			ui.SetPlayHandler(playButtonHandler);
 
-			var _parentFlow = BeatSaberUI.MainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+			_parentFlow = BeatSaberUI.MainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
 
 			BeatSaberUI.PresentFlowCoordinator(_parentFlow, instance);
 		}
