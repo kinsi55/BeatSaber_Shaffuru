@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
 using Shaffuru.AppLogic;
+using Shaffuru.Util;
 using SiraUtil.Zenject;
 using UnityEngine;
 using Zenject;
@@ -78,7 +79,7 @@ namespace Shaffuru.GameLogic {
 				var diffIndex = queuedSong.diffIndex;
 
 				if(diffIndex == -1) {
-					var h = MapPool.GetHashOfLevelid(queuedSong.levelId);
+					var h = MapUtil.GetHashOfLevelid(queuedSong.levelId);
 
 					if(h == null)
 						return;

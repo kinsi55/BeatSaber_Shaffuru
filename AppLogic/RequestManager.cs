@@ -99,7 +99,7 @@ namespace Shaffuru.AppLogic {
 				if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
 					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} maps in the queue", channel);
 
-				} else if(songQueueManager.Contains(x => MapPool.GetHashOfLevelid(x.levelId) == hash)) {
+				} else if(songQueueManager.Contains(x => MapUtil.GetHashOfLevelid(x.levelId) == hash)) {
 					Msg($"@{sender} The map is already in the queue", channel);
 
 				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory(levelId)) {

@@ -33,7 +33,7 @@ namespace Shaffuru.AppLogic {
 			if(IsFull())
 				return false;
 
-			if(!mapPool.LevelHashRequestable(MapPool.GetHashOfLevelid(queuedSong.levelId)))
+			if(!mapPool.LevelHashRequestable(MapUtil.GetHashOfLevelid(queuedSong.levelId)))
 				return false;
 
 			lock(queue)
@@ -66,14 +66,14 @@ namespace Shaffuru.AppLogic {
 					x = queue.Dequeue();
 			}
 
-			requeueBlockList.Add(MapPool.GetLevelIdWithoutUniquenessAddition(x.levelId));
+			requeueBlockList.Add(MapUtil.GetLevelIdWithoutUniquenessAddition(x.levelId));
 
 			return x;
 		}
 
 		public int Count(Func<ShaffuruSong, bool> action) => queue.Count(action);
 		public bool Contains(Func<ShaffuruSong, bool> action) => queue.Any(action);
-		public bool IsInHistory(string levelId) => requeueBlockList.Contains(MapPool.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
+		public bool IsInHistory(string levelId) => requeueBlockList.Contains(MapUtil.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
 		public bool IsEmpty() => queue.Count == 0;
 
 		public bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;

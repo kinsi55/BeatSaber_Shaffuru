@@ -128,7 +128,7 @@ namespace Shaffuru.AppLogic {
 			if(playlistSongs?.TryGetValue(level, out playlistDiffs) == false)
 				return default;
 
-			var songHash = GetHashOfPreview(level);
+			var songHash = MapUtil.GetHashOfPreview(level);
 			Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData> mappedExtraData = null;
 
 			if(songHash != null) {
@@ -248,7 +248,7 @@ namespace Shaffuru.AppLogic {
 
 
 		public bool AddRequestableLevel(IPreviewBeatmapLevel level, bool forceNoFilters = false) {
-			var hash = GetHashOfPreview(level);
+			var hash = MapUtil.GetHashOfPreview(level);
 
 			if(hash == null)
 				return false;
@@ -308,7 +308,7 @@ namespace Shaffuru.AppLogic {
 			var requestableLevels = new Dictionary<string, int>();
 
 			for(var i = 0; i < filteredLevels.Count; i++) {
-				var mapHash = GetHashOfPreview(filteredLevels[i].level);
+				var mapHash = MapUtil.GetHashOfPreview(filteredLevels[i].level);
 
 				if(mapHash == null || !SongDetailsUtil.instance.songs.FindByHash(mapHash, out var song))
 					continue;
@@ -317,28 +317,6 @@ namespace Shaffuru.AppLogic {
 			}
 
 			this.requestableLevels = requestableLevels;
-		}
-
-		public static string GetHashOfPreview(IPreviewBeatmapLevel preview) {
-			if(preview.levelID.Length < 53)
-				return null;
-
-			return GetHashOfLevelid(preview.levelID);
-		}
-
-		public static string GetHashOfLevelid(string levelid) {
-			if(levelid[12] != '_') // custom_level_<hash, 40 chars>
-				return null;
-
-			return levelid.Substring(13, 40);
-		}
-
-		// Removes WIP etc from the end of the levelID that SongCore happens to add for duplicate songs with the same hash
-		public static string GetLevelIdWithoutUniquenessAddition(string levelid) {
-			if(levelid.Length <= 53)
-				return levelid;
-
-			return levelid.Substring(0, 53);
 		}
 	}
 }
