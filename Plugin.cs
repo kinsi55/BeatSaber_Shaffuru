@@ -18,11 +18,10 @@ namespace Shaffuru {
 		internal static bool isShaffuruActive = false;
 
 		[Init]
-		public Plugin(IPALogger logger, IPA.Config.Config conf, Zenjector zenjector) {
+		public Plugin(IPALogger logger, Zenjector zenjector) {
 			Instance = this;
 			Log = logger;
 
-			Config.Instance = conf.Generated<Config>();
 			zenjector.Install<Installers.AppInstaller>(Location.App);
 			zenjector.Install<Installers.MenuInstaller>(Location.Menu);
 			zenjector.Install<Installers.GameInstaller>(Location.StandardPlayer);

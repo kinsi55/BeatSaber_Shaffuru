@@ -15,6 +15,7 @@ namespace Shaffuru.MenuLogic.UI {
 		[Inject] readonly GameplaySetupViewController gameplaySetupViewController = null;
 		[Inject] readonly PlayedSongList playedSongList = null;
 		[Inject] readonly Anlasser anlasser = null;
+		[Inject] readonly Config config = null;
 
 		protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
 			if(firstActivation) {
@@ -66,6 +67,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 		protected override void BackButtonWasPressed(ViewController topViewController) {
 			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
+			config.Save();
 		}
 
 		// HAHABALLS

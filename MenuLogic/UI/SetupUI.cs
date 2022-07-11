@@ -28,7 +28,7 @@ namespace Shaffuru.MenuLogic.UI {
 		[Inject] readonly Anlasser anlasser = null;
 		[Inject] readonly PlayedSongList playedSongList = null;
 
-		[UIParams] public readonly BSMLParserParams parserParams = null;
+		[UIParams] readonly BSMLParserParams parserParams = null;
 
 		string filter_playlist { get => Config.Instance.filter_playlist; set => Config.Instance.filter_playlist = value; }
 		[UIValue("playlists")] List<object> playlists = null;
@@ -104,7 +104,8 @@ namespace Shaffuru.MenuLogic.UI {
 			parserParams.EmitEvent("OpenStartModal");
 			var playable = 0;
 			try {
-				await Task.Run(() => mapPool.ProcessBeatmapPool(Config.Instance.songFilteringConfig));
+				mapPool.SetFilterConfig(Config.Instance.songFilteringConfig);
+				await Task.Run(() => mapPool.ProcessBeatmapPool());
 				playable = (mapPool?.filteredLevels?.Count ?? 0);
 				filteredSongsLabel.text = $"{playable} Playable Levels ({(mapPool?.requestableLevels?.Count ?? 0)} on BeatSaver / requestable)";
 			} catch(Exception ex) {

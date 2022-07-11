@@ -1,27 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using IPA.Config.Stores;
 using IPA.Config.Stores.Attributes;
+using IPA.Utilities;
+using Newtonsoft.Json;
+using ProtoBuf;
+using Zenject;
 
-[assembly: InternalsVisibleTo(GeneratedStore.AssemblyVisibilityTarget)]
 namespace Shaffuru {
-	public class SongFilteringConfig {
-		public int minSeconds = 15;
+	[ProtoContract]
+	class SongFilteringConfig {
+		[ProtoMember(0)] public int minSeconds = 15;
 
-		public bool allowME = true;
+		[ProtoMember(1)] public bool allowME = true;
 
-		public bool enableAdvancedFilters = false;
-		public float advanced_njs_min = 0f;
-		public float advanced_njs_max = 30f;
-		public float advanced_nps_min = 0f;
-		public float advanced_nps_max = 30f;
-		public int advanced_bpm_min = 0;
-		public bool advanced_only_ranked = false;
-		public int advanced_uploadDate_min = 0;
+		[ProtoMember(2)] public bool enableAdvancedFilters = false;
+		[ProtoMember(3)] public float advanced_njs_min = 0f;
+		[ProtoMember(4)] public float advanced_njs_max = 30f;
+		[ProtoMember(5)] public float advanced_nps_min = 0f;
+		[ProtoMember(6)] public float advanced_nps_max = 30f;
+		[ProtoMember(7)] public int advanced_bpm_min = 0;
+		[ProtoMember(8)] public bool advanced_only_ranked = false;
+		[ProtoMember(9)] public int advanced_uploadDate_min = 0;
 	}
 
-	internal class Config {
+	class Config {
 		public static Config Instance;
 
 		public static readonly List<DateTime> hideOlderThanOptions = BuilDateTimeList();
@@ -35,47 +40,37 @@ namespace Shaffuru {
 		}
 
 
-		public virtual int queue_sizeLimit { get; set; } = 32;
-		public virtual int queue_requeueLimit { get; set; } = 32;
+		public int queue_sizeLimit = 32;
+		public int queue_requeueLimit = 32;
 
-		public virtual bool chat_request_enabled { get; set; } = true;
-		public virtual bool chat_request_show_name { get; set; } = true;
-		//public virtual bool chat_currentmap_enabled { get; set; } = false;
-		public virtual bool request_allowDownloading { get; set; } = false;
-		public virtual bool request_allowSpecificDiff { get; set; } = false;
-		public virtual bool request_allowSpecificTime { get; set; } = false;
-		public virtual int request_limitPerUser { get; set; } = 2;
+		public bool chat_request_enabled = true;
+		public bool chat_request_show_name = true;
+		//public bool chat_currentmap_enabled = false;
+		public bool request_allowDownloading = false;
+		public bool request_allowSpecificDiff = false;
+		public bool request_allowSpecificTime = false;
+		public int request_limitPerUser = 2;
 
 
-		[NonNullable]
 		public SongFilteringConfig songFilteringConfig = new SongFilteringConfig();
 
 		public string filter_playlist = "None (All Songs)";
 		public bool filter_playlist_onlyHighlighted = true;
 
-		public virtual bool jumpcut_enabled { get; set; } = false;
+		public bool jumpcut_enabled = false;
 		// Maybe at some point. I feel like this would be a massive pain
-		//public virtual bool jumpcut_tryKeepParity { get; set; } = false;f
-		public virtual float transition_reactionTime { get; set; } = 0.5f;
-		public virtual float transition_gracePeriod { get; set; } = 0.4f;
-		public virtual int jumpcut_minSeconds { get; set; } = 10;
-		public virtual int jumpcut_maxSeconds { get; set; } = 30;
+		//public bool jumpcut_tryKeepParity = false;f
+		public float transition_reactionTime = 0.5f;
+		public float transition_gracePeriod = 0.4f;
+		public int jumpcut_minSeconds = 10;
+		public int jumpcut_maxSeconds = 30;
 
-		public virtual bool random_prefer_top_diff { get; set; } = false;
+		public bool random_prefer_top_diff = false;
 
-		public virtual int ramclearer_frequency { get; set; } = 25;
+		public int ramclearer_frequency = 25;
 
-		/// <summary>
-		/// This is called whenever BSIPA reads the config from disk (including when file changes are detected).
-		/// </summary>
-		public virtual void OnReload() {
-			// Do stuff after config is read from disk.
-		}
 
-		/// <summary>
-		/// Call this to force BSIPA to update the config file. This is also called by BSIPA if it detects the file was modified.
-		/// </summary>
-		public virtual void Changed() {
+		void Sanitize() {
 			if(songFilteringConfig.minSeconds < 15)
 				songFilteringConfig.minSeconds = 15;
 
@@ -96,11 +91,40 @@ namespace Shaffuru {
 				transition_reactionTime = 0.3f;
 		}
 
-		/// <summary>
-		/// Call this to have BSIPA copy the values from <paramref name="other"/> into this config.
-		/// </summary>
-		public virtual void CopyFrom(Config other) {
-			// This instance's members populated from other
+		static readonly string configPath = Path.Combine(UnityGame.UserDataPath, $"{typeof(Config).Namespace}.json");
+
+		static readonly JsonSerializerSettings leanDeserializeSettings = new JsonSerializerSettings {
+			NullValueHandling = NullValueHandling.Ignore,
+			Error = (se, ev) => {
+#if DEBUG
+				Plugin.Log.Warn("Failed JSON deserialize:");
+				Plugin.Log.Warn(ev.ErrorContext.Error);
+#endif
+				ev.ErrorContext.Handled = true;
+			}
+		};
+
+		public void Load() {
+			if(File.Exists(configPath)) {
+				JsonConvert.PopulateObject(File.ReadAllText(configPath), this, leanDeserializeSettings);
+
+				songFilteringConfig ??= new SongFilteringConfig();
+
+				Sanitize();
+			} else {
+				songFilteringConfig ??= new SongFilteringConfig();
+
+				Save();
+			}
+		}
+
+		public void Save() {
+			File.WriteAllText(configPath, JsonConvert.SerializeObject(this, Formatting.Indented));
+		}
+
+		public Config() {
+			Instance = this;
+			Load();
 		}
 	}
 }

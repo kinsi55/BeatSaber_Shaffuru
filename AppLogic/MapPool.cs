@@ -55,7 +55,7 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
-		static SongFilteringConfig songFilterConfig;
+		public SongFilteringConfig currentFilterConfig;
 		public List<ValidSong> filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
 		public bool isFilteredByPlaylist { get; private set; } = false;
@@ -156,7 +156,7 @@ namespace Shaffuru.AppLogic {
 				var validDiffsSongdetailsFilterCheck = int.MaxValue;
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
-				if(!forceNoFilters && songFilterConfig.enableAdvancedFilters) {
+				if(!forceNoFilters && currentFilterConfig.enableAdvancedFilters) {
 					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out songDetailsSong))
 						break;
 
@@ -199,12 +199,12 @@ namespace Shaffuru.AppLogic {
 			if(fullCheck && song.songDurationSeconds < minSongLength)
 				return false;
 
-			if(songFilterConfig.enableAdvancedFilters) {
-				if(song.bpm < songFilterConfig.advanced_bpm_min)
+			if(currentFilterConfig.enableAdvancedFilters) {
+				if(song.bpm < currentFilterConfig.advanced_bpm_min)
 					return false;
 
-				if(songFilterConfig.advanced_uploadDate_min > 0 &&
-					song.uploadTime < Config.hideOlderThanOptions[songFilterConfig.advanced_uploadDate_min])
+				if(currentFilterConfig.advanced_uploadDate_min > 0 &&
+					song.uploadTime < Config.hideOlderThanOptions[currentFilterConfig.advanced_uploadDate_min])
 					return false;
 			} else if(!fullCheck) {
 				validDiffs = int.MaxValue;
@@ -219,20 +219,20 @@ namespace Shaffuru.AppLogic {
 				if(diff.characteristic != SongDetailsCache.Structs.MapCharacteristic.Standard)
 					continue;
 
-				if(songFilterConfig.enableAdvancedFilters) {
-					if(diff.njs < songFilterConfig.advanced_njs_min || diff.njs > songFilterConfig.advanced_njs_max)
+				if(currentFilterConfig.enableAdvancedFilters) {
+					if(diff.njs < currentFilterConfig.advanced_njs_min || diff.njs > currentFilterConfig.advanced_njs_max)
 						continue;
 
 					var nps = (float)diff.notes / song.songDurationSeconds;
-					if(nps < songFilterConfig.advanced_nps_min || nps > songFilterConfig.advanced_nps_max)
+					if(nps < currentFilterConfig.advanced_nps_min || nps > currentFilterConfig.advanced_nps_max)
 						continue;
 
-					if(songFilterConfig.advanced_only_ranked && !diff.ranked)
+					if(currentFilterConfig.advanced_only_ranked && !diff.ranked)
 						continue;
 				}
 
 				if(fullCheck) {
-					if(!songFilterConfig.allowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
+					if(!currentFilterConfig.allowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
 						continue;
 
 					if((diff.mods & SongDetailsCache.Structs.MapMods.NoodleExtensions) != 0)
@@ -270,10 +270,14 @@ namespace Shaffuru.AppLogic {
 			return true;
 		}
 
-		public async Task ProcessBeatmapPool(SongFilteringConfig config = null, bool forceNoFilters = false) {
-			songFilterConfig = config ?? Config.Instance.songFilteringConfig;
+		public void SetFilterConfig(SongFilteringConfig config = null) {
+			currentFilterConfig = config;
+		}
 
-			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(songFilterConfig.minSeconds, Config.Instance.jumpcut_minSeconds) : songFilterConfig.minSeconds;
+		public async Task ProcessBeatmapPool(bool forceNoFilters = false) {
+			currentFilterConfig ??= Config.Instance.songFilteringConfig;
+
+			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(currentFilterConfig.minSeconds, Config.Instance.jumpcut_minSeconds) : currentFilterConfig.minSeconds;
 
 			var maps = beatmapLevelsModel
 				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
@@ -290,7 +294,7 @@ namespace Shaffuru.AppLogic {
 				playlistSongs = TheJ.GetAllSongsInSelectedPlaylist();
 
 			isFilteredByPlaylist = playlistSongs != null;
-			allowMappingExtensions = (forceNoFilters || songFilterConfig.allowME) && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
+			allowMappingExtensions = (forceNoFilters || currentFilterConfig.allowME) && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 
 			var newFilteredLevels = new List<ValidSong>();
 
