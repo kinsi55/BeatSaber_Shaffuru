@@ -55,7 +55,7 @@ namespace Shaffuru.AppLogic {
 				var levels = mapPool.filteredLevels.Where(x => !requeueBlockList.Contains(x.level.levelID));
 
 				// Shouldnt ever be the case, failsafe
-				if(levels.Count() == 0)
+				if(!levels.Any())
 					return null;
 
 				var l = levels.ElementAt(rngSource.Value.Next(levels.Count()));

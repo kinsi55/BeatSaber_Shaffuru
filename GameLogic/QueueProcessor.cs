@@ -9,7 +9,7 @@ using UnityEngine;
 using Zenject;
 
 namespace Shaffuru.GameLogic {
-	class QueueProcessor : IInitializable, ITickable {
+	class QueueProcessor : ITickable {
 		readonly MapPool mapPool;
 		readonly BeatmapLoader beatmapLoader;
 		readonly BeatmapSwitcher beatmapSwitcher;
@@ -55,6 +55,8 @@ namespace Shaffuru.GameLogic {
 
 		public float switchToNextBeatmapAt = 1.3f;
 		bool isQueueingNewSong = false;
+
+		public event Action<ShaffuruSong> switchedToNewSong;
 
 		public async void Tick() {
 			if(isQueueingNewSong || audioTimeSyncController.songTime < switchToNextBeatmapAt)
@@ -161,14 +163,18 @@ namespace Shaffuru.GameLogic {
 
 			switchToNextBeatmapAt = audioTimeSyncController.songTime + length;
 
+			var playedSong = new ShaffuruSong(queuedSong.levelId, outDiff.difficulty, startTime, length, queuedSong.source);
+
 			beatmapSwitcher.SwitchToDifferentBeatmap(outDiff, outBeatmap, startTime, length);
 
-			playedSongList.Add(new ShaffuruSong(queuedSong.levelId, outDiff.difficulty, startTime, length, queuedSong.source));
+			playedSongList.Add(playedSong);
 
 			FIELD_PauseMenuManager_InitData_previewBeatmapLevel.SetValue(pauseMenuManager_InitData, loadedBeatmap.beatmapLevel);
 			FIELD_PauseMenuManager_InitData_beatmapDifficulty.SetValue(pauseMenuManager_InitData, outDiff.difficulty);
 
 			isQueueingNewSong = false;
+
+			switchedToNewSong?.Invoke(playedSong);
 		}
 	}
 }

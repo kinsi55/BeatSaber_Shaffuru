@@ -1,15 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ProtoBuf;
 
 namespace Shaffuru.AppLogic {
+	[ProtoContract(SkipConstructor = true)]
 	class ShaffuruSong {
+		[ProtoMember(1)]
 		public string levelId { get; protected set; }
+		[ProtoMember(2)]
 		public int diffIndex { get; protected set; } = -1;
+		[ProtoMember(3)]
 		public float startTime { get; protected set; }
+		[ProtoMember(4)]
 		public float length { get; protected set; }
+		[ProtoMember(5)]
 		public string source { get; protected set; }
-
-		public IPreviewBeatmapLevel level { get; protected set; }
 
 		public ShaffuruSong(string levelId, int diffIndex, float startTime = -1, float length = -1, string source = null) {
 			this.levelId = levelId;
@@ -19,13 +24,8 @@ namespace Shaffuru.AppLogic {
 			this.source = source;
 		}
 
-		public ShaffuruSong(string levelId, BeatmapDifficulty diff, float startTime = -1, float length = -1, string source = null) {
-			this.levelId = levelId;
-			this.diffIndex = (int)diff;
-			this.startTime = startTime;
-			this.length = length;
-			this.source = source;
-		}
+		public ShaffuruSong(string levelId, BeatmapDifficulty diff, float startTime = -1, float length = -1, string source = null) :
+			this(levelId, (int)diff, startTime, length, source) { }
 	}
 
 	class ShaffuruSongList {
