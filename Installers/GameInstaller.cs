@@ -9,7 +9,7 @@ namespace Shaffuru.Installers {
 			var setupData = Container.Resolve<GameplayCoreSceneSetupData>();
 
 			Plugin.isShaffuruActive = false;
-			if(setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
+			if(!setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
 				return;
 
 			TheStuff();
