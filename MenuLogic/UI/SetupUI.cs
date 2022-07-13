@@ -59,14 +59,16 @@ namespace Shaffuru.MenuLogic.UI {
 			playlists = new List<object>() { "None (All Songs)" };
 
 			if(hasLib)
-				LoadPlaylistsList();
+				Task.Run(LoadPlaylistsList);
 		}
 
 		void LoadPlaylistsList() {
 			playlists.AddRange(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.packName).Distinct());
 
-			if(playlistDropdown != null)
+			if(playlistDropdown != null) {
 				playlistDropdown.UpdateChoices();
+				playlistDropdown.ReceiveValue();
+			}
 		}
 
 		[UIComponent("button_advancedFiltersConfig")] readonly NoTransitionsButton advancedFiltersConfigButton = null;
