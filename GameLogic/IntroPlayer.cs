@@ -7,13 +7,11 @@ namespace Shaffuru.GameLogic {
 	class IntroPlayer : IInitializable {
 		QueueProcessor queueProcessor;
 		BeatmapSwitcher beatmapSwitcher;
-		AudioTimeSyncController audioTimeSyncController;
 
 		static bool didPlayThisSession = false;
-		public IntroPlayer(QueueProcessor queueProcessor, BeatmapSwitcher beatmapSwitcher, AudioTimeSyncController audioTimeSyncController) {
+		public IntroPlayer(QueueProcessor queueProcessor, BeatmapSwitcher beatmapSwitcher) {
 			this.queueProcessor = queueProcessor;
 			this.beatmapSwitcher = beatmapSwitcher;
-			this.audioTimeSyncController = audioTimeSyncController;
 		}
 
 		public void Initialize() {
