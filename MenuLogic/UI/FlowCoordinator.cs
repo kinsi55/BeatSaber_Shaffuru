@@ -34,7 +34,7 @@ namespace Shaffuru.MenuLogic.UI {
 		}
 
 		private void Resultui_playSong(IPreviewBeatmapLevel obj) {
-			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
+			_parentFlow.DismissFlowCoordinator(this, immediately: true);
 			SharedCoroutineStarter.instance.StartCoroutine(PlaySonge(obj));
 		}
 
@@ -66,7 +66,7 @@ namespace Shaffuru.MenuLogic.UI {
 		}
 
 		protected override void BackButtonWasPressed(ViewController topViewController) {
-			BeatSaberUI.MainFlowCoordinator.DismissFlowCoordinator(this);
+			_parentFlow.DismissFlowCoordinator(this);
 			
 			config.Save();
 		}
