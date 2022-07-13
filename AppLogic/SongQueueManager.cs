@@ -3,33 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using Shaffuru.Util;
 using SiraUtil.Zenject;
+using Unity.Collections;
+using Zenject;
 
 namespace Shaffuru.AppLogic {
-	class SongQueueManager {
-		static Queue<ShaffuruSong> queue;
-		public static RollingList<string> requeueBlockList { get; private set; }
+	class SongQueueManager : ISongQueueManager {
+		protected static Queue<ShaffuruSong> queue;
+		protected static RollingList<string> requeueBlockList;
 
-		readonly MapPool mapPool;
-		readonly UBinder<Plugin, System.Random> rngSource;
 
-		public SongQueueManager(MapPool mapPool, UBinder<Plugin, System.Random> rng) {
-			this.mapPool = mapPool;
-			this.rngSource = rng;
+		[Inject] protected readonly MapPool mapPool;
+		[Inject] protected readonly UBinder<Plugin, System.Random> rngSource;
 
+		public SongQueueManager() {
 			queue ??= new Queue<ShaffuruSong>();
 
 			if(requeueBlockList == null) {
 				requeueBlockList = new RollingList<string>(Config.Instance.queue_requeueLimit);
 			} else {
-				requeueBlockList.SetSize(Config.Instance.queue_requeueLimit);
+				SetRequeueBlockListSize(Config.Instance.queue_requeueLimit);
 			}
 		}
 
-		public bool EnqueueSong(string levelId, BeatmapDifficulty difficulty, float startTime = -1, float length = -1, string source = null) {
-			return EnqueueSong(new ShaffuruSong(levelId, difficulty, startTime, length, source));
+		public virtual void SetRequeueBlockListSize(int size) {
+			requeueBlockList.SetSize(size);
 		}
 
-		public bool EnqueueSong(ShaffuruSong queuedSong) {
+		public virtual bool EnqueueSong(ShaffuruSong queuedSong) {
 			if(IsFull())
 				return false;
 
@@ -42,9 +42,9 @@ namespace Shaffuru.AppLogic {
 			return true;
 		}
 
-		public void Clear() => queue?.Clear();
+		public virtual void Clear() => queue?.Clear();
 
-		public ShaffuruSong GetNextSong() {
+		public virtual ShaffuruSong GetNextSong() {
 			ShaffuruSong x;
 
 			if(queue.Count == 0) {
@@ -52,15 +52,27 @@ namespace Shaffuru.AppLogic {
 				if(mapPool.filteredLevels.Count == requeueBlockList.Count)
 					requeueBlockList.Clear();
 
-				var levels = mapPool.filteredLevels.Where(x => !requeueBlockList.Contains(x.level.levelID));
+				using(var _levels = new NativeArray<MapPool.ValidSong>(mapPool.filteredLevels.Count, Allocator.Temp, NativeArrayOptions.UninitializedMemory)) {
+					// I have no idea why I need to do this but else Compiler angy
+					var levels = _levels;
 
-				// Shouldnt ever be the case, failsafe
-				if(!levels.Any())
-					return null;
+					var validLevels = 0;
 
-				var l = levels.ElementAt(rngSource.Value.Next(levels.Count()));
+					foreach(var fl in mapPool.filteredLevels) {
+						if(requeueBlockList.Contains(fl.level.levelID))
+							continue;
 
-				x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff(), -1, -1, null);
+						levels[validLevels++] = fl;
+					}
+
+					// Shouldnt ever be the case, failsafe
+					if(validLevels == 0)
+						return null;
+
+					var l = levels[rngSource.Value.Next(validLevels)];
+
+					x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff(), -1, -1, null);
+				}
 			} else {
 				lock(queue)
 					x = queue.Dequeue();
@@ -71,11 +83,25 @@ namespace Shaffuru.AppLogic {
 			return x;
 		}
 
-		public int Count(Func<ShaffuruSong, bool> action) => queue.Count(action);
-		public bool Contains(Func<ShaffuruSong, bool> action) => queue.Any(action);
-		public bool IsInHistory(string levelId) => requeueBlockList.Contains(MapUtil.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
-		public bool IsEmpty() => queue.Count == 0;
+		public virtual int Count(Func<ShaffuruSong, bool> action) => queue.Count(action);
+		public virtual bool Contains(Func<ShaffuruSong, bool> action) => queue.Any(action);
+		public virtual bool IsInHistory(string levelId) => requeueBlockList.Contains(MapUtil.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
+		public virtual bool IsEmpty() => queue.Count == 0;
 
-		public bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;
+		public virtual bool IsFull() => queue.Count >= Config.Instance.queue_sizeLimit;
+	}
+
+	internal interface ISongQueueManager {
+		public void SetRequeueBlockListSize(int size);
+		public bool EnqueueSong(ShaffuruSong queuedSong);
+		public void Clear();
+		public ShaffuruSong GetNextSong();
+
+		public int Count(Func<ShaffuruSong, bool> action);
+		public bool Contains(Func<ShaffuruSong, bool> action);
+		public bool IsInHistory(string levelId);
+		public bool IsEmpty();
+
+		public bool IsFull();
 	}
 }

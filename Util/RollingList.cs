@@ -15,7 +15,7 @@ namespace Shaffuru.Util {
 			this.maximumCount = maximumCount;
 
 			while(_list.Count > this.maximumCount)
-				_list.TryPop(out var x);
+				_list.TryPop(out var _);
 		}
 
 		public int maximumCount { get; private set; }
@@ -23,7 +23,7 @@ namespace Shaffuru.Util {
 
 		public void Add(T value) {
 			if(_list.Count == maximumCount && _list.Count > 0)
-				_list.TryPop(out var x);
+				_list.TryPop(out var _);
 			_list.Push(value);
 		}
 

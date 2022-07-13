@@ -13,7 +13,7 @@ namespace Shaffuru.GameLogic {
 		readonly MapPool mapPool;
 		readonly BeatmapLoader beatmapLoader;
 		readonly BeatmapSwitcher beatmapSwitcher;
-		readonly SongQueueManager songQueueManager;
+		readonly ISongQueueManager songQueueManager;
 		readonly UBinder<Plugin, System.Random> rngSource;
 
 		readonly AudioTimeSyncController audioTimeSyncController;
@@ -30,7 +30,7 @@ namespace Shaffuru.GameLogic {
 			MapPool mapPool,
 			BeatmapLoader beatmapLoader,
 			BeatmapSwitcher beatmapSwitcher,
-			SongQueueManager songQueueManager,
+			ISongQueueManager songQueueManager,
 			AudioTimeSyncController audioTimeSyncController,
 			PauseMenuManager.InitData pauseMenuManager_InitData,
 			PlayedSongList playedSongList,
@@ -44,13 +44,8 @@ namespace Shaffuru.GameLogic {
 			this.pauseMenuManager_InitData = pauseMenuManager_InitData;
 			this.playedSongList = playedSongList;
 			this.rngSource = rngSource;
-		}
 
-		public void Initialize() {
 			//songQueueManager.EnqueueSong("custom_level_F402008042EFACA4291A6633EBB6B562E4ADCD87", BeatmapDifficulty.ExpertPlus, 5, 5);
-			//songQueueManager.EnqueueSong("custom_level_64B81F99B76742B3C70EAC3BDA4230ED55E0D2AD", BeatmapDifficulty.Hard, 50, 4);
-			//songQueueManager.EnqueueSong("custom_level_D77B25882287CD6CDF4E6D784BBE607C3295F79A", BeatmapDifficulty.Hard, 30, 5.5f);
-			//songQueueManager.EnqueueSong("custom_level_9F783CE7F810062852795F4CBDF8335245FD044A", BeatmapDifficulty.ExpertPlus, 137);
 		}
 
 		public float switchToNextBeatmapAt = 1.3f;

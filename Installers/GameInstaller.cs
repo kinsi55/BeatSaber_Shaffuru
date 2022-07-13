@@ -1,4 +1,5 @@
-﻿using Shaffuru.GameLogic;
+﻿using Shaffuru.AppLogic;
+using Shaffuru.GameLogic;
 using Shaffuru.MenuLogic;
 using Zenject;
 
@@ -8,18 +9,24 @@ namespace Shaffuru.Installers {
 			var setupData = Container.Resolve<GameplayCoreSceneSetupData>();
 
 			Plugin.isShaffuruActive = false;
-			if(setupData.difficultyBeatmap.level.levelID != Anlasser.LevelId)
+			if(setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
 				return;
 
+			TheStuff();
+
+			Container.BindInterfacesAndSelfTo<IntroPlayer>().AsSingle().NonLazy();
+		}
+
+		public void TheStuff() {
 			Plugin.isShaffuruActive = true;
 
 			Container.BindInterfacesAndSelfTo<BeatmapLoader>().AsSingle();
 			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();
-			Container.BindInterfacesAndSelfTo<QueueProcessor>().AsSingle();
+			Container.BindInterfacesAndSelfTo<QueueProcessor>().AsSingle().NonLazy();
 
-			Container.BindInterfacesAndSelfTo<IntroPlayer>().AsSingle().NonLazy();
+			var mapPool = Container.Resolve<MapPool>();
 
-			if(Config.Instance.songFilteringConfig.allowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null)
+			if(mapPool.currentFilterConfig.allowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null)
 				EnableME();
 		}
 

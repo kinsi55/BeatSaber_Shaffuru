@@ -120,8 +120,8 @@ namespace Shaffuru.MenuLogic.UI {
 			startLevelButton.interactable = playable > 0;
 
 			if(playable > 0) {
-				// We cannot require 2 songs to be played if the is only one..
-				SongQueueManager.requeueBlockList.SetSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
+				// We cannot require 2 songs to be played if there is only one..
+				songQueueManager.SetRequeueBlockListSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
 			}
 		}
 
