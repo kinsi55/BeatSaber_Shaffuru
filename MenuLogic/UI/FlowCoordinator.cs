@@ -22,8 +22,6 @@ namespace Shaffuru.MenuLogic.UI {
 				SetTitle("Shaffuru Setup");
 				showBackButton = true;
 
-				gameplaySetupViewController.Setup(true, true, true, false, PlayerSettingsPanelController.PlayerSettingsPanelLayout.Singleplayer);
-
 				anlasser.finishedOrFailedCallback += ShowResultView;
 
 				ProvideInitialViewControllers(ui, gameplaySetupViewController);
@@ -88,13 +86,15 @@ namespace Shaffuru.MenuLogic.UI {
 
 		public void Initialize() {
 			if(instance == null)
-				MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", ShowSetupView, true));
+				MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", () => {
+					gameplaySetupViewController.Setup(true, true, true, false, PlayerSettingsPanelController.PlayerSettingsPanelLayout.Singleplayer);
+					ShowSetupView();
+				}, true));
 			instance = this;
 		}
 
 		static FlowCoordinator _parentFlow;
-		public void ShowSetupView() => ShowSetupView(null);
-		public void ShowSetupView(Action playButtonHandler) {
+		public void ShowSetupView(Action playButtonHandler = null) {
 			if(instance == null)
 				return;
 
