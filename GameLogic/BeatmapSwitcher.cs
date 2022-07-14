@@ -52,6 +52,7 @@ namespace Shaffuru.GameLogic {
 		public BeatmapSwitcher(
 			GameplayCoreSceneSetupData _sceneSetupData,
 			BeatmapObjectSpawnController.InitData BeatmapObjectSpawnController_InitData,
+			AudioTimeSyncController.InitData AudioTimeSyncController_initData,
 			IJumpOffsetYProvider jumpOffsetYProvider,
 			IReadonlyBeatmapData readonlyBeatmapData,
 			BeatmapObjectSpawnController beatmapObjectSpawnController,
@@ -69,9 +70,10 @@ namespace Shaffuru.GameLogic {
 			this.audioTimeSyncControllerWrapper = audioTimeSyncControllerWrapper;
 			this.gameEnergyCounter = gameEnergyCounter;
 
-			customAudioSource = new CustomSyncedAudioSource(this.audioTimeSyncControllerWrapper);
-			// The audio effect when you play, need to apply that onto our custom audio source
-			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController)).SetAudioSource(customAudioSource.source);
+			customAudioSource = new CustomSyncedAudioSource(audioTimeSyncControllerWrapper);
+			customAudioSource.SetFailEffect((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController));
+			// This is only set in the Start() method ._.
+			customAudioSource.source.pitch = AudioTimeSyncController_initData.timeScale;
 
 			beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
 
@@ -80,7 +82,6 @@ namespace Shaffuru.GameLogic {
 
 			// We dont need that to play
 			audioTimeSyncControllerWrapper.audioSource.mute = true;
-			Plugin.Log.Debug("BeatmapSwitcher Created");
 		}
 
 		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset) {
@@ -277,17 +278,20 @@ namespace Shaffuru.GameLogic {
 
 	class CustomSyncedAudioSource {
 		public AudioSource source { get; private set; }
+		public AudioPitchGainEffect failEffect { get; private set; }
 		float audioLatency = 0f;
 
 		public CustomSyncedAudioSource(AudioTimeSyncControllerWrapper controller) {
 			// Easiest way to keep same Volume etc
-			var x = GameObject.Instantiate(controller.audioTimeSyncController, controller.audioTimeSyncController.transform);
+			var x = GameObject.Instantiate(controller.audioTimeSyncController);
+
+			x.name = "FINDME";
 
 			foreach(var l in x.gameObject.GetComponents<MonoBehaviour>())
 				if(l.name != "AudioSource")
 					GameObject.Destroy(l);
 
-			foreach(var child in x.transform.Cast<Transform>())
+			foreach(Transform child in x.transform)
 				GameObject.Destroy(child.gameObject);
 
 			source = x.GetComponent<AudioSource>();
@@ -310,6 +314,11 @@ namespace Shaffuru.GameLogic {
 				source.Play();
 				//Console.WriteLine("{0} {1}", source.isPlaying, source.clip.length);
 			}
+		}
+
+		internal void SetFailEffect(AudioPitchGainEffect audioPitchGainEffect) {
+			failEffect = audioPitchGainEffect;
+			audioPitchGainEffect.SetAudioSource(source);
 		}
 	}
 }
