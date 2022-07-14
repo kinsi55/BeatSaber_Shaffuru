@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using BeatSaberMarkupLanguage;
 using IPA;
 using Shaffuru.AppLogic;
@@ -6,6 +7,7 @@ using SiraUtil.Zenject;
 using UnityEngine;
 using IPALogger = IPA.Logging.Logger;
 
+[assembly: InternalsVisibleTo("Shaffuru.Multiplayer", AllInternalsVisible = true)]
 namespace Shaffuru {
 	[Plugin(RuntimeOptions.SingleStartInit)]
 	public class Plugin {
@@ -30,6 +32,11 @@ namespace Shaffuru {
 			var sp = Sprite.Create(Tex2D, new Rect(0, 0, Tex2D.width, Tex2D.height), Vector2.zero, 100);
 
 			SongCore.Collections.AddSeperateSongFolder("Shaffuru Downloads", SongDownloaderJob.ShaffuruDownloadPath, SongCore.Data.FolderLevelPack.NewPack, sp);
+		}
+
+		[OnExit]
+		public void OnExit() {
+			Config.Instance?.Save();
 		}
 	}
 }

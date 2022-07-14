@@ -15,7 +15,6 @@ namespace Shaffuru.MenuLogic.UI {
 		[Inject] readonly GameplaySetupViewController gameplaySetupViewController = null;
 		[Inject] readonly PlayedSongList playedSongList = null;
 		[Inject] readonly Anlasser anlasser = null;
-		[Inject] readonly Config config = null;
 
 		protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) {
 			if(firstActivation) {
@@ -48,8 +47,8 @@ namespace Shaffuru.MenuLogic.UI {
 			levelSearchViewController?.ResetCurrentFilterParams();
 			levelFilteringNavigationController.UpdateCustomSongs();
 
-			if(levelFilteringNavigationController.selectedLevelCategory.ToString() != nameof(LevelCategory.All))
-				levelFilteringNavigationController.UpdateSecondChildControllerContent((LevelCategory)Enum.Parse(typeof(LevelCategory), nameof(LevelCategory.All)));
+			if(levelFilteringNavigationController.selectedLevelCategory != LevelCategory.All)
+				levelFilteringNavigationController.UpdateSecondChildControllerContent(LevelCategory.All);
 
 			yield return new WaitForEndOfFrame();
 			// Reset again here. This is kind of a duct-tape fix for an edge-case of better song list
@@ -65,8 +64,14 @@ namespace Shaffuru.MenuLogic.UI {
 
 		protected override void BackButtonWasPressed(ViewController topViewController) {
 			_parentFlow.DismissFlowCoordinator(this);
-			
-			config.Save();
+		}
+
+		public static void Close(bool immediately, Action finishedCallback) {
+			if(_parentFlow == null)
+				return;
+
+			_parentFlow.DismissFlowCoordinator(instance, finishedCallback, immediately: immediately);
+			_parentFlow = null;
 		}
 
 		// HAHABALLS
