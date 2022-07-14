@@ -5,8 +5,8 @@ using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class IntroPlayer : IInitializable {
-		QueueProcessor queueProcessor;
-		BeatmapSwitcher beatmapSwitcher;
+		readonly QueueProcessor queueProcessor;
+		readonly BeatmapSwitcher beatmapSwitcher;
 
 		static bool didPlayThisSession = false;
 		public IntroPlayer(QueueProcessor queueProcessor, BeatmapSwitcher beatmapSwitcher) {

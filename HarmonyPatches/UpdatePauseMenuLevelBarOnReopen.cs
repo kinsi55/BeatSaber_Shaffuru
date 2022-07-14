@@ -1,13 +1,10 @@
 ﻿using HarmonyLib;
+using SiraUtil.Affinity;
 
 namespace Shaffuru.HarmonyPatches {
-	[HarmonyPatch(typeof(PauseMenuManager), nameof(PauseMenuManager.ShowMenu))]
-	static class UpdatePauseMenuLevelBarOnReopen {
-		static void Postfix(PauseMenuManager __instance) {
-			if(!Plugin.isShaffuruActive)
-				return;
-
-			__instance.Start();
-		}
+	class UpdatePauseMenuLevelBarOnReopen : IAffinity {
+		[AffinityPatch(typeof(PauseMenuManager), nameof(PauseMenuManager.ShowMenu))]
+		[AffinityPostfix]
+		void Postfix(PauseMenuManager __instance) => __instance.Start();
 	}
 }

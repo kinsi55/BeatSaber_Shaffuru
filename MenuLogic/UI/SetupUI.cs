@@ -20,8 +20,8 @@ namespace Shaffuru.MenuLogic.UI {
 	[HotReload(RelativePathToLayout = @"Views/setup.bsml")]
 	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.setup.bsml")]
 	class SetupUI : BSMLAutomaticViewController {
-		Config config => Config.Instance;
-		SongFilteringConfig songFilterConfig => Config.Instance.songFilteringConfig;
+		static Config config => Config.Instance;
+		static SongFilteringConfig songFilterConfig => Config.Instance.songFilteringConfig;
 
 		[Inject] readonly MapPool mapPool = null;
 		[Inject] readonly SongQueueManager songQueueManager = null;

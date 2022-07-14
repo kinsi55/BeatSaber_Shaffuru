@@ -71,7 +71,7 @@ namespace Shaffuru.AppLogic {
 
 					var l = levels[rngSource.Value.Next(validLevels)];
 
-					x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff(), -1, -1, null);
+					x = new ShaffuruSong(l.level.levelID, l.GetRandomValidDiff());
 				}
 			} else {
 				lock(queue)

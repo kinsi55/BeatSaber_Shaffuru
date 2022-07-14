@@ -14,7 +14,7 @@ namespace Shaffuru.Util {
 		}
 
 		public static string GetHashOfLevelid(string levelid) {
-			if(levelid[12] != '_') // custom_level_<hash, 40 chars>
+			if(levelid.Length < 53 || levelid[12] != '_') // custom_level_<hash, 40 chars>
 				return null;
 
 			return levelid.Substring(13, 40);

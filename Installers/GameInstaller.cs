@@ -1,5 +1,6 @@
 ﻿using Shaffuru.AppLogic;
 using Shaffuru.GameLogic;
+using Shaffuru.HarmonyPatches;
 using Shaffuru.MenuLogic;
 using Zenject;
 
@@ -8,21 +9,24 @@ namespace Shaffuru.Installers {
 		public override void InstallBindings() {
 			var setupData = Container.Resolve<GameplayCoreSceneSetupData>();
 
-			Plugin.isShaffuruActive = false;
 			if(!setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
 				return;
 
 			TheStuff();
 
-			Container.BindInterfacesAndSelfTo<IntroPlayer>().AsSingle().NonLazy();
+			Container.BindInterfacesTo<UpdatePauseMenuLevelBarOnReopen>().AsSingle();
+			Container.BindInterfacesTo<IntroPlayer>().AsSingle().NonLazy();
 		}
 
 		public void TheStuff() {
-			Plugin.isShaffuruActive = true;
+			Container.BindInterfacesTo<HeckOffCutSoundsCrash>().AsSingle();
+
+			Container.BindInterfacesAndSelfTo<AudioTimeSyncControllerWrapper>().AsSingle();
 
 			Container.BindInterfacesAndSelfTo<BeatmapLoader>().AsSingle();
 			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();
 			Container.BindInterfacesAndSelfTo<QueueProcessor>().AsSingle().NonLazy();
+			Container.BindInterfacesTo<BeatmapObjectDissolver>().AsSingle().NonLazy();
 
 			var mapPool = Container.Resolve<MapPool>();
 

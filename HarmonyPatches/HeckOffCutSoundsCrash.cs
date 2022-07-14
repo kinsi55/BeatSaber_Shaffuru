@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using SiraUtil.Affinity;
 
 namespace Shaffuru.HarmonyPatches {
-	[HarmonyPatch(typeof(NoteCutSoundEffectManager))]
-	static class HeckOffCutSoundsCrash {
+	class HeckOffCutSoundsCrash : IAffinity {
 		public static bool enablePatch = false;
 
-		[HarmonyPatch(nameof(NoteCutSoundEffectManager.HandleNoteWasSpawned))]
-		[HarmonyPatch(nameof(NoteCutSoundEffectManager.HandleNoteWasCut))]
-		static bool Prefix() => !enablePatch;
+		[AffinityPatch(typeof(NoteCutSoundEffectManager), nameof(NoteCutSoundEffectManager.HandleNoteWasSpawned))]
+		[AffinityPatch(typeof(NoteCutSoundEffectManager), nameof(NoteCutSoundEffectManager.HandleNoteWasCut))]
+		[AffinityPrefix]
+		bool Prefix() => !enablePatch;
 	}
 }

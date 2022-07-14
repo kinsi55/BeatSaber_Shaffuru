@@ -44,18 +44,20 @@ namespace Shaffuru.MenuLogic.UI {
 			readonly ShaffuruSong song;
 			internal IPreviewBeatmapLevel preview { get; private set; }
 
-			readonly string songName = "";
-			readonly string playTime = "";
-			readonly string diffAndSource = "";
+			readonly string songName;
+			readonly string playTime;
+			readonly string diffAndSource;
 
 
-			public SongListSong(ShaffuruSong song) {
+			public SongListSong(ShaffuruSong song, float v) {
 				this.song = song;
+
+				var sts = TimeSpan.FromSeconds((float)v);
 
 				preview = BeatmapLoader.GetPreviewBeatmapFromLevelId(song.levelId);
 
 				songName = preview?.songName ?? "Unknown song";
-				playTime = string.Format(@" {0:mm\:ss} - {1:mm\:ss}", TimeSpan.FromSeconds(song.startTime), TimeSpan.FromSeconds(song.startTime + song.length));
+				playTime = string.Format(@" {0:00}:{1:00}", sts.TotalMinutes, sts.Seconds);
 
 				if(song.source == null) {
 					diffAndSource = $"{(BeatmapDifficulty)song.diffIndex} (Randomly picked)";
@@ -112,7 +114,8 @@ namespace Shaffuru.MenuLogic.UI {
 
 
 			void SpawnTable() {
-				songList.data = playedSongList.list.Select(x => new SongListSong(x)).ToList<object>();
+				float accu = 0;
+				songList.data = playedSongList.list.Select(x => new SongListSong(x, accu += (float)x.length)).ToList<object>();
 				songList.tableView.ReloadData();
 
 				songList.tableView.SelectCellWithIdx(0, true);

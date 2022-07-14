@@ -58,7 +58,7 @@ namespace Shaffuru.AppLogic {
 				}
 
 				var diff = -1;
-				var startTime = -1;
+				float? startTime = null;
 				string hash = null;
 				string levelId = null;
 				var song = SongDetailsCache.Structs.Song.none;
@@ -176,7 +176,7 @@ namespace Shaffuru.AppLogic {
 						levelId,
 						diff,
 						startTime,
-						-1,
+						null,
 						sender
 					));
 

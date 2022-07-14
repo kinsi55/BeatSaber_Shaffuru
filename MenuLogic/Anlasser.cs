@@ -2,6 +2,7 @@
 using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
 using UnityEngine;
+using Zenject;
 
 namespace Shaffuru.MenuLogic {
 	class Anlasser {
@@ -25,7 +26,7 @@ namespace Shaffuru.MenuLogic {
 		public Anlasser(
 			PlayerDataModel playerDataModel,
 			CustomLevelLoader customLevelLoader,
-			MenuTransitionsHelper menuTransitionsHelper,
+			[InjectOptional] MenuTransitionsHelper menuTransitionsHelper,
 			BeatmapCharacteristicCollectionSO beatmapCharacteristicCollectionSO,
 			UBinder<Plugin, System.Random> rng
 		) {

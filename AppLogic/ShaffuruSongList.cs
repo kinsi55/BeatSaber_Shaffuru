@@ -10,13 +10,13 @@ namespace Shaffuru.AppLogic {
 		[ProtoMember(2)]
 		public int diffIndex { get; protected set; } = -1;
 		[ProtoMember(3)]
-		public float startTime { get; protected set; }
+		public float? startTime { get; protected set; } = null;
 		[ProtoMember(4)]
-		public float length { get; protected set; }
+		public float? length { get; protected set; } = null;
 		[ProtoMember(5)]
-		public string source { get; protected set; }
+		public string source { get; protected set; } = null;
 
-		public ShaffuruSong(string levelId, int diffIndex, float startTime = -1, float length = -1, string source = null) {
+		public ShaffuruSong(string levelId, int diffIndex, float? startTime = null, float? length = null, string source = null) {
 			this.levelId = levelId;
 			this.diffIndex = diffIndex;
 			this.startTime = startTime;
@@ -24,7 +24,7 @@ namespace Shaffuru.AppLogic {
 			this.source = source;
 		}
 
-		public ShaffuruSong(string levelId, BeatmapDifficulty diff, float startTime = -1, float length = -1, string source = null) :
+		public ShaffuruSong(string levelId, BeatmapDifficulty diff, float? startTime = null, float? length = null, string source = null) :
 			this(levelId, (int)diff, startTime, length, source) { }
 	}
 
