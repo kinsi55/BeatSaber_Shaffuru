@@ -17,7 +17,9 @@ namespace Shaffuru.GameLogic {
 		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_callbacksInTimes = AccessTools.Field(typeof(BeatmapCallbacksController), "_callbacksInTimes");
 
 		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect = AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
-		static readonly FieldInfo FIELD_CallbacksInTime_callbacks = AccessTools.Field(typeof(CallbacksInTime), "_callbacks");
+
+		static readonly IPA.Utilities.FieldAccessor<CallbacksInTime, Dictionary<Type, List<BeatmapDataCallbackWrapper>>>.Accessor FIELD_CallbacksInTime_callbacks
+			= IPA.Utilities.FieldAccessor<CallbacksInTime, Dictionary<Type, List<BeatmapDataCallbackWrapper>>>.GetAccessor("_callbacks");
 
 
 		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), nameof(GameEnergyCounter.noFail));
@@ -101,21 +103,21 @@ namespace Shaffuru.GameLogic {
 			beatmapCallbacksController.TriggerBeatmapEvent(new BPMChangeBeatmapEventData(0, bpm));
 		}
 
-		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float insertBeatmapUntilTime = 0) {
+		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
 			SharedCoroutineStarter.instance.StartCoroutine(NoSpawnZone());
 
 			IEnumerator NoSpawnZone() {
 				FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, true);
 				HeckOffCutSoundsCrash.enablePatch = true;
 
-				yield return Switcher(difficultyBeatmap, replacementBeatmapData, startTime, insertBeatmapUntilTime);
+				yield return Switcher(difficultyBeatmap, replacementBeatmapData, startTime, secondsToInsert);
 
 				HeckOffCutSoundsCrash.enablePatch = false;
 				FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, false);
 			}
 		}
 
-		IEnumerator Switcher(IDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float insertBeatmapUntilTime = 0) {
+		IEnumerator Switcher(IDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
 			var reactionTime = Config.Instance.transition_reactionTime;
 			var dissolveTime = reactionTime * 0.6f;
 
@@ -160,7 +162,7 @@ namespace Shaffuru.GameLogic {
 				var relativeSongTime = x.time - startTime;
 
 				// If we are past the time which we want to add / replace in, break
-				if(insertBeatmapUntilTime > 0 && relativeSongTime > insertBeatmapUntilTime + 1)
+				if(secondsToInsert > 0 && relativeSongTime > secondsToInsert + 1)
 					break;
 
 				// If the current nodes (start) is in the past...
@@ -223,7 +225,7 @@ namespace Shaffuru.GameLogic {
 				var aheadTime = v.aheadTime;
 				// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
 				if(x.Key == startBeatmapCallbackAheadTime) {
-					var cbs = (Dictionary<Type, List<BeatmapDataCallbackWrapper>>)FIELD_CallbacksInTime_callbacks.GetValue(v);
+					var cbs = FIELD_CallbacksInTime_callbacks(ref v);
 					aheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
 					foreach(var cbl in cbs.Values) {
 						cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = aheadTime; });

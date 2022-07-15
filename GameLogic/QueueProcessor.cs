@@ -161,7 +161,8 @@ namespace Shaffuru.GameLogic {
 
 			var playedSong = new ShaffuruSong(song.levelId, outDiff.difficulty, startTime, length, song.source);
 
-			beatmapSwitcher.SwitchToDifferentBeatmap(outDiff, outBeatmap, startTime, length);
+			// Length + 0.5 for cases where loading the map takes a bit longer for some reason
+			beatmapSwitcher.SwitchToDifferentBeatmap(outDiff, outBeatmap, startTime, length + 0.5f);
 
 			playedSongList.Add(playedSong);
 

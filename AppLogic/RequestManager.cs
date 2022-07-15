@@ -18,6 +18,8 @@ namespace Shaffuru.AppLogic {
 			this.mapPool = mapPool;
 
 			this.chatSource = chatSource;
+
+			SetHandler();
 		}
 
 		public void Initialize() {
@@ -32,16 +34,26 @@ namespace Shaffuru.AppLogic {
 			chatSource.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 		}
 
-		void Msg(string message, object channel) => chatSource.SendChatMessage($"! {message}", channel);
+		public void Msg(string message, string sender, object channel) => chatSource.SendChatMessage($"! @{sender} {message}", channel);
 
-		static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+		public static Regex diffTimePattern = new Regex(@"(?<diff>Easy|Normal|Hard|Expert|ExpertPlus)?\s*((?<timeM>[0-9]{1,2}):(?<timeS>[0-5]?[0-9])|$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+		Action<string, string, object> chatHandler;
 
 		private void Twitch_OnTextMessageReceived(string sender, string message, object channel) {
 			if(!Config.Instance.chat_request_enabled || (!message.StartsWith("!chaos", StringComparison.OrdinalIgnoreCase) && !message.StartsWith("!sr", StringComparison.OrdinalIgnoreCase)))
 				return;
 
+			chatHandler(sender, message, channel);
+		}
+
+		public void SetHandler(Action<string, string, object> handler = null) {
+			chatHandler = handler ?? OnTextMessageReceived;
+		}
+
+		private void OnTextMessageReceived(string sender, string message, object channel) {
 			if(mapPool.filteredLevels == null || SongDetailsUtil.instance == null) {
-				Msg($"@{sender} Shaffuru is not initialized", channel);
+				Msg(sender, "Shaffuru is not initialized", channel);
 				return;
 			}
 
@@ -53,7 +65,7 @@ namespace Shaffuru.AppLogic {
 					return;
 
 				if(songQueueManager.IsFull()) {
-					Msg($"@{sender} The queue is full", channel);
+					Msg(sender, "The queue is full", channel);
 					return;
 				}
 
@@ -64,7 +76,7 @@ namespace Shaffuru.AppLogic {
 				var song = SongDetailsCache.Structs.Song.none;
 
 				// https://github.com/kinsi55/BeatSaber_SongDetails/commit/7c85cee7849794c8670ef960bc6a583ba9c68e9c 💀
-				var key = split[1].ToLower();
+				var key = split[1].ToLowerInvariant();
 				if(key.Length < 10) {
 					try {
 						if(SongDetailsUtil.instance.songs.FindByMapId(key, out song)) {
@@ -77,18 +89,18 @@ namespace Shaffuru.AppLogic {
 				bool mapNeedsDownload = false;
 
 				if(hash == null) {
-					Msg($"@{sender} Unknown map ID", channel);
+					Msg(sender, "Unknown map ID", channel);
 
 					return;
 				} else if(!mapPool.LevelHashRequestable(hash)) {
 					if(SongCore.Collections.hashForLevelID(levelId) != string.Empty || mapPool.isFilteredByPlaylist) {
-						Msg($"@{sender} The map does not match the configured filters", channel);
+						Msg(sender, "The map does not match the configured filters", channel);
 						return;
 					} else if(!Config.Instance.request_allowDownloading) {
-						Msg($"@{sender} The map is not downloaded", channel);
+						Msg(sender, "The map is not downloaded", channel);
 						return;
 					} else if(SongDownloaderJob.downloadingMaps.Contains(song.mapId)) {
-						Msg($"@{sender} The map is currently being downloaded", channel);
+						Msg(sender, "The map is currently being downloaded", channel);
 						return;
 					} else {
 						mapNeedsDownload = true;
@@ -97,24 +109,24 @@ namespace Shaffuru.AppLogic {
 
 
 				if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
-					Msg($"@{sender} You already have {Config.Instance.request_limitPerUser} maps in the queue", channel);
+					Msg(sender, $"You already have {Config.Instance.request_limitPerUser} maps in the queue", channel);
 
 				} else if(songQueueManager.Contains(x => MapUtil.GetHashOfLevelid(x.levelId) == hash)) {
-					Msg($"@{sender} The map is already in the queue", channel);
+					Msg(sender, "The map is already in the queue", channel);
 
 				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory(levelId)) {
-					Msg($"@{sender} The map has already been played recently", channel);
+					Msg(sender, "The map has already been played recently", channel);
 
 				} else {
 					var theKeyAndPossiblyMapName = !Config.Instance.chat_request_show_name ? split[1] : $"{split[1]} - {song.songName}";
 
 					if(mapNeedsDownload) {
 						if(!mapPool.SongdetailsFilterCheck(song, out var _)) {
-							Msg($"@{sender} The map doesn't match the configured filters", channel);
+							Msg(sender, "The map doesn't match the configured filters", channel);
 							return;
 						}
 
-						Msg($"@{sender} {theKeyAndPossiblyMapName} will be downloaded and queued when done", channel);
+						Msg(sender, $"{theKeyAndPossiblyMapName} will be downloaded and queued when done", channel);
 
 						var dl = new SongDownloaderJob(song.mapId).Schedule();
 
@@ -124,7 +136,7 @@ namespace Shaffuru.AppLogic {
 						dl.Complete();
 
 						if(!mapPool.LevelHashRequestable(hash)) {
-							Msg($"@{sender} Map download failed", channel);
+							Msg(sender, $"Map download failed", channel);
 
 							return;
 						}
@@ -137,10 +149,10 @@ namespace Shaffuru.AppLogic {
 
 						if(split.Length >= 4) {
 							if(!m.Groups["timeM"].Success) {
-								Msg($"@{sender} Invalid time (Ex: 2:33)", channel);
+								Msg(sender, $"Invalid time (Ex: 2:33)", channel);
 								return;
 							} else if(!m.Groups["diff"].Success) {
-								Msg($"@{sender} Invalid difficulty (Ex: 'hard' or 'ExpertPlus')", channel);
+								Msg(sender, $"Invalid difficulty (Ex: 'hard' or 'ExpertPlus')", channel);
 								return;
 							}
 						}
@@ -151,7 +163,7 @@ namespace Shaffuru.AppLogic {
 							Enum.TryParse<BeatmapDifficulty>(m.Groups["diff"].Value, true, out var requestedDiff)
 						) {
 							if(!theMappe.IsDiffValid(requestedDiff)) {
-								Msg($"@{sender} The {requestedDiff} difficulty doesn't match the configured filters", channel);
+								Msg(sender, $"The {requestedDiff} difficulty doesn't match the configured filters", channel);
 								return;
 							}
 
@@ -182,9 +194,9 @@ namespace Shaffuru.AppLogic {
 
 					if(queued) {
 						if(!mapNeedsDownload)
-							Msg($"@{sender} Queued {theKeyAndPossiblyMapName} ({(BeatmapDifficulty)diff})", channel);
+							Msg(sender, $"Queued {theKeyAndPossiblyMapName} ({(BeatmapDifficulty)diff})", channel);
 					} else {
-						Msg($"@{sender} Couldn't queue {split[1]} (Unknown error)", channel);
+						Msg(sender, $"Couldn't queue {split[1]} (Unknown error)", channel);
 					}
 				}
 			});
