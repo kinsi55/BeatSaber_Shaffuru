@@ -74,49 +74,9 @@ namespace Shaffuru.AppLogic {
 
 		public void Dispose() => Clear();
 
-		// Wrapping this to prevent missing symbol stuff if no bsplaylistlib
-		static class TheJ {
-			public static ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> GetAllSongsInSelectedPlaylist() {
-				// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
-				var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
-					.GetAllPlaylists(true)
-					.FirstOrDefault(x => x.packName == Config.Instance.filter_playlist);
-
-				IEnumerable<IGrouping<IPreviewBeatmapLevel, BeatSaberPlaylistsLib.Types.PlaylistSong>> theThing = null;
-
-				if(x is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist l) {
-					theThing = l.BeatmapLevels.Cast<BeatSaberPlaylistsLib.Types.PlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
-				} else if(x is BeatSaberPlaylistsLib.Blist.BlistPlaylist bl) {
-					theThing = bl.BeatmapLevels.Cast<BeatSaberPlaylistsLib.Blist.BlistPlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
-				} else {
-					return null;
-				}
-
-				var playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
-
-				foreach(var xy in theThing) {
-					if(!Config.Instance.filter_playlist_onlyHighlighted) {
-						playlistSongs.Add(xy.First().PreviewBeatmapLevel, null);
-						continue;
-					}
-
-					var highlightedDiffs = xy.Where(x => x.Difficulties != null)
-						.SelectMany(x => x.Difficulties)
-						.Select(x => x.BeatmapDifficulty)
-						.Distinct().ToArray();
-
-					playlistSongs.Add(
-						xy.First().PreviewBeatmapLevel,
-
-						highlightedDiffs.Length == 0 ? null : highlightedDiffs
-					);
-				}
-
-				return playlistSongs;
-			}
-		}
 
 		int minSongLength = 0;
+		public static bool supportsMappingExtensions => IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 		bool allowMappingExtensions = false;
 
 		ValidSong LevelFilterCheck(IPreviewBeatmapLevel level, ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null, bool forceNoFilters = false) {
@@ -129,7 +89,7 @@ namespace Shaffuru.AppLogic {
 				return default;
 
 			var songHash = MapUtil.GetHashOfPreview(level);
-			Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData> mappedExtraData = null;
+			Dictionary<BeatmapDifficulty, SongCore.Data.ExtraSongData.DifficultyData> mappedExtraData = null;
 
 			if(songHash != null) {
 				var extraData = SongCore.Collections.RetrieveExtraSongData(songHash);
@@ -137,13 +97,14 @@ namespace Shaffuru.AppLogic {
 				if(extraData?._difficulties == null)
 					return default;
 
-				mappedExtraData = new Dictionary<string, SongCore.Data.ExtraSongData.DifficultyData>();
-
 				foreach(var x in extraData._difficulties) {
-					var k = $"{x._beatmapCharacteristicName}_{x._difficulty}";
+					// We are only allowing Standard characteristic below - So we might as well only collect extradata for those
+					if(x._beatmapCharacteristicName != Anlasser.standardCharacteristic.serializedName)
+						continue;
 
-					if(!mappedExtraData.ContainsKey(k))
-						mappedExtraData[k] = x;
+					mappedExtraData ??= new Dictionary<BeatmapDifficulty, SongCore.Data.ExtraSongData.DifficultyData>();
+
+					mappedExtraData[x._difficulty] = x;
 				}
 			}
 
@@ -173,11 +134,13 @@ namespace Shaffuru.AppLogic {
 
 					// mappedExtraData will be null for OST
 					if(mappedExtraData != null) {
-						if(!mappedExtraData.TryGetValue($"{beatmapSet.beatmapCharacteristic.serializedName}_{beatmapDiff}", out var extradata))
+						if(!mappedExtraData.TryGetValue(beatmapDiff, out var extradata))
 							continue;
 
+						var r = extradata.additionalDifficultyData._requirements;
+
 						// I have a feeling any requirements in the map would be BAAAD
-						if(extradata.additionalDifficultyData._requirements.Any(x => !allowMappingExtensions || x != "Mapping Extensions"))
+						if(r.Length != 0 && (!allowMappingExtensions || Array.Exists(r, x => x != "Mapping Extensions")))
 							continue;
 					}
 
@@ -192,6 +155,8 @@ namespace Shaffuru.AppLogic {
 			return default;
 		}
 
+
+		ValidSong __SongdetailsFilterCheckVS = new ValidSong();
 		/// <param name="fullCheck">Can be used to disable some checks that would be redundant when called from LevelFilterCheck</param>
 		public bool SongdetailsFilterCheck(in SongDetailsCache.Structs.Song song, out int validDiffs, bool fullCheck = true) {
 			validDiffs = 0;
@@ -211,7 +176,7 @@ namespace Shaffuru.AppLogic {
 				return true;
 			}
 
-			var v = new ValidSong();
+			__SongdetailsFilterCheckVS.validDiffs = 0;
 
 			for(var i = (int)song.diffOffset + song.diffCount; --i >= song.diffOffset;) {
 				ref var diff = ref SongDetailsUtil.instance.difficulties[i];
@@ -235,14 +200,14 @@ namespace Shaffuru.AppLogic {
 					if(!currentFilterConfig.allowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
 						continue;
 
-					if((diff.mods & SongDetailsCache.Structs.MapMods.NoodleExtensions) != 0)
+					if((diff.mods & (SongDetailsCache.Structs.MapMods.NoodleExtensions | SongDetailsCache.Structs.MapMods.Chroma)) != 0)
 						continue;
 				}
 
-				v.SetDiffValid((BeatmapDifficulty)diff.difficulty);
+				__SongdetailsFilterCheckVS.SetDiffValid((BeatmapDifficulty)diff.difficulty);
 			}
 
-			validDiffs = v.validDiffs;
+			validDiffs = __SongdetailsFilterCheckVS.validDiffs;
 			return validDiffs != 0;
 		}
 
@@ -291,10 +256,10 @@ namespace Shaffuru.AppLogic {
 			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
 			if(!forceNoFilters && IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
-				playlistSongs = TheJ.GetAllSongsInSelectedPlaylist();
+				playlistSongs = PlaylistsUtil.GetAllSongsInPlaylist(Config.Instance.filter_playlist);
 
 			isFilteredByPlaylist = playlistSongs != null;
-			allowMappingExtensions = (forceNoFilters || currentFilterConfig.allowME) && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
+			allowMappingExtensions = (forceNoFilters || currentFilterConfig.allowME) && supportsMappingExtensions;
 
 			var newFilteredLevels = new List<ValidSong>();
 
