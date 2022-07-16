@@ -10,7 +10,7 @@
         "SongCore": "^3.9.0",
         "SiraUtil": "^3.0.0-rc1",
         "BeatSaberMarkupLanguage": "^1.5.11",
-        "SongDetailsCache": "^1.1.8"
+        "SongDetailsCache": "^1.1.9"
     },
     "loadAfter": [
         "SongCore",
