@@ -25,6 +25,8 @@ namespace Shaffuru.AppLogic {
 			downloadingMaps.Add(beatsaverId);
 		}
 
+		static readonly char[] InvalidPathChars = Path.GetInvalidFileNameChars();
+
 		static readonly MethodInfo SongCore_LoadSongAndAddToDictionaries = IPA.Loader.PluginManager.GetPluginFromId("SongCore")?
 			.Assembly.GetType("SongCore.Loader")?
 			.GetMethod("LoadSongAndAddToDictionaries", BindingFlags.NonPublic | BindingFlags.Instance);
@@ -36,7 +38,7 @@ namespace Shaffuru.AppLogic {
 					return;
 
 				var downloadUrl = $"https://r2cdn.beatsaver.com/{song.hash.ToLowerInvariant()}.zip";
-				var folderName = string.Concat($"{song.key} ({song.songName} - {song.levelAuthorName})".Split(Path.GetInvalidFileNameChars())).Trim();
+				var folderName = string.Concat($"{song.key} ({song.songName} - {song.levelAuthorName})".Split(InvalidPathChars)).Trim();
 
 				using(var m = DownloadMap(downloadUrl)) {
 					if(m == null)
@@ -89,7 +91,7 @@ namespace Shaffuru.AppLogic {
 			try {
 				var longestFileNameLength = 0;
 
-				using(var zipStream = new MemoryStream(dlh.data)) {
+				using(var zipStream = new MemoryStream(dlh.data, false)) {
 					// BetterSongSearch 🙏
 					using(var archive = new ZipArchive(zipStream, ZipArchiveMode.Read)) {
 						foreach(var entry in archive.Entries) {
