@@ -107,11 +107,11 @@ namespace Shaffuru.AppLogic {
 								var file = new NativeArray<byte>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
 								var x = new UnmanagedMemoryStream((byte*)NativeArrayUnsafeUtility.GetUnsafePtr(file), len, len, FileAccess.ReadWrite);
 
+								files.Add(entry.Name, (file, x));
+
 								str.CopyTo(x);
 
 								x.Position = 0;
-
-								files.Add(entry.Name, (file, x));
 
 								if(entry.Name.Length > longestFileNameLength)
 									longestFileNameLength = entry.Name.Length;
