@@ -197,7 +197,7 @@ namespace Shaffuru.AppLogic {
 				}
 
 				if(fullCheck) {
-					if(!currentFilterConfig.allowME && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
+					if(!allowMappingExtensions && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
 						continue;
 
 					if((diff.mods & (SongDetailsCache.Structs.MapMods.NoodleExtensions | SongDetailsCache.Structs.MapMods.Chroma)) != 0)
@@ -236,12 +236,10 @@ namespace Shaffuru.AppLogic {
 		}
 
 		public void SetFilterConfig(SongFilteringConfig config = null) {
-			currentFilterConfig = config;
+			currentFilterConfig = config ?? Config.Instance.songFilteringConfig;
 		}
 
 		public async Task ProcessBeatmapPool(bool forceNoFilters = false) {
-			currentFilterConfig ??= Config.Instance.songFilteringConfig;
-
 			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(currentFilterConfig.minSeconds, Config.Instance.jumpcut_minSeconds) : currentFilterConfig.minSeconds;
 
 			var maps = beatmapLevelsModel
@@ -272,7 +270,7 @@ namespace Shaffuru.AppLogic {
 					newFilteredLevels.Add(mapCheck);
 			}
 
-			this.filteredLevels = newFilteredLevels.ToList();
+			this.filteredLevels = newFilteredLevels;
 
 			var requestableLevels = new Dictionary<string, int>();
 

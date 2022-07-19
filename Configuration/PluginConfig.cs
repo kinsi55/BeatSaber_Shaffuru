@@ -24,6 +24,10 @@ namespace Shaffuru {
 		[ProtoMember(8)] public int advanced_bpm_min = 0;
 		[ProtoMember(9)] public bool advanced_only_ranked = false;
 		[ProtoMember(10)] public int advanced_uploadDate_min = 0;
+
+		public SongFilteringConfig Copy() {
+			return (SongFilteringConfig)MemberwiseClone();
+		}
 	}
 
 	class Config {

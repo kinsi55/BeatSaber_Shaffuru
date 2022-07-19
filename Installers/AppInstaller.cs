@@ -13,7 +13,7 @@ namespace Shaffuru.Installers {
 			Container.Bind<PlayedSongList>().FromInstance(new PlayedSongList()).AsSingle();
 
 			Container.BindInterfacesAndSelfTo<MapPool>().AsSingle();
-			Container.BindInterfacesAndSelfTo<SongQueueManager>().AsSingle();
+			Container.Bind<SongQueue>().AsSingle();
 
 			if(IPA.Loader.PluginManager.GetPluginFromId("CatCore") != null) {
 				Container.BindInterfacesAndSelfTo<CatCoreSource>().AsSingle();

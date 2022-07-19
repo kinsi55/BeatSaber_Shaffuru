@@ -8,13 +8,13 @@ using Zenject;
 
 namespace Shaffuru.AppLogic {
 	class RequestManager : IInitializable, IDisposable {
-		readonly SongQueueManager songQueueManager;
+		readonly SongQueue songQueue;
 
 		readonly MapPool mapPool;
 		readonly IChatMessageSource chatSource;
 
-		public RequestManager(SongQueueManager songQueueManager, MapPool mapPool, IChatMessageSource chatSource) {
-			this.songQueueManager = songQueueManager;
+		public RequestManager(SongQueue songQueue, MapPool mapPool, IChatMessageSource chatSource) {
+			this.songQueue = songQueue;
 			this.mapPool = mapPool;
 
 			this.chatSource = chatSource;
@@ -78,14 +78,13 @@ namespace Shaffuru.AppLogic {
 			}
 
 			Task.Run(() => {
-				if(songQueueManager.IsFull()) {
+				if(songQueue.IsFull()) {
 					sendResponse("The queue is full");
 					return;
 				}
 
 				var song = SongDetailsCache.Structs.Song.none;
 
-				// https://github.com/kinsi55/BeatSaber_SongDetails/commit/7c85cee7849794c8670ef960bc6a583ba9c68e9c 💀
 				var key = split[1].ToLowerInvariant();
 				if(key.Length > 10 || !SongDetailsUtil.instance.songs.FindByMapId(key, out song)) {
 					sendResponse("Unknown map ID");
@@ -115,13 +114,13 @@ namespace Shaffuru.AppLogic {
 					}
 				}
 
-				if(songQueueManager.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
+				if(songQueue.Count(x => x.source == sender) >= Config.Instance.request_limitPerUser) {
 					sendResponse($"You already have {Config.Instance.request_limitPerUser} maps in the queue");
 
-				} else if(songQueueManager.Contains(x => MapUtil.GetHashOfLevelid(x.levelId) == hash)) {
+				} else if(songQueue.Contains(x => MapUtil.GetHashOfLevelid(x.levelId) == hash)) {
 					sendResponse("The map is already in the queue");
 
-				} else if(Config.Instance.queue_requeueLimit > 0 && songQueueManager.IsInHistory(levelId)) {
+				} else if(Config.Instance.queue_requeueLimit > 0 && songQueue.IsInHistory(levelId)) {
 					sendResponse("The map has already been played recently");
 
 				} else {
@@ -194,7 +193,7 @@ namespace Shaffuru.AppLogic {
 					if(diff == -1)
 						diff = (int)theMappe.GetRandomValidDiff();
 
-					var queued = songQueueManager.EnqueueSong(new ShaffuruSong(
+					var queued = songQueue.EnqueueSong(new ShaffuruSong(
 						levelId,
 						diff,
 						startTime,

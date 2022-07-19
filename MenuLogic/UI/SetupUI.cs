@@ -24,7 +24,7 @@ namespace Shaffuru.MenuLogic.UI {
 		static SongFilteringConfig songFilterConfig => Config.Instance.songFilteringConfig;
 
 		[Inject] readonly MapPool mapPool = null;
-		[Inject] readonly SongQueueManager songQueueManager = null;
+		[Inject] readonly SongQueue songQueue = null;
 		[Inject] readonly RequestManager requestManager = null;
 		[Inject] readonly Anlasser anlasser = null;
 		[Inject] readonly PlayedSongList playedSongList = null;
@@ -85,7 +85,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 		[UIAction("ClearQueue")]
 		void ClearQueue() {
-			songQueueManager.Clear();
+			songQueue.Clear();
 		}
 
 		[UIComponent("label_songCount")] readonly TextMeshProUGUI filteredSongsLabel = null;
@@ -123,7 +123,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 			if(playable > 0) {
 				// We cannot require 2 songs to be played if there is only one..
-				songQueueManager.SetRequeueBlockListSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
+				songQueue.SetRequeueBlockListSize(Math.Min(playable - 1, Config.Instance.queue_requeueLimit));
 			}
 		}
 

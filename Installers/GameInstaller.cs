@@ -12,6 +12,8 @@ namespace Shaffuru.Installers {
 			if(!setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
 				return;
 
+			Container.BindInterfacesAndSelfTo<SongQueueManager>().AsSingle();
+
 			TheStuff();
 
 			Container.BindInterfacesTo<UpdatePauseMenuLevelBarOnReopen>().AsSingle();
