@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
 using Shaffuru.AppLogic;
+using Shaffuru.MenuLogic;
 using Shaffuru.Util;
 using SiraUtil.Zenject;
 using UnityEngine;
@@ -102,7 +103,7 @@ namespace Shaffuru.GameLogic {
 				}
 
 				foreach(var d in loadedBeatmap.beatmapLevel.beatmapLevelData.difficultyBeatmapSets) {
-					if(d.beatmapCharacteristic.serializedName != "Standard")
+					if(d.beatmapCharacteristic != Anlasser.standardCharacteristic)
 						continue;
 
 					foreach(var diff in d.difficultyBeatmaps) {

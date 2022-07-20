@@ -32,14 +32,12 @@ namespace Shaffuru.Util {
 				}
 
 				var highlightedDiffs = xy.Where(x => x.Difficulties != null)
-					.SelectMany(x => x.Difficulties)
-					.Select(x => x.BeatmapDifficulty)
-					.Distinct().ToArray();
+					.SelectMany(x => x.Difficulties);
 
 				playlistSongs.Add(
 					xy.First().PreviewBeatmapLevel,
 
-					highlightedDiffs.Length == 0 ? null : highlightedDiffs
+					!highlightedDiffs.Any() ? null : highlightedDiffs.Select(x => x.BeatmapDifficulty).Distinct().ToArray()
 				);
 			}
 
