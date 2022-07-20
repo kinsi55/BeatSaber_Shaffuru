@@ -106,7 +106,7 @@ namespace Shaffuru.AppLogic {
 								continue;
 								
 							using(var str = entry.Open()) {
-								var file = new NativeArray<byte>(len, Allocator.TempJob, NativeArrayOptions.UninitializedMemory);
+								var file = new NativeArray<byte>(len, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
 								var x = new UnmanagedMemoryStream((byte*)NativeArrayUnsafeUtility.GetUnsafePtr(file), len, len, FileAccess.ReadWrite);
 
 								files.Add(entry.Name, (file, x));
