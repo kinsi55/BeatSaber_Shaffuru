@@ -42,6 +42,9 @@ namespace Shaffuru.MenuLogic {
 		public event Action<LevelCompletionResults> finishedOrFailedCallback;
 
 
+		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelData, AudioClip>.Accessor BeatmapLevelData_audioClip =
+			IPA.Utilities.FieldAccessor<BeatmapLevelData, AudioClip>.GetAccessor("_audioClip");
+
 		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelSO, AudioClip>.Accessor BeatmapLevelSO_audioClip =
 			IPA.Utilities.FieldAccessor<BeatmapLevelSO, AudioClip>.GetAccessor("_audioClip");
 
@@ -67,6 +70,8 @@ namespace Shaffuru.MenuLogic {
 				var audioClip = AudioClip.Create("", lengthSeconds * 1000, 1, 1000, false);
 
 				BeatmapLevelSO_audioClip(ref beatmapLevel) = audioClip;
+				if(beatmapLevel.beatmapLevelData is BeatmapLevelData b)
+					BeatmapLevelData_audioClip(ref b) = audioClip;
 				lastShaffuruMapLength = lengthSeconds;
 			}
 
