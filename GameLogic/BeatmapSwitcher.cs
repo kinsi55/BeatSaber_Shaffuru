@@ -48,7 +48,7 @@ namespace Shaffuru.GameLogic {
 
 		readonly BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
 
-		readonly RamCleaner ramCleaner = new RamCleaner();
+		readonly RamCleaner ramCleaner;
 		internal CustomSyncedAudioSource customAudioSource { get; private set; }
 
 		public BeatmapSwitcher(
@@ -61,7 +61,8 @@ namespace Shaffuru.GameLogic {
 			BeatmapCallbacksController beatmapCallbacksController,
 			AudioTimeSyncControllerWrapper audioTimeSyncControllerWrapper,
 			GameEnergyCounter gameEnergyCounter,
-			GameSongController gameSongController
+			GameSongController gameSongController,
+			RamCleaner ramCleaner
 		) {
 			this._sceneSetupData = _sceneSetupData;
 			this.BeatmapObjectSpawnController_InitData = BeatmapObjectSpawnController_InitData;
@@ -71,6 +72,7 @@ namespace Shaffuru.GameLogic {
 			this.beatmapCallbacksController = beatmapCallbacksController;
 			this.audioTimeSyncControllerWrapper = audioTimeSyncControllerWrapper;
 			this.gameEnergyCounter = gameEnergyCounter;
+			this.ramCleaner = ramCleaner;
 
 			customAudioSource = new CustomSyncedAudioSource(audioTimeSyncControllerWrapper);
 			customAudioSource.SetFailEffect((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController));

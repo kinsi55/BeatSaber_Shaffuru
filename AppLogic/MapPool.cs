@@ -49,6 +49,7 @@ namespace Shaffuru.AppLogic {
 			}
 
 			public bool IsDiffValid(BeatmapDifficulty diff) => (validDiffs & (1 << (int)diff)) != 0;
+			public static bool IsDiffValid(int validDiffsMask, BeatmapDifficulty diff) => (validDiffsMask & (1 << (int)diff)) != 0;
 
 			public void SetDiffValid(BeatmapDifficulty diff) {
 				validDiffs |= (1 << (int)diff);

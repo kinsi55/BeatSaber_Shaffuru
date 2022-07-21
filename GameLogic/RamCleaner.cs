@@ -5,6 +5,8 @@ using UnityEngine;
 
 namespace Shaffuru.GameLogic {
 	class RamCleaner {
+		public static readonly RamCleaner instance = new RamCleaner();
+
 		static int cleanSkips = 0;
 
 		const string clearingText = "Clearing RAM so your PC\ndoesn't explode <color=#FC5>😁</color>\n\nLag right now is normal <color=#FC5>👍</color>\n";
@@ -30,6 +32,10 @@ namespace Shaffuru.GameLogic {
 		public bool TrySkip() {
 			// TODO: Maybe in addition to requiring at least N maps to have been played, check if free system memory is actually low
 			return cleanSkips++ < Config.Instance.ramclearer_frequency * 2;
+		}
+
+		internal static void AddWeight(int weight) {
+			cleanSkips += weight;
 		}
 
 		public IEnumerator ClearRam() {

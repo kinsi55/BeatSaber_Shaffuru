@@ -1,5 +1,6 @@
 ﻿using System;
 using Shaffuru.AppLogic;
+using Shaffuru.GameLogic;
 using Shaffuru.Util;
 using SiraUtil.Zenject;
 using Zenject;
@@ -10,6 +11,7 @@ namespace Shaffuru.Installers {
 			Container.BindInstance(new UBinder<Plugin, Random>(new Random())).AsSingle();
 			Container.Bind<Config>().FromInstance(Config.Instance ??= new Config()).AsSingle();
 
+			Container.Bind<RamCleaner>().FromInstance(RamCleaner.instance).AsSingle();
 			Container.Bind<PlayedSongList>().FromInstance(new PlayedSongList()).AsSingle();
 
 			Container.BindInterfacesAndSelfTo<MapPool>().AsSingle();
