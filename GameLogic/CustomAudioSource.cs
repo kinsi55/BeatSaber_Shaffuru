@@ -55,12 +55,10 @@ namespace Shaffuru.GameLogic {
 			source.clip = clip;
 		}
 
-		float last_audioTimeWrappersongTime = 0;
 		float lastSetTime = 0;
 		public void Play(float songStart = 0) {
 			if(source.clip != null) {
 				source.time = songStart + audioLatency;
-				last_audioTimeWrappersongTime = audioTimeWrapper.songTime;
 				lastSetTime = source.time - audioTimeWrapper.songTime;
 
 				source.Play();

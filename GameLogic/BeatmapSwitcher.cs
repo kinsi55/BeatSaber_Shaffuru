@@ -29,7 +29,7 @@ namespace Shaffuru.GameLogic {
 			= IPA.Utilities.FieldAccessor<SliderData, float>.GetAccessor($"<{nameof(SliderData.tailTime)}>k__BackingField");
 
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime 
-			= IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("aheadTime");
+			= IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor(nameof(BeatmapDataCallbackWrapper.aheadTime));
 
 		readonly GameplayCoreSceneSetupData sceneSetupData;
 
