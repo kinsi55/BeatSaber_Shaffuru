@@ -6,6 +6,7 @@ using System.Reflection;
 using HarmonyLib;
 using Shaffuru.HarmonyPatches;
 using UnityEngine;
+using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class BeatmapSwitcher : IDisposable {
@@ -30,9 +31,8 @@ namespace Shaffuru.GameLogic {
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime 
 			= IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor("aheadTime");
 
-		readonly GameplayCoreSceneSetupData _sceneSetupData;
+		readonly GameplayCoreSceneSetupData sceneSetupData;
 
-		readonly BeatmapObjectSpawnController.InitData BeatmapObjectSpawnController_InitData;
 		readonly float startBeatmapCallbackAheadTime;
 		readonly IJumpOffsetYProvider jumpOffsetYProvider;
 
@@ -51,40 +51,40 @@ namespace Shaffuru.GameLogic {
 		readonly RamCleaner ramCleaner;
 
 		public BeatmapSwitcher(
-			GameplayCoreSceneSetupData _sceneSetupData,
-			BeatmapObjectSpawnController.InitData BeatmapObjectSpawnController_InitData,
-			IJumpOffsetYProvider jumpOffsetYProvider,
-			IReadonlyBeatmapData readonlyBeatmapData,
-			BeatmapObjectSpawnController beatmapObjectSpawnController,
-			BeatmapCallbacksController beatmapCallbacksController,
-			AudioTimeWrapper audioTimeSyncControllerWrapper,
-			GameEnergyCounter gameEnergyCounter,
+			GameplayCoreSceneSetupData sceneSetupData,
+			[InjectOptional] IJumpOffsetYProvider jumpOffsetYProvider,
+			[InjectOptional] IReadonlyBeatmapData readonlyBeatmapData,
+			[InjectOptional] BeatmapObjectSpawnController beatmapObjectSpawnController,
+			[InjectOptional] BeatmapCallbacksController beatmapCallbacksController,
+			AudioTimeWrapper audioTimeWrapper,
+			[InjectOptional] GameEnergyCounter gameEnergyCounter,
 			CustomAudioSource customAudioSource,
-			GameSongController gameSongController,
 			RamCleaner ramCleaner
 		) {
-			this._sceneSetupData = _sceneSetupData;
-			this.BeatmapObjectSpawnController_InitData = BeatmapObjectSpawnController_InitData;
+			this.sceneSetupData = sceneSetupData;
 			this.jumpOffsetYProvider = jumpOffsetYProvider;
 			this.readonlyBeatmapData = readonlyBeatmapData;
 			this.beatmapObjectSpawnController = beatmapObjectSpawnController;
 			this.beatmapCallbacksController = beatmapCallbacksController;
-			this.audioTimeWrapper = audioTimeSyncControllerWrapper;
+			this.audioTimeWrapper = audioTimeWrapper;
 			this.customAudioSource = customAudioSource;
 			this.gameEnergyCounter = gameEnergyCounter;
 			this.ramCleaner = ramCleaner;
 
-			beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
+			if(beatmapCallbacksController != null)
+				beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
 
-			beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
-			startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
+			if(beatmapObjectSpawnController != null) {
+				beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
+				startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
+			}
 		}
 
-		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset) {
-			BeatmapObjectSpawnControllerHelpers.GetNoteJumpValues(_sceneSetupData.playerSpecificSettings, mapOffset, out var noteJumpValueType, out var noteJumpValue);
+		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset, int noteLinesCount) {
+			BeatmapObjectSpawnControllerHelpers.GetNoteJumpValues(sceneSetupData.playerSpecificSettings, mapOffset, out var noteJumpValueType, out var noteJumpValue);
 			beatmapObjectSpawnMovementData.Init(
-				// If this changes the game would probably explode
-				BeatmapObjectSpawnController_InitData.noteLinesCount,
+				// If this changes the game would probably explode - I dont think it does ever tho?
+				noteLinesCount,
 				njs,
 				bpm,
 				noteJumpValueType,
@@ -97,17 +97,22 @@ namespace Shaffuru.GameLogic {
 			beatmapCallbacksController.TriggerBeatmapEvent(new BPMChangeBeatmapEventData(0, bpm));
 		}
 
+		void SetSpawningEnabled(bool enable) {
+			if(beatmapObjectSpawnController != null)
+				FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, !enable);
+		}
+
 		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
 			SharedCoroutineStarter.instance.StartCoroutine(NoSpawnZone());
 
 			IEnumerator NoSpawnZone() {
-				FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, true);
+				SetSpawningEnabled(false);
 				HeckOffCutSoundsCrash.enablePatch = true;
 
 				yield return Switcher(difficultyBeatmap, replacementBeatmapData, startTime, secondsToInsert);
 
 				HeckOffCutSoundsCrash.enablePatch = false;
-				FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, false);
+				SetSpawningEnabled(true);
 			}
 		}
 
@@ -143,94 +148,106 @@ namespace Shaffuru.GameLogic {
 
 			var currentAudioTime = audioTimeWrapper.songTime;
 
-			LinkedListNode<BeatmapDataItem> prevNode = null;
 
-			// Find the newest node processed by any callback (biggest aheadTime)
-			foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
-				if(prevNode == null || prevNode.Value.time < x.Value.lastProcessedNode.Value.time)
-					prevNode = x.Value.lastProcessedNode.Next;
-			}
+			if(readonlyBeatmapData != null) {
+				LinkedListNode<BeatmapDataItem> prevNode = null;
 
-			foreach(var x in replacementBeatmapData.allBeatmapDataItems) {
-				var relativeSongTime = x.time - startTime;
-
-				// If we are past the time which we want to add / replace in, break
-				if(secondsToInsert > 0 && relativeSongTime > secondsToInsert + 1)
-					break;
-
-				// If the current nodes (start) is in the past...
-				if(relativeSongTime < 0) {
-					// Ignore it if its not a wall
-					if(x.type != BeatmapDataItem.BeatmapDataItemType.BeatmapObject || !(x is ObstacleData woll))
-						continue;
-
-					// If it is a wall, modify the start time and length so that its start is `reactionTime`ms in the future
-					var newLength = woll.duration + relativeSongTime - reactionTime;
-
-					if(newLength < 0)
-						continue;
-
-					woll.UpdateDuration(newLength);
-
-					relativeSongTime = reactionTime;
+				// Find the newest node processed by any callback (biggest aheadTime)
+				foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
+					if(prevNode == null || prevNode.Value.time < x.Value.lastProcessedNode.Value.time)
+						prevNode = x.Value.lastProcessedNode.Next;
 				}
 
-				// If its not an event, only insert new items that are at least reactionTime in the future
-				if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && relativeSongTime < reactionTime)
-					continue;
+				foreach(var x in replacementBeatmapData.allBeatmapDataItems) {
+					var relativeSongTime = x.time - startTime;
 
-				// Was there already a new / unused node we can overwrite to save on allocations?
-				if(prevNode != null) {
-					prevNode.Value = x;
-					// No :(
-				} else {
-					prevNode = readonlyBeatmapData.allBeatmapDataItems.AddLast(x);
-				}
-				prevNode = prevNode.Next;
+					// If we are past the time which we want to add / replace in, break
+					if(secondsToInsert > 0 && relativeSongTime > secondsToInsert + 1)
+						break;
 
-				// Change the nodes time to be at the right time in the modified context
-				var j = x;
-				var bmot = relativeSongTime + currentAudioTime;
+					// If the current nodes (start) is in the past...
+					if(relativeSongTime < 0) {
+						// Ignore it if its not a wall
+						if(x.type != BeatmapDataItem.BeatmapDataItemType.BeatmapObject || !(x is ObstacleData woll))
+							continue;
 
-				// Sliders and arcs have an end time that we need to correct also
-				if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && x is SliderData xSlider)
-					SETTER_SliderData_tailTime(ref xSlider) = bmot + xSlider.tailTime - x.time;
+						// If it is a wall, modify the start time and length so that its start is `reactionTime`ms in the future
+						var newLength = woll.duration + relativeSongTime - reactionTime;
 
-				SETTER_BeatmapDataItem_time(ref j) = bmot;
-			}
+						if(newLength < 0)
+							continue;
 
-			// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
-			for(; prevNode != null; prevNode = prevNode.Next) {
-				var iv = prevNode.Value;
-				SETTER_BeatmapDataItem_time(ref iv) = float.MaxValue;
-			}
+						woll.UpdateDuration(newLength);
 
-			// Update to the new maps stuffs
-			var njs = replacementDifficultyBeatmap.noteJumpMovementSpeed;
-			if(njs == 0)
-				njs = BeatmapDifficultyMethods.NoteJumpMovementSpeed(replacementDifficultyBeatmap.difficulty);
-
-			// This updates the spawnAheadTime amonguser things
-			UpdateBeatmapObjectSpawnControllerInitData(replacementDifficultyBeatmap.level.beatsPerMinute, njs, replacementDifficultyBeatmap.noteJumpStartBeatOffset);
-
-			foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
-				var v = x.Value;
-				var aheadTime = v.aheadTime;
-				// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
-				if(x.Key == startBeatmapCallbackAheadTime) {
-					var cbs = FIELD_CallbacksInTime_callbacks(ref v);
-					aheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
-					foreach(var cbl in cbs.Values) {
-						cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = aheadTime; });
+						relativeSongTime = reactionTime;
 					}
+
+					// If its not an event, only insert new items that are at least reactionTime in the future
+					if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && relativeSongTime < reactionTime)
+						continue;
+
+					// Was there already a new / unused node we can overwrite to save on allocations?
+					if(prevNode != null) {
+						prevNode.Value = x;
+						// No :(
+					} else {
+						prevNode = readonlyBeatmapData.allBeatmapDataItems.AddLast(x);
+					}
+					prevNode = prevNode.Next;
+
+					// Change the nodes time to be at the right time in the modified context
+					var j = x;
+					var bmot = relativeSongTime + currentAudioTime;
+
+					// Sliders and arcs have an end time that we need to correct also
+					if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && x is SliderData xSlider)
+						SETTER_SliderData_tailTime(ref xSlider) = bmot + xSlider.tailTime - x.time;
+
+					SETTER_BeatmapDataItem_time(ref j) = bmot;
 				}
 
-				while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time < currentAudioTime)
-					v.lastProcessedNode = v.lastProcessedNode.Next;
+				// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
+				for(; prevNode != null; prevNode = prevNode.Next) {
+					var iv = prevNode.Value;
+					SETTER_BeatmapDataItem_time(ref iv) = float.MaxValue;
+				}
 			}
 
-			// Allow stuff to spawn again before music switches
-			FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, false);
+			if(beatmapObjectSpawnController != null) {
+				// Update to the new maps stuffs
+				var njs = replacementDifficultyBeatmap.noteJumpMovementSpeed;
+				if(njs == 0)
+					njs = BeatmapDifficultyMethods.NoteJumpMovementSpeed(replacementDifficultyBeatmap.difficulty);
+
+				// This updates the spawnAheadTime amonguser things
+				UpdateBeatmapObjectSpawnControllerInitData(
+					replacementDifficultyBeatmap.level.beatsPerMinute,
+					njs,
+					replacementDifficultyBeatmap.noteJumpStartBeatOffset,
+					replacementBeatmapData.numberOfLines
+				);
+			}
+
+			if(beatmapCallbacksController != null) {
+				foreach(var x in beatmapObjectCallbackController_callbacksInTimes) {
+					var v = x.Value;
+					var aheadTime = v.aheadTime;
+					// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
+					if(x.Key == startBeatmapCallbackAheadTime) {
+						var cbs = FIELD_CallbacksInTime_callbacks(ref v);
+						aheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
+						foreach(var cbl in cbs.Values) {
+							cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = aheadTime; });
+						}
+					}
+
+					while(v.lastProcessedNode.Next != null && v.lastProcessedNode.Next.Value.time < currentAudioTime)
+						v.lastProcessedNode = v.lastProcessedNode.Next;
+				}
+			}
+
+			// Allow stuff to spawn again before music switches (Disabled previously in NoSpawnZone())
+			SetSpawningEnabled(true);
 
 
 			var timePre = audioTimeWrapper.songTime;
@@ -255,14 +272,16 @@ namespace Shaffuru.GameLogic {
 				if(audioTimeWrapper == null)
 					yield break;
 
-				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
+				if(gameEnergyCounter != null)
+					SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
 
 				yield return new WaitForSeconds(Config.Instance.transition_gracePeriod);
 
 				if(audioTimeWrapper == null)
 					yield break;
 
-				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
+				if(gameEnergyCounter != null)
+					SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
 			}
 		}
 
