@@ -16,8 +16,6 @@ namespace Shaffuru.GameLogic {
 
 		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_callbacksInTimes = AccessTools.Field(typeof(BeatmapCallbacksController), "_callbacksInTimes");
 
-		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect = AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
-
 		static readonly IPA.Utilities.FieldAccessor<CallbacksInTime, Dictionary<Type, List<BeatmapDataCallbackWrapper>>>.Accessor FIELD_CallbacksInTime_callbacks
 			= IPA.Utilities.FieldAccessor<CallbacksInTime, Dictionary<Type, List<BeatmapDataCallbackWrapper>>>.GetAccessor("_callbacks");
 
@@ -43,24 +41,25 @@ namespace Shaffuru.GameLogic {
 
 		readonly BeatmapCallbacksController beatmapCallbacksController;
 		readonly IReadOnlyDictionary<float, CallbacksInTime> beatmapObjectCallbackController_callbacksInTimes;
-		readonly AudioTimeSyncControllerWrapper audioTimeSyncControllerWrapper;
+		readonly AudioTimeWrapper audioTimeWrapper;
 		readonly GameEnergyCounter gameEnergyCounter;
+
+		public readonly CustomAudioSource customAudioSource;
 
 		readonly BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
 
 		readonly RamCleaner ramCleaner;
-		internal CustomSyncedAudioSource customAudioSource { get; private set; }
 
 		public BeatmapSwitcher(
 			GameplayCoreSceneSetupData _sceneSetupData,
 			BeatmapObjectSpawnController.InitData BeatmapObjectSpawnController_InitData,
-			AudioTimeSyncController.InitData AudioTimeSyncController_initData,
 			IJumpOffsetYProvider jumpOffsetYProvider,
 			IReadonlyBeatmapData readonlyBeatmapData,
 			BeatmapObjectSpawnController beatmapObjectSpawnController,
 			BeatmapCallbacksController beatmapCallbacksController,
-			AudioTimeSyncControllerWrapper audioTimeSyncControllerWrapper,
+			AudioTimeWrapper audioTimeSyncControllerWrapper,
 			GameEnergyCounter gameEnergyCounter,
+			CustomAudioSource customAudioSource,
 			GameSongController gameSongController,
 			RamCleaner ramCleaner
 		) {
@@ -70,22 +69,15 @@ namespace Shaffuru.GameLogic {
 			this.readonlyBeatmapData = readonlyBeatmapData;
 			this.beatmapObjectSpawnController = beatmapObjectSpawnController;
 			this.beatmapCallbacksController = beatmapCallbacksController;
-			this.audioTimeSyncControllerWrapper = audioTimeSyncControllerWrapper;
+			this.audioTimeWrapper = audioTimeSyncControllerWrapper;
+			this.customAudioSource = customAudioSource;
 			this.gameEnergyCounter = gameEnergyCounter;
 			this.ramCleaner = ramCleaner;
-
-			customAudioSource = new CustomSyncedAudioSource(audioTimeSyncControllerWrapper);
-			customAudioSource.SetFailEffect((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController));
-			// This is only set in the Start() method ._.
-			customAudioSource.source.pitch = AudioTimeSyncController_initData.timeScale;
 
 			beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
 
 			beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
 			startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
-
-			// We dont need that to play
-			audioTimeSyncControllerWrapper.audioSource.mute = true;
 		}
 
 		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset) {
@@ -125,13 +117,12 @@ namespace Shaffuru.GameLogic {
 
 			BeatmapObjectDissolver.DissolveAllAndEverything(dissolveTime);
 
-			if(!ramCleaner.TrySkip() && audioTimeSyncControllerWrapper.songLength - audioTimeSyncControllerWrapper.songTime >= 30f) {
+			if(!ramCleaner.TrySkip() && audioTimeWrapper.songLength - audioTimeWrapper.songTime >= 30f) {
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.8f);
-				var audioSource = audioTimeSyncControllerWrapper.audioSource;
+				
+				audioTimeWrapper.Pause();
 
-				audioSource.Pause();
-
-				customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
+				customAudioSource.SetClip(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.2f);
 				yield return ramCleaner.ClearRam();
@@ -140,17 +131,17 @@ namespace Shaffuru.GameLogic {
 				var s = Time.time;
 				for(var i = 0; i < 20; i++)
 					yield return null;
-				yield return new WaitUntil(() => audioTimeSyncControllerWrapper.audioTimeSyncController == null || Time.time - s >= 0.5f);
-				audioSource.UnPause();
+				yield return new WaitUntil(() => !audioTimeWrapper.isValid || Time.time - s >= 0.5f);
+				audioTimeWrapper.Resume();
 			} else {
 				// Force this to execute after Behaviour Update()'s so the TimeSyncController is up-to-date
 				yield return null;
 			}
 
-			if(audioTimeSyncControllerWrapper.audioTimeSyncController == null)
+			if(!audioTimeWrapper.isValid)
 				yield break;
 
-			var currentAudioTime = audioTimeSyncControllerWrapper.songTime;
+			var currentAudioTime = audioTimeWrapper.songTime;
 
 			LinkedListNode<BeatmapDataItem> prevNode = null;
 
@@ -242,33 +233,33 @@ namespace Shaffuru.GameLogic {
 			FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, false);
 
 
-			var timePre = audioTimeSyncControllerWrapper.songTime;
+			var timePre = audioTimeWrapper.songTime;
 			// Wait before swapping in the new audio until the new notes are a bit closer. Feels better
-			yield return new WaitUntil(() => audioTimeSyncControllerWrapper == null || audioTimeSyncControllerWrapper.songTime - timePre >= Math.Min(reactionTime * 0.5f, startTime));
+			yield return new WaitUntil(() => !audioTimeWrapper.isValid || audioTimeWrapper.songTime - timePre >= Math.Min(reactionTime * 0.5f, startTime));
 
-			if(audioTimeSyncControllerWrapper == null)
+			if(audioTimeWrapper == null)
 				yield break;
 
 			// New audio
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
-			customAudioSource.SetAudio(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
-			customAudioSource.Play(startTime + (audioTimeSyncControllerWrapper.songTime - timePre));
+			customAudioSource.SetClip(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
+			customAudioSource.Play(startTime + (audioTimeWrapper.songTime - timePre));
 
 			HeckOffCutSoundsCrash.enablePatch = false;
 
 			if(Config.Instance.transition_gracePeriod > 0) {
 				//TODO: Not sure if we need jump or move duration here, need to test
-				yield return new WaitUntil(() => audioTimeSyncControllerWrapper == null || audioTimeSyncControllerWrapper.songTime > timePre + reactionTime);
+				yield return new WaitUntil(() => audioTimeWrapper == null || audioTimeWrapper.songTime > timePre + reactionTime);
 
-				if(audioTimeSyncControllerWrapper == null)
+				if(audioTimeWrapper == null)
 					yield break;
 
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
 
 				yield return new WaitForSeconds(Config.Instance.transition_gracePeriod);
 
-				if(audioTimeSyncControllerWrapper == null)
+				if(audioTimeWrapper == null)
 					yield break;
 
 				SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
@@ -277,52 +268,6 @@ namespace Shaffuru.GameLogic {
 
 		public void Dispose() {
 			HeckOffCutSoundsCrash.enablePatch = false;
-		}
-	}
-
-	class CustomSyncedAudioSource {
-		public AudioSource source { get; private set; }
-		public AudioPitchGainEffect failEffect { get; private set; }
-		float audioLatency = 0f;
-
-		public CustomSyncedAudioSource(AudioTimeSyncControllerWrapper controller) {
-			// Easiest way to keep same Volume etc
-			var x = GameObject.Instantiate(controller.audioTimeSyncController);
-
-			x.name = "FINDME";
-
-			foreach(var l in x.gameObject.GetComponents<MonoBehaviour>())
-				if(l.name != "AudioSource")
-					GameObject.Destroy(l);
-
-			foreach(Transform child in x.transform)
-				GameObject.Destroy(child.gameObject);
-
-			source = x.GetComponent<AudioSource>();
-			this.audioLatency = controller.audioLatency;
-		}
-
-		public void SetAudio(AudioClip clip) {
-			if(source.clip == clip)
-				return;
-
-			source.Stop();
-			//source.clip?.UnloadAudioData();
-			source.time = 0f;
-			source.clip = clip;
-		}
-
-		public void Play(float songStart = 0) {
-			if(source.clip != null) {
-				source.time = songStart + audioLatency;
-				source.Play();
-				//Console.WriteLine("{0} {1}", source.isPlaying, source.clip.length);
-			}
-		}
-
-		internal void SetFailEffect(AudioPitchGainEffect audioPitchGainEffect) {
-			failEffect = audioPitchGainEffect;
-			audioPitchGainEffect.SetAudioSource(source);
 		}
 	}
 }

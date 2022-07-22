@@ -14,21 +14,31 @@ namespace Shaffuru.Installers {
 
 			Container.BindInterfacesAndSelfTo<SongQueueManager>().AsSingle();
 
-			TheStuff();
+			CoreInstaller();
+
+			Container.BindInterfacesTo<UnifiedATSC>().AsSingle().NonLazy();
+
+			IngameInstaller();
+
+			Container.BindInterfacesTo<BeatmapSwitchSubscriber>().AsSingle().WithArguments(0).NonLazy();
 
 			Container.BindInterfacesTo<UpdatePauseMenuLevelBarOnReopen>().AsSingle();
 			Container.BindInterfacesTo<IntroPlayer>().AsSingle().NonLazy();
 		}
 
-		public void TheStuff() {
+		public void IngameInstaller() {
+			Container.BindInterfacesTo<BeatmapObjectDissolver>().AsSingle().NonLazy();
+			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();
+		}
+
+		public void CoreInstaller() {
+			Container.BindInterfacesAndSelfTo<AudioTimeWrapper>().AsSingle();
+			Container.Bind<CustomAudioSource>().AsSingle();
 			Container.BindInterfacesTo<HeckOffCutSoundsCrash>().AsSingle();
 
-			Container.BindInterfacesAndSelfTo<AudioTimeSyncControllerWrapper>().AsSingle();
 
 			Container.BindInterfacesAndSelfTo<BeatmapLoader>().AsSingle();
-			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();
 			Container.BindInterfacesAndSelfTo<QueueProcessor>().AsSingle().NonLazy();
-			Container.BindInterfacesTo<BeatmapObjectDissolver>().AsSingle().NonLazy();
 
 			var mapPool = Container.Resolve<MapPool>();
 

@@ -27,7 +27,7 @@ namespace Shaffuru.GameLogic {
 				var bundle = AssetBundle.LoadFromStream(stream);
 
 				var triangle = bundle.LoadAsset<AudioClip>("triangle");
-				beatmapSwitcher.customAudioSource.SetAudio(triangle);
+				beatmapSwitcher.customAudioSource.SetClip(triangle);
 
 				queueProcessor.switchToNextBeatmapAt += triangle.length;
 				bundle.Unload(false);
