@@ -132,7 +132,6 @@ namespace Shaffuru.MenuLogic {
 				false,
 				null,
 				(a, b) => {
-					// TODO: Handle other cases in some way maybe? Some end stats screen?
 					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
 						Start(lengthSeconds);
 						return;
