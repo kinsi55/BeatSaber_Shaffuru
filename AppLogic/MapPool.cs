@@ -81,8 +81,13 @@ namespace Shaffuru.AppLogic {
 		bool allowMappingExtensions = false;
 
 		ValidSong LevelFilterCheck(IPreviewBeatmapLevel level, ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null, bool forceNoFilters = false) {
-			if(!forceNoFilters && level.songDuration - level.songTimeOffset < minSongLength)
-				return default;
+			if(!forceNoFilters) {
+				if(level.songDuration - level.songTimeOffset < minSongLength)
+					return default;
+
+				if(currentFilterConfig.enableAdvancedFilters && level.beatsPerMinute < currentFilterConfig.advanced_bpm_min)
+					return default;
+			}
 
 			BeatmapDifficulty[] playlistDiffs = null;
 
@@ -156,8 +161,6 @@ namespace Shaffuru.AppLogic {
 			return default;
 		}
 
-
-		ValidSong __SongdetailsFilterCheckVS = new ValidSong();
 		/// <param name="fullCheck">Can be used to disable some checks that would be redundant when called from LevelFilterCheck</param>
 		public bool SongdetailsFilterCheck(in SongDetailsCache.Structs.Song song, out int validDiffs, bool fullCheck = true) {
 			validDiffs = 0;
@@ -166,7 +169,7 @@ namespace Shaffuru.AppLogic {
 				return false;
 
 			if(currentFilterConfig.enableAdvancedFilters) {
-				if(song.bpm < currentFilterConfig.advanced_bpm_min)
+				if(fullCheck && song.bpm < currentFilterConfig.advanced_bpm_min)
 					return false;
 
 				if(currentFilterConfig.advanced_uploadDate_min > 0 &&
@@ -177,7 +180,7 @@ namespace Shaffuru.AppLogic {
 				return true;
 			}
 
-			__SongdetailsFilterCheckVS.validDiffs = 0;
+			var __SongdetailsFilterCheckVS = new ValidSong();
 
 			for(var i = (int)song.diffOffset + song.diffCount; --i >= song.diffOffset;) {
 				ref var diff = ref SongDetailsUtil.instance.difficulties[i];
@@ -254,7 +257,10 @@ namespace Shaffuru.AppLogic {
 
 			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
-			if(!forceNoFilters && IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null)
+			if(!forceNoFilters &&
+				Config.Instance.filter_playlist != Config.filter_playlist_default && 
+				IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null
+			)
 				playlistSongs = PlaylistsUtil.GetAllSongsInPlaylist(Config.Instance.filter_playlist);
 
 			isFilteredByPlaylist = playlistSongs != null;

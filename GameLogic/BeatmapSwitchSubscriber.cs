@@ -26,16 +26,14 @@ namespace Shaffuru.GameLogic {
 		}
 
 		private void QueueProcessor_switchedToNewSong(ShaffuruSong song, IDifficultyBeatmap beatmap, IReadonlyBeatmapData beatmapData) {
-			void cont() {
-				beatmapSwitcher.SwitchToDifferentBeatmap(beatmap, beatmapData, (float)song.startTime, (float)song.length);
-			}
+			void cont() => beatmapSwitcher.SwitchToDifferentBeatmap(beatmap, beatmapData, (float)song.startTime, (float)song.length);
 
 			if(delayMs == 0) {
 				cont();
 				return;
 			}
 
-			Task.Delay(delayMs).ContinueWith(_ => cont(), CancellationToken.None, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
+			Task.Delay(delayMs).ContinueWith(_ => cont(), TaskContinuationOptions.None);
 		}
 	}
 }

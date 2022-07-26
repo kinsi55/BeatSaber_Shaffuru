@@ -58,7 +58,8 @@ namespace Shaffuru {
 
 		public SongFilteringConfig songFilteringConfig = new SongFilteringConfig();
 
-		public string filter_playlist = "None (All Songs)";
+		public const string filter_playlist_default = "None (All Songs)";
+		public string filter_playlist = filter_playlist_default;
 		public bool filter_playlist_onlyHighlighted = true;
 
 		public bool jumpcut_enabled = false;

@@ -90,6 +90,10 @@ namespace Shaffuru.GameLogic {
 				}
 
 				try {
+					/*
+					 * TODO: Maybe in the future go through the pain that would be manually loading just the specific
+					 * difficulty that we need in a less memory demanding fashion than basegame
+					 */
 					loadedBeatmap = await beatmapLoader.LoadBeatmap(song.levelId);
 
 					if(loadedBeatmap.isError)

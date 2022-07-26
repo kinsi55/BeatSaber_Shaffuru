@@ -57,7 +57,7 @@ namespace Shaffuru.MenuLogic.UI {
 			if(!rebuild)
 				return;
 
-			playlists = new List<object>() { "None (All Songs)" };
+			playlists = new List<object>() { Config.filter_playlist_default };
 
 			if(hasLib)
 				Task.Run(LoadPlaylistsList);
