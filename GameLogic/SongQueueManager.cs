@@ -11,7 +11,7 @@ namespace Shaffuru.GameLogic {
 	class SongQueueManager : ISongQueueManager {
 		[Inject] protected readonly SongQueue songQueue;
 		[Inject] protected readonly UBinder<Plugin, System.Random> rngSource;
-		[Inject] readonly MapPool mapPool;
+		[Inject] readonly MapPool mapPool = null;
 
 		public virtual bool EnqueueSong(ShaffuruSong queuedSong) {
 			return songQueue.EnqueueSong(queuedSong);
