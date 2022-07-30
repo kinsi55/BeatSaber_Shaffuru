@@ -254,6 +254,11 @@ namespace Shaffuru.AppLogic {
 			if(!forceNoFilters)
 				maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minSongLength);
 
+			/*
+			 * Not completely sure if this is necessary. This is trying to always have the levelids of levels which
+			 * are not duplicates first, because then the duplicates get ignored
+			 */
+			maps = maps.OrderBy(x => x.levelID.Length);
 
 			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
 
@@ -267,30 +272,41 @@ namespace Shaffuru.AppLogic {
 			allowMappingExtensions = (forceNoFilters || currentFilterConfig.allowME) && supportsMappingExtensions;
 
 			var newFilteredLevels = new List<ValidSong>();
+			var newFilteredUnknownHashes = new HashSet<string>();
+			var newRequestableLevels = new Dictionary<string, int>();
 
 			await SongDetailsUtil.Init();
 
 			foreach(var map in maps) {
+				// Prevent duplicate songs
+				var mapHash = MapUtil.GetHashOfLevelid(map.levelID);
+
+				if(mapHash != null) {
+					if(newFilteredUnknownHashes.Contains(mapHash))
+						continue;
+
+					newFilteredUnknownHashes.Add(mapHash);
+				}
+
+				// Check if this song matches
 				var mapCheck = LevelFilterCheck(map, playlistSongs, forceNoFilters);
 
-				if(mapCheck.validDiffs != 0)
-					newFilteredLevels.Add(mapCheck);
-			}
+				if(mapCheck.validDiffs == 0)
+					continue;
 
-			this.filteredLevels = newFilteredLevels;
+				// Add it to the filtered levels
+				newFilteredLevels.Add(mapCheck);
 
-			var requestableLevels = new Dictionary<string, int>();
-
-			for(var i = 0; i < filteredLevels.Count; i++) {
-				var mapHash = MapUtil.GetHashOfPreview(filteredLevels[i].level);
-
+				// Check if the song exists on beatsaver too
 				if(mapHash == null || !SongDetailsUtil.instance.songs.FindByHash(mapHash, out var song))
 					continue;
 
-				requestableLevels[mapHash] = i;
+				// Make it requestable
+				newRequestableLevels[mapHash] = newFilteredLevels.Count - 1;
 			}
 
-			this.requestableLevels = requestableLevels;
+			this.filteredLevels = newFilteredLevels;
+			this.requestableLevels = newRequestableLevels;
 		}
 	}
 }
