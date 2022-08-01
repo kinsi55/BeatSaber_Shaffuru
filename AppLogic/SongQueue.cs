@@ -50,7 +50,7 @@ namespace Shaffuru.AppLogic {
 				s = _queue.Dequeue();
 
 			if(addToRequeueBlocklist && s != null)
-				_requeueBlockList.Add(MapUtil.GetLevelIdWithoutUniquenessAddition(s.levelId));
+				AddToHistory(s.levelId);
 
 			return s;
 		}
@@ -60,6 +60,7 @@ namespace Shaffuru.AppLogic {
 		public int Count(Func<ShaffuruSong, bool> action) => _queue.Count(action);
 		public bool Contains(Func<ShaffuruSong, bool> action) => _queue.Any(action);
 		public bool IsInHistory(string levelId) => _requeueBlockList.Contains(MapUtil.GetLevelIdWithoutUniquenessAddition(levelId)) == true;
+		public void AddToHistory(string levelId) => _requeueBlockList.Add(MapUtil.GetLevelIdWithoutUniquenessAddition(levelId));
 		public bool IsEmpty() => _queue.Count == 0;
 
 		public bool IsFull() => _queue.Count >= Config.Instance.queue_sizeLimit;

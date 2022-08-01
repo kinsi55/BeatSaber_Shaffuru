@@ -25,7 +25,7 @@ namespace Shaffuru.GameLogic {
 				var validLevels = 0;
 
 				foreach(var fl in mapPool.filteredLevels) {
-					if(songQueue.requeueBlockList.Contains(fl.level.levelID))
+					if(songQueue.IsInHistory(fl.level.levelID))
 						continue;
 
 					levels[validLevels++] = fl;
@@ -54,7 +54,7 @@ namespace Shaffuru.GameLogic {
 				x = songQueue.DequeueSong(false);
 			}
 
-			songQueue.requeueBlockList.Add(MapUtil.GetLevelIdWithoutUniquenessAddition(x.levelId));
+			songQueue.AddToHistory(x.levelId);
 
 			return x;
 		}
