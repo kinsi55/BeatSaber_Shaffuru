@@ -22,7 +22,7 @@ namespace Shaffuru.Util {
 		public int Count => _list.Count;
 
 		public void Add(T value) {
-			if(_list.Count == maximumCount && _list.Count > 0)
+			if(_list.Count >= maximumCount && _list.Count > 0)
 				_list.TryPop(out var _);
 			_list.Push(value);
 		}
