@@ -111,7 +111,12 @@ namespace Shaffuru {
 
 		public void Load() {
 			if(File.Exists(configPath)) {
-				JsonConvert.PopulateObject(File.ReadAllText(configPath), this, leanDeserializeSettings);
+				try {
+					JsonConvert.PopulateObject(File.ReadAllText(configPath), this, leanDeserializeSettings);
+				} catch (Exception ex) {
+					Plugin.Log.Error("Failed to load Config - Resetting to default:");
+					Plugin.Log.Error(ex);
+				}
 
 				songFilteringConfig ??= new SongFilteringConfig();
 
