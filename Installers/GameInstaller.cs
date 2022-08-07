@@ -43,7 +43,7 @@ namespace Shaffuru.Installers {
 
 			var mapPool = Container.Resolve<MapPool>();
 
-			if(mapPool.currentFilterConfig.allowME && IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null)
+			if(mapPool.currentFilterConfig.allowME && MapPool.supportsMappingExtensions)
 				EnableME();
 		}
 
