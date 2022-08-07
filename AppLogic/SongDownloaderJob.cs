@@ -61,7 +61,7 @@ namespace Shaffuru.AppLogic {
 				}
 			} finally {
 				downloadingMaps.Remove(beatsaverId);
-				RamCleaner.AddWeight(2);
+				RamCleaner.AddWeight(1);
 			}
 		}
 
