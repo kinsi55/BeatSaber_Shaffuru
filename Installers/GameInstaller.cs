@@ -27,6 +27,7 @@ namespace Shaffuru.Installers {
 		}
 
 		public void IngameInstaller() {
+			Container.BindInterfacesTo<ReassignBasegameFailEffectToCustomAudioSource>().AsSingle().NonLazy();
 			Container.BindInterfacesTo<BeatmapObjectDissolver>().AsSingle().NonLazy();
 			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();
 		}
