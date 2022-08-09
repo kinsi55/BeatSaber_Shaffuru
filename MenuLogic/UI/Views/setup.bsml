@@ -1,6 +1,6 @@
 ﻿<vertical child-control-height='false' child-expand-height='false' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<tab-selector tab-tag='tabs' id='tabSelector'/>
-	<vertical vertical-fit="PreferredSize" preferred-height="62" pad-bottom="2">
+	<vertical vertical-fit="PreferredSize" preferred-height="62" pad-bottom="2" pad-top="8">
 		<tab tags='tabs' tab-name='Song Filtering'>
 			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 				<macro.as-host host='songFilterConfig'>
@@ -19,41 +19,42 @@
 						hover-hint='Should Mapping Extensions maps be playable? This should be obvious but... This only has a function if you have it installed'
 					/>
 				</macro.as-host>
+				<horizontal pad-top='5'/>
+				<dropdown-list-setting id='dropdown_playlist' value='filter_playlist' choices='playlists' text='Playlist' apply-on-change='true'/>
 				<macro.as-host host='config'>
 					<toggle-setting value='filter_playlist_onlyHighlighted' text='Highlighted Playlist difficulties' apply-on-change='true'
 						hover-hint='When active, if a playlist is used to pre-filter the mapset only difficulties that are highlighted in that playlist are allowed, if there is any. If not all are allowed'
 					/>
 				</macro.as-host>
-				<dropdown-list-setting id='dropdown_playlist' value='filter_playlist' choices='playlists' text='Playlist' apply-on-change='true'/>
 			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Chat Commands'>
-			<vertical pad-top='5'>
+			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize' child-control-height='true'>
 				<text text='You need to have CatCore or ChatCore installed and configured for Chat Commands to work!' color='grey' font-size='3.5' align='Center'/>
+
 				<macro.as-host host='config'>
-					<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-						<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->
-						<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr/!chaos [bsr code])' apply-on-change='true'/>
-						<toggle-setting value='chat_request_show_name' text='Show name of request song in Chat' apply-on-change='true'/>
-						<toggle-setting value='request_allowDownloading' text='Allow downloading of requested songs *²' apply-on-change='true'
-							hover-hint='When a user requests a song that you have not downloaded yet should they be downloaded?'
-						/>
-						<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' apply-on-change='true'
-							hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
-						/>
-						<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *' apply-on-change='true'
-							hover-hint='Usage: !sr 25f 4:20 or !sr 25f Expert 4:20'
-						/>
-						<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' apply-on-change='true'/>
-					</modifier-container>
+					<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->
+					<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr/!chaos [bsr code])' apply-on-change='true'/>
+					<toggle-setting value='chat_request_show_name' text='Show name of request song in Chat' apply-on-change='true'/>
+					<toggle-setting value='request_allowDownloading' text='Allow downloading of requested songs *²' apply-on-change='true'
+						hover-hint='When a user requests a song that you have not downloaded yet should they be downloaded?'
+					/>
+					<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' apply-on-change='true'
+						hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
+					/>
+					<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *' apply-on-change='true'
+						hover-hint='Usage: !sr 25f 4:20 or !sr 25f Expert 4:20'
+					/>
+					<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' apply-on-change='true'/>
 				</macro.as-host>
+					
 				<text text='* Only respected when Jumpcut is enabled' color='cyan' font-size='3.5' align='Center'/>
 				<text text='*² Not possible when you have a Playlist filter applied' color='cyan' font-size='3.5' align='Center'/>
-			</vertical>
+			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Map Transition'>
-			<macro.as-host host='config'>
-				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
+			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
+				<macro.as-host host='config'>
 					<slider-setting value='transition_reactionTime' text='Transition duration (Seconds)' min='0.3' max='1.0' increment='0.01' apply-on-change='true'
 						hover-hint='How long should the transition from one song to another be?'
 					/>
@@ -69,42 +70,38 @@
 					<slider-setting value='jumpcut_maxSeconds' text='Jumpcut Max. play duration' integer-only='true' min='10' max='60' apply-on-change='true'
 						hover-hint='How long should a specific song play at most?'
 					/>
-				</modifier-container>
-			</macro.as-host>
+				</macro.as-host>
+			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Queue'>
-			<vertical>
-				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
-					<macro.as-host host='config'>
-						<slider-setting value='queue_sizeLimit' text='Queue size Limit' integer-only='true' min='16' max='69' apply-on-change='true'
-							hover-hint='How many songs, overall, can be queued at the same time?'
-						/>
-						<slider-setting value='queue_requeueLimit' text='Re-queue block' integer-only='true' min='0' max='69' apply-on-change='true'
-							hover-hint='How many different songs must be played before a specific song can be played again? (This value is lowered as necessary depending on the amount of valid songs)'
-						/>
-					</macro.as-host>
-				</modifier-container>
+			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
+				<macro.as-host host='config'>
+					<slider-setting value='queue_sizeLimit' text='Queue size' integer-only='true' min='16' max='69' apply-on-change='true'
+						hover-hint='How many songs, overall, can be queued at the same time?'
+					/>
+					<slider-setting value='queue_requeueLimit' text='History size' integer-only='true' min='0' max='69' apply-on-change='true'
+						hover-hint='How many different songs must be played before a specific song can be played again? (This value is lowered as necessary depending on the amount of valid songs)'
+					/>
+				</macro.as-host>
 				<horizontal pad-top='5' preferred-height='10'>
 					<button on-click='ClearQueue' text='Clear queue and history'/>
 				</horizontal>
-			</vertical>
+			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Misc'>
-			<macro.as-host host='config'>
-				<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
+			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize' child-control-height="true" preferred-width="90">
+				<macro.as-host host='config'>
 					<toggle-setting value='random_prefer_top_diff' text='Always pick highest valid Difficulty' apply-on-change='true'
 						hover-hint='Always pick the highest diff when selecting a random song'
 					/>
 					<slider-setting value='ramclearer_frequency' text='RAM clearing frequency' apply-on-change='true' min='25' max='50' integer-only='true'
 						hover-hint='After how many played maps should the RAM be cleared?'
 					/>
-					<horizontal preferred-width="90">
-						<text color="#EEC" font-size="4" align="Center" word-wrapping="true"
-							text="⚠ You should probably not increase RAM clearing frequency above like 35 unless you either run almost nothing in the background, or have 32GB of RAM"
-						/>
-					</horizontal>
-				</modifier-container>
-			</macro.as-host>
+				</macro.as-host>
+				<text color="#EEC" font-size="4" align="Center" word-wrapping="true"
+					text="⚠ You should probably not increase RAM clearing frequency above like 35 unless you either run almost nothing in the background, or have 32GB of RAM"
+				/>
+			</modifier-container>
 		</tab>
 	</vertical>
 	<horizontal preferred-height='12' bg='round-rect-panel' pad='1'>
