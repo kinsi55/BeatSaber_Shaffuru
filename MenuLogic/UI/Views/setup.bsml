@@ -141,7 +141,7 @@
 	</modal>
 
 	<modal move-to-center='true' hide-event='CloseStartModal' show-event='OpenStartModal' size-delta-x='80' size-delta-y='52'>
-		<vertical horizontal-fit='Unconstrained' pad='4' pad-top='9'>
+		<vertical horizontal-fit='Unconstrained' pad='4' pad-top='9' pad-bottom='15'>
 			<horizontal bg='panel-top-gradient' ignore-layout='true' anchor-max-x='.97' anchor-min-x='.03' anchor-min-y='1' anchor-pos-y='-5'>
 				<text text="Shaffuru - Start" align='Center'/>
 			</horizontal>
@@ -149,13 +149,9 @@
 				<text id='label_songCount' text='J' align='Center'/>
 				<slider-setting value='playDuration' text='Play time' integer-only='true' min='3' max='120' increment='1' formatter='PlayTimeFormatter' apply-on-change='true' show-buttons='true'/>
 			</vertical>
-			<horizontal>
-				<vertical>
-					<primary-button id='button_startLevel' on-click='StartGame' text='Start' min-width='20' interactable='false'/>
-				</vertical>
-				<vertical>
-					<button event-click='CloseStartModal' text='Close' min-width='20'/>
-				</vertical>
+			<horizontal anchor-min-y='-0.98' anchor-pos-y='10' ignore-layout='true'>
+				<primary-button id='button_startLevel' on-click='StartGame' text='Start' min-width='20' interactable='false'/>
+				<button event-click='CloseStartModal' text='Close' min-width='20'/>
 			</horizontal>
 		</vertical>
 	</modal>
