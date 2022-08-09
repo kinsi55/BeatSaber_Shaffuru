@@ -44,7 +44,7 @@ namespace Shaffuru.GameLogic {
 		public virtual ShaffuruSong GetNextSong() {
 			ShaffuruSong x;
 
-			if(songQueue.queue.Count == 0) {
+			if(songQueue.IsEmpty()) {
 				// If the requeueBlockList contains as many levels as we have filtered ones, clear it, because every playable level has already been played
 				if(mapPool.filteredLevels.Count == songQueue.requeueBlockList.Count)
 					songQueue.requeueBlockList.Clear();
