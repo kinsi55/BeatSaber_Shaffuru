@@ -11,7 +11,7 @@ namespace Shaffuru.GameLogic {
 	class BeatmapSwitchSubscriber : IInitializable, IDisposable {
 		[Inject] readonly QueueProcessor queueProcessor = null;
 		[Inject] readonly BeatmapSwitcher beatmapSwitcher = null;
-		int delayMs = 0;
+		readonly int delayMs = 0;
 
 		public BeatmapSwitchSubscriber(int delayMs = 0) {
 			this.delayMs = delayMs;

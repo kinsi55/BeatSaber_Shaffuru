@@ -92,8 +92,8 @@ namespace Shaffuru.MenuLogic.UI {
 		public void Initialize() {
 			if(instance == null)
 				MenuButtons.instance.RegisterButton(new MenuButton("Shaffuru", " iufrkjedsfios", () => {
-					gameplaySetupViewController.Setup(true, true, true, false, PlayerSettingsPanelController.PlayerSettingsPanelLayout.Singleplayer);
-					ShowSetupView();
+					instance.gameplaySetupViewController.Setup(true, true, true, false, PlayerSettingsPanelController.PlayerSettingsPanelLayout.Singleplayer);
+					instance.ShowSetupView();
 				}, true));
 			instance = this;
 		}
