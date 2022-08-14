@@ -56,6 +56,7 @@ namespace Shaffuru.AppLogic {
 			}
 		}
 
+		public string currentPlaylistFilter;
 		public SongFilteringConfig currentFilterConfig;
 		public List<ValidSong> filteredLevels { get; private set; }
 		public IReadOnlyDictionary<string, int> requestableLevels { get; private set; }
@@ -239,8 +240,9 @@ namespace Shaffuru.AppLogic {
 			return true;
 		}
 
-		public void SetFilterConfig(SongFilteringConfig config = null) {
+		public void SetFilterConfig(SongFilteringConfig config = null, string playlistName = null) {
 			currentFilterConfig = config ?? Config.Instance.songFilteringConfig;
+			currentPlaylistFilter = playlistName ?? Config.Instance.filter_playlist;
 		}
 
 		public async Task ProcessBeatmapPool(bool forceNoFilters = false) {
