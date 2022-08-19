@@ -4,7 +4,7 @@
 		<tab tags='tabs' tab-name='Song Filtering'>
 			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 				<macro.as-host host='songFilterConfig'>
-					<slider-setting value='minSeconds' text='Min Song length (Seconds)' integer-only='true' min='15' max='60' apply-on-change='true'
+					<slider-setting value='minSeconds' text='Required Length (Seconds)' integer-only='true' min='15' max='60' apply-on-change='true'
 						hover-hint='Songs must be at least this long to be allowed'
 					/>
 				</macro.as-host>
