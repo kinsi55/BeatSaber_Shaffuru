@@ -57,7 +57,7 @@ namespace Shaffuru.MenuLogic.UI {
 				preview = BeatmapLoader.GetPreviewBeatmapFromLevelId(song.levelId);
 
 				songName = preview?.songName ?? "Unknown song";
-				playTime = string.Format(@" {0:00}:{1:00}", sts.TotalMinutes, sts.Seconds);
+				playTime = string.Format(@" {0:00}:{1:00}", (int)sts.TotalMinutes, sts.Seconds);
 
 				if(song.source == null) {
 					diffAndSource = $"{(BeatmapDifficulty)song.diffIndex} (Randomly picked)";
