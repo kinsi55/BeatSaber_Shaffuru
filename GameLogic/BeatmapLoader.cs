@@ -21,18 +21,12 @@ namespace Shaffuru.GameLogic {
 		}
 
 		public static void AddBeatmapToLoadedPreviewBeatmaps(string levelId, IPreviewBeatmapLevel level) {
-			if(beatmapLevelsModel == null)
-				return;
-
 			BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref beatmapLevelsModel)[levelId] = level;
 
 			reloadLevelpacksOnExit = true;
 		}
 
 		public static IPreviewBeatmapLevel GetPreviewBeatmapFromLevelId(string levelId) {
-			if(beatmapLevelsModel == null)
-				return null;
-
 			if(BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref beatmapLevelsModel).TryGetValue(levelId, out var map))
 				return map;
 
