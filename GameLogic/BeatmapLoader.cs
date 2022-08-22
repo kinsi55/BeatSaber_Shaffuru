@@ -33,7 +33,7 @@ namespace Shaffuru.GameLogic {
 			return null;
 		}
 
-		public static bool RefrehsLevelPacksIfNecessary() {
+		public static bool RefreshLevelPacksIfNecessary() {
 			if(!reloadLevelpacksOnExit)
 				return false;
 

@@ -137,7 +137,7 @@ namespace Shaffuru.MenuLogic {
 						return;
 					}
 
-					BeatmapLoader.RefrehsLevelPacksIfNecessary();
+					BeatmapLoader.RefreshLevelPacksIfNecessary();
 
 					if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared ||
 						b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed ||
