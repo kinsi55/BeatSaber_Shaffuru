@@ -2,6 +2,7 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
+using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class RamCleaner {
@@ -11,22 +12,24 @@ namespace Shaffuru.GameLogic {
 
 		const string clearingText = "Clearing RAM so your PC\ndoesn't explode <color=#FC5>😁</color>\n\nLag right now is normal <color=#FC5>👍</color>\n";
 
-		readonly GameObject cleanInfoText;
-		readonly TextMeshPro cleanLabel;
+		GameObject cleanInfoText;
+		TextMeshPro cleanLabel;
 
-		public RamCleaner() {
-			cleanInfoText = new GameObject($"Label", typeof(Canvas), typeof(TextMeshPro));
+		void CreateLabelIfNeededAndEnableIt() {
+			if(cleanInfoText == null) {
+				cleanInfoText = new GameObject($"Label", typeof(Canvas), typeof(TextMeshPro));
 
-			cleanLabel = cleanInfoText.GetComponent<TextMeshPro>();
-			cleanLabel.richText = true;
-			cleanLabel.text = "";
-			cleanLabel.fontSize = 3.5f;
-			cleanLabel.alignment = TextAlignmentOptions.Center;
-			cleanLabel.color = Color.magenta;
+				cleanLabel = cleanInfoText.GetComponent<TextMeshPro>();
+				cleanLabel.richText = true;
+				cleanLabel.text = "";
+				cleanLabel.fontSize = 3.5f;
+				cleanLabel.alignment = TextAlignmentOptions.Center;
+				cleanLabel.color = Color.magenta;
 
-			((RectTransform)cleanInfoText.transform).position = new Vector3(0, 1.75f, 4f);
+				((RectTransform)cleanInfoText.transform).position = new Vector3(0, 1.75f, 4f);
+			}
 
-			cleanInfoText.SetActive(false);
+			cleanInfoText.SetActive(true);
 		}
 
 		public bool TrySkip() {
@@ -43,7 +46,7 @@ namespace Shaffuru.GameLogic {
 			cleanSkips = 0;
 
 			var oldMode = UnityEngine.Scripting.GarbageCollector.GCMode;
-			cleanInfoText.SetActive(true);
+			CreateLabelIfNeededAndEnableIt();
 
 			cleanLabel.text = clearingText + "0.00%";
 			/*
