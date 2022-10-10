@@ -9,6 +9,8 @@ Endless Mode evolved. You pick a duration to play for and it keeps feeding you s
 - You can make songs start and end at a random point instead of playing through its entirety! This was formerly called CHAOSMOD and is what this mod started out as
 - You can accept requests from Twitch chat for songs to be played, and if you want to, even allow a specific difficulty (And Start time) to be requested - The request still has to match your configured filters.
 - Compatible with JDFixer / NJSFixer preferences. Ideally you should set those up so you dont play with the same JD on slow and fast songs
+- People can request maps that you don't have downloaded ***and they will be downloaded and queued while you are playing!***
+- Multiplayer support via BeatTogher & MultiplayerExtensions!
 
 ## Install
 
@@ -36,9 +38,20 @@ Songs can be requested with `!sr [bsr id] ([Difficulty]) ([Time])`. Difficulty a
 
 For these to work, as mentioned before, you need to have CatCore installed and setup. Additionally, songs that are requested must currently already be downloaded.
 
+## Multiplayer
+
+To play Shaffuru in Multiplayer there is a couple of prerequisites for you as well as everyone else playing:
+
+- You need the [BeatTogether](https://github.com/BeatTogether/BeatTogether#requirements) and [MultiplayerExtensions](https://github.com/Goobwabber/MultiplayerExtensions#installation) plugins
+- You need the seperate Shaffuru.Multiplayer plugin from the [Releases](#Install)
+- The person hosting the Multiplayer Lobby [must be a supporter of mine](https://github.com/sponsors/kinsi55)
+	- Getting whitelisted of Shaffuru is currently a manual process - Join the Discord linked on the Sponsors page and let me know if you have sponsored me 😀👍
+- Chat-Requests made in non-host players of the lobby are only respected if they themselves are also a supporter of mine
+
+Other than that, the Multiplayer experience is supposed to be exactly the same as Solo, song filtering, requests, downloads, you name it, everything is there!
+
 ## Limitations
 
-- If a map has any requirement it cannot be played
+- If a map has any requirement *other than Mapping Extensions* it cannot be played
 - Score submission obviously isnt gonna happen
-- Only maps that you already have downloaded can be requested at the moment. I might be able to change this in the future
 - Some Counters / Mods dont like this like the "Notes left" and "PB" display, they'll just display garbage
