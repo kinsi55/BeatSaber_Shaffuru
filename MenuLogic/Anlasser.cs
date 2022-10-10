@@ -142,26 +142,26 @@ namespace Shaffuru.MenuLogic {
 				StartStandardLevelReflectionArgsArray[11] = null;
 				StartStandardLevelReflectionArgsArray[12] = null;
 
-				StartStandardLevelReflectionArgsArray[13] = new Action<LevelScenesTransitionSetupDataSO, LevelCompletionResults>((a, b) => {
-					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
-						Start(lengthSeconds);
-						return;
-					}
-
-					BeatmapLoader.RefreshLevelPacksIfNecessary();
-
-					if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared ||
-						b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed ||
-						// If user is dum dum and plays with nofail and then backs out to menu we show this too because we are nice :)
-						b.energy == 0f
-					) {
-						finishedOrFailedCallback?.Invoke(b);
-					}
-				});
-
 				if(StartStandardLevelReflectionArgsArray.Length > 14)
 					StartStandardLevelReflectionArgsArray[14] = null;
 			}
+
+			StartStandardLevelReflectionArgsArray[13] = new Action<LevelScenesTransitionSetupDataSO, LevelCompletionResults>((a, b) => {
+				if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
+					Start(lengthSeconds);
+					return;
+				}
+
+				BeatmapLoader.RefreshLevelPacksIfNecessary();
+
+				if(b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Cleared ||
+					b.levelEndStateType == LevelCompletionResults.LevelEndStateType.Failed ||
+					// If user is dum dum and plays with nofail and then backs out to menu we show this too because we are nice :)
+					b.energy == 0f
+				) {
+					finishedOrFailedCallback?.Invoke(b);
+				}
+			});
 
 			StartStandardLevelReflectionArgsArray[3] = playerDataModel.playerData.overrideEnvironmentSettings;
 			StartStandardLevelReflectionArgsArray[4] = playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme();
