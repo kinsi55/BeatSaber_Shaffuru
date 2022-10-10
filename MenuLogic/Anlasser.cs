@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
 using UnityEngine;
@@ -110,7 +113,13 @@ namespace Shaffuru.MenuLogic {
 			BeatmapLevelSO_songName(ref beatmapLevel) = $"Shaffuru ({lengthSeconds / 60} Minutes)";
 			BeatmapLevelSO_levelID(ref beatmapLevel) = $"{LevelIdPrefix}{lengthSeconds}";
 		}
-		
+
+		static MethodInfo StartStandardLevelMethod = typeof(MenuTransitionsHelper).GetMethods().FirstOrDefault(
+			x => x.Name == nameof(MenuTransitionsHelper.StartStandardLevel) &&
+			x.GetParameters().Any(x => x.Name == "afterSceneSwitchCallback")
+		);
+
+		object[] StartStandardLevelReflectionArgsArray = null;
 
 		public void Start(int lengthSeconds, int rngSeed = 0) {
 			if(rngSeed != 0)
@@ -118,20 +127,22 @@ namespace Shaffuru.MenuLogic {
 
 			UpdateFakeBeatmap(lengthSeconds);
 
-			menuTransitionsHelper.StartStandardLevel(
-				"Shaffuru",
-				difficultyBeatmap,
-				beatmapLevel,
-				playerDataModel.playerData.overrideEnvironmentSettings,
-				playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(),
-				playerDataModel.playerData.gameplayModifiers,
-				playerDataModel.playerData.playerSpecificSettings, // gameplaySetupViewController.playerSettings is only initialized after entering solo once
-				null,
-				"Exit",
-				false,
-				false,
-				null,
-				(a, b) => {
+			// Using reflection here so I can target 1.21+ instead of 1.25 since they added a 14th argument to StartStandardLevel there (Thats the only thing that broke)
+			if(StartStandardLevelReflectionArgsArray == null) {
+				StartStandardLevelReflectionArgsArray = new object[StartStandardLevelMethod.GetParameters().Length];
+
+				StartStandardLevelReflectionArgsArray[0] = "Shaffuru";
+				StartStandardLevelReflectionArgsArray[1] = difficultyBeatmap;
+				StartStandardLevelReflectionArgsArray[2] = beatmapLevel;
+
+				StartStandardLevelReflectionArgsArray[7] = null;
+				StartStandardLevelReflectionArgsArray[8] = "Exit";
+				StartStandardLevelReflectionArgsArray[9] = false;
+				StartStandardLevelReflectionArgsArray[10] = false;
+				StartStandardLevelReflectionArgsArray[11] = null;
+				StartStandardLevelReflectionArgsArray[12] = null;
+
+				StartStandardLevelReflectionArgsArray[13] = new Action<LevelScenesTransitionSetupDataSO, LevelCompletionResults>((a, b) => {
 					if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
 						Start(lengthSeconds);
 						return;
@@ -146,8 +157,18 @@ namespace Shaffuru.MenuLogic {
 					) {
 						finishedOrFailedCallback?.Invoke(b);
 					}
-				}
-			);
+				});
+
+				if(StartStandardLevelReflectionArgsArray.Length > 14)
+					StartStandardLevelReflectionArgsArray[14] = null;
+			}
+
+			StartStandardLevelReflectionArgsArray[3] = playerDataModel.playerData.overrideEnvironmentSettings;
+			StartStandardLevelReflectionArgsArray[4] = playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme();
+			StartStandardLevelReflectionArgsArray[5] = playerDataModel.playerData.gameplayModifiers;
+			StartStandardLevelReflectionArgsArray[6] = playerDataModel.playerData.playerSpecificSettings;
+
+			StartStandardLevelMethod.Invoke(menuTransitionsHelper, StartStandardLevelReflectionArgsArray);
 		}
 	}
 }
