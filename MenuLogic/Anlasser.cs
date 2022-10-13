@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
+using Polyglot;
 using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
 using UnityEngine;
@@ -136,7 +137,7 @@ namespace Shaffuru.MenuLogic {
 				StartStandardLevelReflectionArgsArray[2] = beatmapLevel;
 
 				StartStandardLevelReflectionArgsArray[7] = null;
-				StartStandardLevelReflectionArgsArray[8] = "Exit";
+				StartStandardLevelReflectionArgsArray[8] = Localization.Get("BUTTON_MENU");
 				StartStandardLevelReflectionArgsArray[9] = false;
 				StartStandardLevelReflectionArgsArray[10] = false;
 				StartStandardLevelReflectionArgsArray[11] = null;
