@@ -43,7 +43,7 @@ For these to work, as mentioned before, you need to have CatCore installed and s
 To play Shaffuru in Multiplayer there is a couple of prerequisites for you as well as everyone else playing:
 
 - You need the [BeatTogether](https://github.com/BeatTogether/BeatTogether#requirements) and [MultiplayerCore](https://github.com/Goobwabber/MultiplayerCore#installation) plugins
-- You need the seperate Shaffuru.Multiplayer plugin from the [Releases](#Install)
+- You need the seperate Shaffuru.Multiplayer plugin from the [Releases](#Install) (**Additionally** to the normal Shaffuru)
 - The person hosting the Multiplayer Lobby [must be a supporter of mine](https://github.com/sponsors/kinsi55)
 	- Getting whitelisted of Shaffuru is currently a manual process - Join the Discord linked on the Sponsors page and let me know if you have sponsored me 😀👍
 - Chat-Requests made in non-host players of the lobby are only respected if they themselves are also a supporter of mine
