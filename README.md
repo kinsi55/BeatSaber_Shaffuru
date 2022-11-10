@@ -10,7 +10,7 @@ Endless Mode evolved. You pick a duration to play for and it keeps feeding you s
 - You can accept requests from Twitch chat for songs to be played, and if you want to, even allow a specific difficulty (And Start time) to be requested - The request still has to match your configured filters.
 - Compatible with JDFixer / NJSFixer preferences. Ideally you should set those up so you dont play with the same JD on slow and fast songs
 - People can request maps that you don't have downloaded ***and they will be downloaded and queued while you are playing!***
-- Multiplayer support via BeatTogher & MultiplayerExtensions!
+- Multiplayer support via BeatTogher + MultiplayerCore!
 
 ## Install
 
@@ -42,7 +42,7 @@ For these to work, as mentioned before, you need to have CatCore installed and s
 
 To play Shaffuru in Multiplayer there is a couple of prerequisites for you as well as everyone else playing:
 
-- You need the [BeatTogether](https://github.com/BeatTogether/BeatTogether#requirements) and [MultiplayerExtensions](https://github.com/Goobwabber/MultiplayerExtensions#installation) plugins
+- You need the [BeatTogether](https://github.com/BeatTogether/BeatTogether#requirements) and [MultiplayerCore](https://github.com/Goobwabber/MultiplayerCore#installation) plugins
 - You need the seperate Shaffuru.Multiplayer plugin from the [Releases](#Install)
 - The person hosting the Multiplayer Lobby [must be a supporter of mine](https://github.com/sponsors/kinsi55)
 	- Getting whitelisted of Shaffuru is currently a manual process - Join the Discord linked on the Sponsors page and let me know if you have sponsored me 😀👍
