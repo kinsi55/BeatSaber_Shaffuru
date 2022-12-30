@@ -25,7 +25,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 		[Inject] readonly MapPool mapPool = null;
 		[Inject] readonly SongQueue songQueue = null;
-		[Inject] readonly RequestManager requestManager = null;
+		[InjectOptional] readonly RequestManager requestManager = null;
 		[Inject] readonly Anlasser anlasser = null;
 		[Inject] readonly PlayedSongList playedSongList = null;
 
@@ -118,7 +118,7 @@ namespace Shaffuru.MenuLogic.UI {
 				return;
 			}
 
-			requestManager.SetDefaultHandler();
+			requestManager?.SetDefaultHandler();
 			startLevelButton.interactable = playable > 0;
 
 			if(playable > 0) {
