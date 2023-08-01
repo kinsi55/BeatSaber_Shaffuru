@@ -9,9 +9,6 @@ namespace Shaffuru.GameLogic {
 		static BeatmapLevelsModel beatmapLevelsModel;
 		static bool reloadLevelpacksOnExit = false;
 
-		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.Accessor BeatmapLevelsModel_loadedPreviewBeatmapLevels =
-			IPA.Utilities.FieldAccessor<BeatmapLevelsModel, Dictionary<string, IPreviewBeatmapLevel>>.GetAccessor("_loadedPreviewBeatmapLevels");
-
 		public BeatmapLoader(
 			GameplayCoreSceneSetupData _sceneSetupData,
 			BeatmapLevelsModel beatmapLevelsModel
@@ -21,13 +18,13 @@ namespace Shaffuru.GameLogic {
 		}
 
 		public static void AddBeatmapToLoadedPreviewBeatmaps(string levelId, IPreviewBeatmapLevel level) {
-			BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref beatmapLevelsModel)[levelId] = level;
+			beatmapLevelsModel._loadedPreviewBeatmapLevels[levelId] = level;
 
 			reloadLevelpacksOnExit = true;
 		}
 
 		public static IPreviewBeatmapLevel GetPreviewBeatmapFromLevelId(string levelId) {
-			if(BeatmapLevelsModel_loadedPreviewBeatmapLevels(ref beatmapLevelsModel).TryGetValue(levelId, out var map))
+			if(beatmapLevelsModel._loadedPreviewBeatmapLevels.TryGetValue(levelId, out var map))
 				return map;
 
 			return null;

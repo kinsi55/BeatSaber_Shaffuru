@@ -19,7 +19,7 @@ namespace Shaffuru.MenuLogic {
 		static int lastShaffuruMapLength = 0;
 		public readonly static BeatmapLevelSO beatmapLevel = ScriptableObject.CreateInstance<BeatmapLevelSO>();
 		readonly static BeatmapDataSO beatmapLevelData = ScriptableObject.CreateInstance<BeatmapDataSO>();
-		public readonly static BeatmapLevelSO.DifficultyBeatmap difficultyBeatmap = new BeatmapLevelSO.DifficultyBeatmap(beatmapLevel, BeatmapDifficulty.ExpertPlus, 0, 10, 0, beatmapLevelData);
+		public readonly static BeatmapLevelSO.DifficultyBeatmap difficultyBeatmap = new BeatmapLevelSO.DifficultyBeatmap(beatmapLevel, BeatmapDifficulty.ExpertPlus, 0, 10, 0, 0, beatmapLevelData);
 		
 		static UBinder<Plugin, System.Random> rngSource;
 
@@ -31,7 +31,7 @@ namespace Shaffuru.MenuLogic {
 			PlayerDataModel playerDataModel,
 			CustomLevelLoader customLevelLoader,
 			[InjectOptional] MenuTransitionsHelper menuTransitionsHelper,
-			BeatmapCharacteristicCollectionSO beatmapCharacteristicCollectionSO,
+			BeatmapCharacteristicCollection beatmapCharacteristicCollection,
 			UBinder<Plugin, System.Random> rng
 		) {
 			this.playerDataModel = playerDataModel;
@@ -40,7 +40,7 @@ namespace Shaffuru.MenuLogic {
 			rngSource = rng;
 
 			defaultEnvironment ??= customLevelLoader.LoadEnvironmentInfo("", false);
-			standardCharacteristic = beatmapCharacteristicCollectionSO.GetBeatmapCharacteristicBySerializedName("Standard");
+			standardCharacteristic = beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName("Standard");
 		}
 
 		public event Action<LevelCompletionResults> finishedOrFailedCallback;
@@ -48,9 +48,6 @@ namespace Shaffuru.MenuLogic {
 
 		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelData, AudioClip>.Accessor BeatmapLevelData_audioClip =
 			IPA.Utilities.FieldAccessor<BeatmapLevelData, AudioClip>.GetAccessor("_audioClip");
-
-		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelSO, AudioClip>.Accessor BeatmapLevelSO_audioClip =
-			IPA.Utilities.FieldAccessor<BeatmapLevelSO, AudioClip>.GetAccessor("_audioClip");
 
 		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelSO, string>.Accessor BeatmapLevelSO_songName =
 			IPA.Utilities.FieldAccessor<BeatmapLevelSO, string>.GetAccessor("_songName");
@@ -73,7 +70,7 @@ namespace Shaffuru.MenuLogic {
 
 				var audioClip = AudioClip.Create("", lengthSeconds * 1000, 1, 1000, false);
 
-				BeatmapLevelSO_audioClip(ref beatmapLevel) = audioClip;
+				beatmapLevel._audioClip = audioClip;
 				if(beatmapLevel.beatmapLevelData is BeatmapLevelData b)
 					BeatmapLevelData_audioClip(ref b) = audioClip;
 				lastShaffuruMapLength = lengthSeconds;
@@ -107,6 +104,7 @@ namespace Shaffuru.MenuLogic {
 					SongCore.Loader.defaultCoverImage,
 					defaultEnvironment,
 					defaultEnvironment,
+					new EnvironmentInfoSO[] { },
 					new[] { new BeatmapLevelSO.DifficultyBeatmapSet(standardCharacteristic, new[] { difficultyBeatmap }) }
 				);
 			}
@@ -120,34 +118,13 @@ namespace Shaffuru.MenuLogic {
 			x.GetParameters().Any(x => x.Name == "afterSceneSwitchCallback")
 		);
 
-		object[] StartStandardLevelReflectionArgsArray = null;
-
 		public void Start(int lengthSeconds, int rngSeed = 0) {
 			if(rngSeed != 0)
 				rngSource.Value = new System.Random(rngSeed);
 
 			UpdateFakeBeatmap(lengthSeconds);
 
-			// Using reflection here so I can target 1.21+ instead of 1.25 since they added a 14th argument to StartStandardLevel there (Thats the only thing that broke)
-			if(StartStandardLevelReflectionArgsArray == null) {
-				StartStandardLevelReflectionArgsArray = new object[StartStandardLevelMethod.GetParameters().Length];
-
-				StartStandardLevelReflectionArgsArray[0] = "Shaffuru";
-				StartStandardLevelReflectionArgsArray[1] = difficultyBeatmap;
-				StartStandardLevelReflectionArgsArray[2] = beatmapLevel;
-
-				StartStandardLevelReflectionArgsArray[7] = null;
-				StartStandardLevelReflectionArgsArray[8] = Localization.Get("BUTTON_MENU");
-				StartStandardLevelReflectionArgsArray[9] = false;
-				StartStandardLevelReflectionArgsArray[10] = false;
-				StartStandardLevelReflectionArgsArray[11] = null;
-				StartStandardLevelReflectionArgsArray[12] = null;
-
-				if(StartStandardLevelReflectionArgsArray.Length > 14)
-					StartStandardLevelReflectionArgsArray[14] = null;
-			}
-
-			StartStandardLevelReflectionArgsArray[13] = new Action<LevelScenesTransitionSetupDataSO, LevelCompletionResults>((a, b) => {
+			var endCallback = new Action<LevelScenesTransitionSetupDataSO, LevelCompletionResults>((a, b) => {
 				if(b.levelEndAction == LevelCompletionResults.LevelEndAction.Restart) {
 					Start(lengthSeconds);
 					return;
@@ -164,12 +141,23 @@ namespace Shaffuru.MenuLogic {
 				}
 			});
 
-			StartStandardLevelReflectionArgsArray[3] = playerDataModel.playerData.overrideEnvironmentSettings;
-			StartStandardLevelReflectionArgsArray[4] = playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme();
-			StartStandardLevelReflectionArgsArray[5] = playerDataModel.playerData.gameplayModifiers;
-			StartStandardLevelReflectionArgsArray[6] = playerDataModel.playerData.playerSpecificSettings;
-
-			StartStandardLevelMethod.Invoke(menuTransitionsHelper, StartStandardLevelReflectionArgsArray);
+			menuTransitionsHelper.StartStandardLevel(
+				"Shaffuru",
+				difficultyBeatmap,
+				beatmapLevel,
+				playerDataModel.playerData.overrideEnvironmentSettings,
+				playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(),
+				playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(),
+				playerDataModel.playerData.gameplayModifiers,
+				playerDataModel.playerData.playerSpecificSettings,
+				null,
+				Localization.Get("BUTTON_MENU"),
+				false,
+				false,
+				null,
+				endCallback,
+				null
+			);
 		}
 	}
 }

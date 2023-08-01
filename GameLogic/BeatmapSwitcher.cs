@@ -10,19 +10,6 @@ using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class BeatmapSwitcher : IDisposable {
-		static readonly FieldInfo FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData 
-			= AccessTools.Field(typeof(BeatmapObjectSpawnController), "_beatmapObjectSpawnMovementData");
-		static readonly FieldInfo FIELD_BeatmapObjectSpawnController_disableSpawning
-			= AccessTools.Field(typeof(BeatmapObjectSpawnController), "_disableSpawning");
-
-		static readonly FieldInfo FIELD_BeatmapObjectCallbackController_callbacksInTimes = AccessTools.Field(typeof(BeatmapCallbacksController), "_callbacksInTimes");
-
-		static readonly IPA.Utilities.FieldAccessor<CallbacksInTime, Dictionary<Type, List<BeatmapDataCallbackWrapper>>>.Accessor FIELD_CallbacksInTime_callbacks
-			= IPA.Utilities.FieldAccessor<CallbacksInTime, Dictionary<Type, List<BeatmapDataCallbackWrapper>>>.GetAccessor("_callbacks");
-
-
-		static readonly MethodInfo SETTER_GameEnergyCounter_noFail = AccessTools.PropertySetter(typeof(GameEnergyCounter), nameof(GameEnergyCounter.noFail));
-
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time 
 			= IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor($"<{nameof(BeatmapDataItem.time)}>k__BackingField");
 		static readonly IPA.Utilities.FieldAccessor<SliderData, float>.Accessor SETTER_SliderData_tailTime 
@@ -72,10 +59,10 @@ namespace Shaffuru.GameLogic {
 			this.ramCleaner = ramCleaner;
 
 			if(beatmapCallbacksController != null)
-				beatmapObjectCallbackController_callbacksInTimes = (Dictionary<float, CallbacksInTime>)FIELD_BeatmapObjectCallbackController_callbacksInTimes.GetValue(beatmapCallbacksController);
+				beatmapObjectCallbackController_callbacksInTimes = beatmapCallbacksController._callbacksInTimes;
 
 			if(beatmapObjectSpawnController != null) {
-				beatmapObjectSpawnMovementData = (BeatmapObjectSpawnMovementData)FIELD_BeatmapObjectSpawnController_beatmapObjectSpawnMovementData.GetValue(beatmapObjectSpawnController);
+				beatmapObjectSpawnMovementData = beatmapObjectSpawnController.beatmapObjectSpawnMovementData;
 				startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
 			}
 		}
@@ -99,7 +86,7 @@ namespace Shaffuru.GameLogic {
 
 		void SetSpawningEnabled(bool enable) {
 			if(beatmapObjectSpawnController != null)
-				FIELD_BeatmapObjectSpawnController_disableSpawning.SetValue(beatmapObjectSpawnController, !enable);
+				beatmapObjectSpawnController._disableSpawning = !enable;
 		}
 
 		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
@@ -234,7 +221,7 @@ namespace Shaffuru.GameLogic {
 					var aheadTime = v.aheadTime;
 					// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
 					if(x.Key == startBeatmapCallbackAheadTime) {
-						var cbs = FIELD_CallbacksInTime_callbacks(ref v);
+						var cbs = v._callbacks;
 						aheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
 						foreach(var cbl in cbs.Values) {
 							cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = aheadTime; });
@@ -273,7 +260,7 @@ namespace Shaffuru.GameLogic {
 					yield break;
 
 				if(gameEnergyCounter != null)
-					SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { true });
+					gameEnergyCounter.noFail = true;
 
 				yield return new WaitForSeconds(Config.Instance.transition_gracePeriod);
 
@@ -281,7 +268,7 @@ namespace Shaffuru.GameLogic {
 					yield break;
 
 				if(gameEnergyCounter != null)
-					SETTER_GameEnergyCounter_noFail.Invoke(gameEnergyCounter, new object[] { false });
+					gameEnergyCounter.noFail = false;
 			}
 		}
 
