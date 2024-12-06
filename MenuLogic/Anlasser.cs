@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using HarmonyLib;
-using Polyglot;
 using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
 using UnityEngine;
@@ -17,14 +17,14 @@ namespace Shaffuru.MenuLogic {
 
 
 		static int lastShaffuruMapLength = 0;
-		public readonly static BeatmapLevelSO beatmapLevel = ScriptableObject.CreateInstance<BeatmapLevelSO>();
+		public readonly static BeatmapLevel beatmapLevel = (BeatmapLevel)FormatterServices.GetUninitializedObject(typeof(BeatmapLevel));
 		readonly static BeatmapDataSO beatmapLevelData = ScriptableObject.CreateInstance<BeatmapDataSO>();
 		public readonly static BeatmapLevelSO.DifficultyBeatmap difficultyBeatmap = new BeatmapLevelSO.DifficultyBeatmap(beatmapLevel, BeatmapDifficulty.ExpertPlus, 0, 10, 0, 0, beatmapLevelData);
 		
 		static UBinder<Plugin, System.Random> rngSource;
 
 
-		static EnvironmentInfoSO defaultEnvironment;
+		static EnvironmentName defaultEnvironment;
 		public static BeatmapCharacteristicSO standardCharacteristic { get; private set; }
 
 		public Anlasser(
@@ -39,7 +39,7 @@ namespace Shaffuru.MenuLogic {
 
 			rngSource = rng;
 
-			defaultEnvironment ??= customLevelLoader.LoadEnvironmentInfo("", false);
+			defaultEnvironment = customLevelLoader.CreateEnvironmentName("", customLevelLoader._defaultEnvironmentInfo);
 			standardCharacteristic = beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName("Standard");
 		}
 
@@ -88,7 +88,7 @@ namespace Shaffuru.MenuLogic {
 			}
 
 			if(isFirst) {
-				beatmapLevel.InitFull(
+				beatmapLevel.SetData(
 					LevelIdPrefix,
 					"Shaffuru",
 					"",
