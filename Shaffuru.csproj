@@ -52,7 +52,7 @@
     <Reference Include="AdditionalContentModel.Interfaces">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\AdditionalContentModel.Interfaces.dll</HintPath>
     </Reference>
-    <Reference Include="BeatmapCore">
+    <Reference Include="BeatmapCore" Publicize="true">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
     </Reference>
     <Reference Include="BeatSaberPlaylistsLib">

@@ -10,11 +10,6 @@ using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class BeatmapSwitcher : IDisposable {
-		static readonly IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time 
-			= IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor($"<{nameof(BeatmapDataItem.time)}>k__BackingField");
-		static readonly IPA.Utilities.FieldAccessor<SliderData, float>.Accessor SETTER_SliderData_tailTime 
-			= IPA.Utilities.FieldAccessor<SliderData, float>.GetAccessor($"<{nameof(SliderData.tailTime)}>k__BackingField");
-
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime 
 			= IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor(nameof(BeatmapDataCallbackWrapper.aheadTime));
 
@@ -191,21 +186,18 @@ namespace Shaffuru.GameLogic {
 					prevNode = prevNode.Next;
 
 					// Change the nodes time to be at the right time in the modified context
-					var j = x;
 					var bmot = relativeSongTime + currentAudioTime;
 
 					// Sliders and arcs have an end time that we need to correct also
 					if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && x is SliderData xSlider)
-						SETTER_SliderData_tailTime(ref xSlider) = bmot + xSlider.tailTime - x.time;
+						xSlider.tailTime = bmot + xSlider.tailTime - x.time;
 
-					SETTER_BeatmapDataItem_time(ref j) = bmot;
+					x.time = bmot;
 				}
 
 				// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
-				for(; prevNode != null; prevNode = prevNode.Next) {
-					var iv = prevNode.Value;
-					SETTER_BeatmapDataItem_time(ref iv) = float.MaxValue;
-				}
+				for(; prevNode != null; prevNode = prevNode.Next)
+					prevNode.Value.time = float.MaxValue;
 			}
 
 			if(beatmapObjectSpawnController != null) {

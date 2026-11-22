@@ -18,14 +18,12 @@ namespace Shaffuru.GameLogic {
 	}
 
 	class UnifiedATSC : UnifiedAudioSource {
-		static readonly FieldInfo FIELD_AudioTimeSyncController_audioSource = AccessTools.Field(typeof(AudioTimeSyncController), "_audioSource");
-
 		AudioTimeSyncController audioTimeSyncController;
 		AudioSource audioSource;
 
 		public UnifiedATSC(AudioTimeSyncController audioTimeSyncController, AudioTimeWrapper audioTimeWrapper) {
 			this.audioTimeSyncController = audioTimeSyncController;
-			audioSource = (AudioSource)FIELD_AudioTimeSyncController_audioSource.GetValue(audioTimeSyncController);
+			audioSource = audioTimeSyncController._audioSource;
 
 			audioTimeWrapper.SetAudioSource(this);
 		}

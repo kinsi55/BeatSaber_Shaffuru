@@ -11,9 +11,6 @@ using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class CustomAudioSource {
-		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect 
-			= AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
-
 		readonly AudioMixerGroup mixer;
 		readonly float defaultPitch = 0;
 
@@ -72,7 +69,7 @@ namespace Shaffuru.GameLogic {
 			source.pitch = defaultPitch;
 			source.volume = defaultVolume;
 
-			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController))?.SetAudioSource(source);
+			gameSongController._failAudioPitchGainEffect?.SetAudioSource(source);
 		}
 
 		public void ResetFailEffect() {
