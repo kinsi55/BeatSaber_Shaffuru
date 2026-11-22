@@ -16,6 +16,7 @@ namespace Shaffuru.AppLogic {
 	struct SongDownloaderJob : IJob {
 		public static readonly HashSet<uint> downloadingMaps = new HashSet<uint>();
 		public static readonly string ShaffuruDownloadPath = Path.Combine(Directory.GetCurrentDirectory(), CustomLevelPathHelper.customLevelsDirectoryPath, "SHAFFURU_DOWNLOADS");
+		public static SongCore.Data.SeparateSongFolder downloadsFolder;
 
 		uint beatsaverId;
 
@@ -52,8 +53,12 @@ namespace Shaffuru.AppLogic {
 
 					var preview = data.Value.beatmapLevel;
 
-					// SongCore only hands this over to the game's CustomLevelLoader on a full refresh, which it doesn't do ingame
-					SongCore.Loader.CustomLevelLoader._loadedBeatmapSaveData[preview.levelID] = SongCore.Loader.LoadedBeatmapSaveData[preview.levelID];
+					// SongCore only hands the save data over to the game's CustomLevelLoader on a refresh, which it doesn't do ingame
+					var folder = new DirectoryInfo(p);
+					var loaded = SongCore.Loader.CustomLevelLoader.LoadBeatmapLevelAsync(new CustomLevelFolderInfo(folder.FullName, folder.Name, File.ReadAllText(Path.Combine(p, "Info.dat"))), CancellationToken.None).Result;
+					SongCore.Loader.CustomLevelLoader._loadedBeatmapSaveData[preview.levelID] = loaded.Value.Item2;
+					// Else the post-session song refresh loads it again under a "custom_level_HASH_FolderName" levelID
+					downloadsFolder.Levels[Path.GetDirectoryName(Path.Combine(p, "Info.dat"))] = preview;
 
 					BeatmapLoader.AddBeatmapToLoadedPreviewBeatmaps(preview.levelID, preview);
 

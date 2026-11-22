@@ -115,7 +115,7 @@
     <Reference Include="SiraUtil">
       <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
     </Reference>
-    <Reference Include="SongCore" Publicize="true">
+    <Reference Include="SongCore">
       <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
     </Reference>
     <Reference Include="SongDetailsCache">
