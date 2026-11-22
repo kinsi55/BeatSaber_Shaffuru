@@ -111,7 +111,7 @@ namespace Shaffuru.AppLogic {
 					 * When filtering by a Playlist, if a map is downloaded, but it is not in the requestable pool We'll
 					 * just assume its not in the playlist - Even if it could possibly be just not downloaded
 					 */
-					if(SongCore.Collections.hashForLevelID(levelId) != string.Empty || mapPool.isFilteredByPlaylist) {
+					if(SongCore.Collections.GetCustomLevelHash(levelId) != string.Empty || mapPool.isFilteredByPlaylist) {
 						sendResponse("The map does not match the configured filters");
 						return null;
 					} else if(!Config.Instance.request_allowDownloading) {

@@ -27,10 +27,6 @@ namespace Shaffuru.AppLogic {
 
 		static readonly char[] InvalidPathChars = Path.GetInvalidFileNameChars();
 
-		static readonly MethodInfo SongCore_LoadSongAndAddToDictionaries = IPA.Loader.PluginManager.GetPluginFromId("SongCore")?
-			.Assembly.GetType("SongCore.Loader")?
-			.GetMethod("LoadSongAndAddToDictionaries", BindingFlags.NonPublic | BindingFlags.Instance);
-
 		static readonly string UserAgent = "Shaffuru/" + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 		public unsafe void Execute() {
 			try {
@@ -49,11 +45,15 @@ namespace Shaffuru.AppLogic {
 					if(p == null)
 						return;
 
-					var data = SongCore.Loader.Instance.LoadCustomLevelSongData(p);
+					var data = SongCore.Loader.LoadCustomLevel(p);
 
-					var preview = (CustomPreviewBeatmapLevel)SongCore_LoadSongAndAddToDictionaries.Invoke(SongCore.Loader.Instance, new object[] {
-						CancellationToken.None, data, p, null
-					});
+					if(data == null)
+						return;
+
+					var preview = data.Value.beatmapLevel;
+
+					// SongCore only hands this over to the game's CustomLevelLoader on a full refresh, which it doesn't do ingame
+					SongCore.Loader.CustomLevelLoader._loadedBeatmapSaveData[preview.levelID] = SongCore.Loader.LoadedBeatmapSaveData[preview.levelID];
 
 					BeatmapLoader.AddBeatmapToLoadedPreviewBeatmaps(preview.levelID, preview);
 

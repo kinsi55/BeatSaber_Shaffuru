@@ -19,8 +19,8 @@ namespace Shaffuru.GameLogic {
 		readonly AudioTimeWrapper audioTimeSyncControllerWrapper;
 
 
-		static readonly FieldInfo FIELD_PauseMenuManager_InitData_previewBeatmapLevel = AccessTools.Field(typeof(PauseMenuManager.InitData), nameof(PauseMenuManager.InitData.previewBeatmapLevel));
-		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapDifficulty = AccessTools.Field(typeof(PauseMenuManager.InitData), nameof(PauseMenuManager.InitData.beatmapDifficulty));
+		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapLevel = AccessTools.Field(typeof(PauseMenuManager.InitData), nameof(PauseMenuManager.InitData.beatmapLevel));
+		static readonly FieldInfo FIELD_PauseMenuManager_InitData_beatmapKey = AccessTools.Field(typeof(PauseMenuManager.InitData), nameof(PauseMenuManager.InitData.beatmapKey));
 		readonly PauseMenuManager.InitData pauseMenuManager_InitData;
 
 
@@ -49,7 +49,7 @@ namespace Shaffuru.GameLogic {
 		public float switchToNextBeatmapAt = 1.3f;
 		bool isExecutingSwitch = false;
 
-		public event Action<ShaffuruSong, IDifficultyBeatmap, IReadonlyBeatmapData> switchedToNewSong;
+		public event Action<ShaffuruSong, LoadedDifficultyBeatmap, IReadonlyBeatmapData> switchedToNewSong;
 
 		public async void Tick() {
 			if(isExecutingSwitch || audioTimeSyncControllerWrapper.songTime < switchToNextBeatmapAt)
@@ -70,9 +70,9 @@ namespace Shaffuru.GameLogic {
 		}
 
 		public async Task SwitchToNewSong(ShaffuruSong song) {
-			IDifficultyBeatmap outDiff = null;
+			LoadedDifficultyBeatmap outDiff = null;
 			IReadonlyBeatmapData outBeatmap = null;
-			BeatmapLevelsModel.GetBeatmapLevelResult loadedBeatmap = default;
+			LoadBeatmapLevelDataResult loadedBeatmap = default;
 
 			await Task.Run(async () => {
 				var diffIndex = song.diffIndex;
@@ -103,19 +103,7 @@ namespace Shaffuru.GameLogic {
 					return;
 				}
 
-				foreach(var d in loadedBeatmap.beatmapLevel.beatmapLevelData.difficultyBeatmapSets) {
-					if(d.beatmapCharacteristic != Anlasser.standardCharacteristic)
-						continue;
-
-					foreach(var diff in d.difficultyBeatmaps) {
-						if((int)diff.difficulty != diffIndex)
-							continue;
-
-						outDiff = diff;
-						break;
-					}
-					break;
-				}
+				outDiff = beatmapLoader.GetDifficulty(song.levelId, (BeatmapDifficulty)diffIndex, loadedBeatmap.beatmapLevelData);
 
 				if(outDiff == null) {
 					Plugin.Log.Error(string.Format("Tried to queue {0} but failed to find diff with index {1} and Standard characteristic", song.levelId, diffIndex));
@@ -133,7 +121,7 @@ namespace Shaffuru.GameLogic {
 			if(outBeatmap == null)
 				return;
 
-			var songLength = outDiff.level.beatmapLevelData.audioClip.length - outDiff.level.songTimeOffset;
+			var songLength = outDiff.audioClip.length - outDiff.level.songTimeOffset;
 			var startTime = song.startTime ?? 0f;
 			var length = song.length ?? songLength;
 
@@ -167,8 +155,8 @@ namespace Shaffuru.GameLogic {
 			playedSongList.Add(playedSong);
 
 			if(pauseMenuManager_InitData != null) {
-				FIELD_PauseMenuManager_InitData_previewBeatmapLevel.SetValue(pauseMenuManager_InitData, loadedBeatmap.beatmapLevel);
-				FIELD_PauseMenuManager_InitData_beatmapDifficulty.SetValue(pauseMenuManager_InitData, outDiff.difficulty);
+				FIELD_PauseMenuManager_InitData_beatmapLevel.SetValue(pauseMenuManager_InitData, outDiff.level);
+				FIELD_PauseMenuManager_InitData_beatmapKey.SetValue(pauseMenuManager_InitData, outDiff.beatmapKey);
 			}
 
 			switchedToNewSong?.Invoke(playedSong, outDiff, outBeatmap);

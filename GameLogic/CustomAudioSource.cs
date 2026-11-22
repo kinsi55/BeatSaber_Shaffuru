@@ -36,7 +36,7 @@ namespace Shaffuru.GameLogic {
 
 			this.audioTimeWrapper = audioTimeWrapper;
 
-			audioLatency = gameplayCoreSceneSetupData.mainSettingsModel.audioLatency;
+			audioLatency = gameplayCoreSceneSetupData._settingsManager.settings.audio.latency;
 
 			source = new GameObject("CAS", typeof(AudioSource)).GetComponent<AudioSource>();
 

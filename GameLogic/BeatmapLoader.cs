@@ -1,9 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static BeatmapLevelsModel;
+using Shaffuru.MenuLogic;
+using UnityEngine;
 
 namespace Shaffuru.GameLogic {
+	// Replacement for the removed IDifficultyBeatmap, exposing what we used of it
+	class LoadedDifficultyBeatmap {
+		public BeatmapLevel level;
+		public BeatmapKey beatmapKey;
+		public BeatmapBasicData beatmapBasicData;
+		public IBeatmapLevelData beatmapLevelData;
+		public AudioClip audioClip;
+
+		public BeatmapDifficulty difficulty => beatmapKey.difficulty;
+		public float noteJumpMovementSpeed => beatmapBasicData.noteJumpMovementSpeed;
+		public float noteJumpStartBeatOffset => beatmapBasicData.noteJumpStartBeatOffset;
+	}
+
 	class BeatmapLoader {
 		readonly GameplayCoreSceneSetupData _sceneSetupData;
 		static BeatmapLevelsModel beatmapLevelsModel;
@@ -17,14 +31,14 @@ namespace Shaffuru.GameLogic {
 			BeatmapLoader.beatmapLevelsModel = beatmapLevelsModel;
 		}
 
-		public static void AddBeatmapToLoadedPreviewBeatmaps(string levelId, IPreviewBeatmapLevel level) {
-			beatmapLevelsModel._loadedPreviewBeatmapLevels[levelId] = level;
+		public static void AddBeatmapToLoadedPreviewBeatmaps(string levelId, BeatmapLevel level) {
+			beatmapLevelsModel._allLoadedBeatmapLevelsRepository._idToBeatmapLevel[levelId] = level;
 
 			reloadLevelpacksOnExit = true;
 		}
 
-		public static IPreviewBeatmapLevel GetPreviewBeatmapFromLevelId(string levelId) {
-			if(beatmapLevelsModel._loadedPreviewBeatmapLevels.TryGetValue(levelId, out var map))
+		public static BeatmapLevel GetPreviewBeatmapFromLevelId(string levelId) {
+			if(beatmapLevelsModel._allLoadedBeatmapLevelsRepository.TryGetBeatmapLevelById(levelId, out var map))
 				return map;
 
 			return null;
@@ -44,25 +58,53 @@ namespace Shaffuru.GameLogic {
 
 
 
-		public Task<GetBeatmapLevelResult> LoadBeatmap(string levelId) {
-			return beatmapLevelsModel.GetBeatmapLevelAsync(levelId, CancellationToken.None);
+		public Task<LoadBeatmapLevelDataResult> LoadBeatmap(string levelId) {
+			return beatmapLevelsModel.LoadBeatmapLevelDataAsync(levelId, BeatmapLevelDataVersion.Original, CancellationToken.None);
 		}
 
-		public async Task<IReadonlyBeatmapData> TransformDifficulty(IDifficultyBeatmap difficulty) {
+		public LoadedDifficultyBeatmap GetDifficulty(string levelId, BeatmapDifficulty difficulty, IBeatmapLevelData beatmapLevelData) {
+			var level = GetPreviewBeatmapFromLevelId(levelId);
+			var basicData = level?.GetDifficultyBeatmapData(Anlasser.standardCharacteristic, difficulty);
+
+			if(basicData == null)
+				return null;
+
+			return new LoadedDifficultyBeatmap() {
+				level = level,
+				beatmapKey = new BeatmapKey(levelId, Anlasser.standardCharacteristic, difficulty),
+				beatmapBasicData = basicData,
+				beatmapLevelData = beatmapLevelData
+			};
+		}
+
+		public async Task<IReadonlyBeatmapData> TransformDifficulty(LoadedDifficultyBeatmap difficulty) {
 			var playerSpecificSettings = _sceneSetupData.playerSpecificSettings;
 			var gameplayModifiers = _sceneSetupData.gameplayModifiers;
+
+			difficulty.audioClip = await _sceneSetupData._audioClipAsyncLoader.LoadSong(difficulty.beatmapLevelData);
 
 			// Process the new beatmap as tho we'd play it so LeftHanded etc is accounted for
 			var environmentEffectsFilterPreset = (difficulty.difficulty == BeatmapDifficulty.ExpertPlus) ? playerSpecificSettings.environmentEffectsFilterExpertPlusPreset : playerSpecificSettings.environmentEffectsFilterDefaultPreset;
 			return BeatmapDataTransformHelper.CreateTransformedBeatmapData(
-				await difficulty.GetBeatmapDataAsync(_sceneSetupData.environmentInfo, playerSpecificSettings),
+				await _sceneSetupData._beatmapDataLoader.LoadBeatmapDataAsync(
+					difficulty.beatmapLevelData,
+					difficulty.beatmapKey,
+					difficulty.level.beatsPerMinute,
+					difficulty.beatmapBasicData.environmentName == _sceneSetupData.targetEnvironmentInfo.serializedName,
+					_sceneSetupData.targetEnvironmentInfo,
+					_sceneSetupData.originalEnvironmentInfo,
+					BeatmapLevelDataVersion.Original,
+					gameplayModifiers,
+					playerSpecificSettings,
+					false
+				),
 				difficulty.level,
 				gameplayModifiers,
 				playerSpecificSettings.leftHanded,
 				environmentEffectsFilterPreset,
-				_sceneSetupData.environmentInfo.environmentIntensityReductionOptions,
+				_sceneSetupData.originalEnvironmentInfo.environmentIntensityReductionOptions,
 				// This is (currently) only used to decide if to merge walls or not...
-				_sceneSetupData.mainSettingsModel
+				_sceneSetupData._settingsManager.settings
 			);
 		}
 	}

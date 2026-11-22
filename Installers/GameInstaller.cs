@@ -9,7 +9,7 @@ namespace Shaffuru.Installers {
 		public override void InstallBindings() {
 			var setupData = Container.Resolve<GameplayCoreSceneSetupData>();
 
-			if(!setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
+			if(!setupData.beatmapLevel.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
 				return;
 
 			Container.BindInterfacesAndSelfTo<SongQueueManager>().AsSingle();

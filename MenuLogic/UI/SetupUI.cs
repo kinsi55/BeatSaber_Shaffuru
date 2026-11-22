@@ -52,7 +52,7 @@ namespace Shaffuru.MenuLogic.UI {
 		void PreparePlaylistStuff(bool rebuild = true) {
 			var hasLib = IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null;
 			if(playlistDropdown != null)
-				playlistDropdown.interactable = hasLib;
+				playlistDropdown.Interactable = hasLib;
 
 			if(!rebuild)
 				return;
@@ -64,7 +64,7 @@ namespace Shaffuru.MenuLogic.UI {
 		}
 
 		void LoadPlaylistsList() {
-			playlists.AddRange(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.packName).Distinct());
+			playlists.AddRange(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.Title).Distinct());
 
 			if(playlistDropdown != null) {
 				playlistDropdown.UpdateChoices();
