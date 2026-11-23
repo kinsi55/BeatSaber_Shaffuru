@@ -81,6 +81,19 @@ namespace Shaffuru.AppLogic {
 		public static bool supportsMappingExtensions => IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 		bool allowMappingExtensions = false;
 
+		bool RequiresUnallowedMod(in string[] r) {
+			foreach(var x in r) {
+				// Mapping Extensions works on dynamically loaded levels, Noodle wont, neither would Vivify
+				if(allowMappingExtensions && x == "Mapping Extensions")
+					continue;
+				// Chroma wont work properly but does it really matter
+				if(x == "Chroma")
+					continue;
+				return true;
+			}
+			return false;
+		}
+
 		ValidSong LevelFilterCheck(BeatmapLevel level, Dictionary<string, BeatmapDifficulty[]> playlistSongs = null, bool forceNoFilters = false) {
 			if(!forceNoFilters) {
 				if(level.songDuration - level.songTimeOffset < minSongLength)
@@ -147,7 +160,7 @@ namespace Shaffuru.AppLogic {
 						var r = extradata.additionalDifficultyData._requirements;
 
 						// I have a feeling any requirements in the map would be BAAAD
-						if(r.Length != 0 && (!allowMappingExtensions || Array.Exists(r, x => x != "Mapping Extensions")))
+						if(RequiresUnallowedMod(r))
 							continue;
 					}
 
@@ -183,6 +196,10 @@ namespace Shaffuru.AppLogic {
 
 			var __SongdetailsFilterCheckVS = new ValidSong();
 
+			// Filter mods not explicitly allowed (Chroma doesnt work but is fine to be loaded, same for Cinema)
+			var allowedMods = SongDetailsCache.Structs.MapMods.Chroma | SongDetailsCache.Structs.MapMods.Cinema |
+				(allowMappingExtensions ? SongDetailsCache.Structs.MapMods.MappingExtensions : 0);
+
 			for(var i = (int)song.diffOffset + song.diffCount; --i >= song.diffOffset;) {
 				ref var diff = ref SongDetailsUtil.instance.difficulties[i];
 
@@ -201,13 +218,8 @@ namespace Shaffuru.AppLogic {
 						continue;
 				}
 
-				if(fullCheck) {
-					if(!allowMappingExtensions && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
-						continue;
-
-					if((diff.mods & (SongDetailsCache.Structs.MapMods.NoodleExtensions | SongDetailsCache.Structs.MapMods.Chroma)) != 0)
-						continue;
-				}
+				if(fullCheck && (diff.mods & ~allowedMods) != 0)
+					continue;
 
 				__SongdetailsFilterCheckVS.SetDiffValid((BeatmapDifficulty)diff.difficulty);
 			}
