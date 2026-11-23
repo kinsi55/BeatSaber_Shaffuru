@@ -20,7 +20,7 @@ namespace Shaffuru.GameLogic {
 
 		public void DissolveAll(float dissolveTime) {
 			// The old maps objects which are dissolving keep moving with the NJS they have now
-			freezeDissolvingNjs?.Freeze(beatmapObjectManager._allBeatmapObjects, dissolveTime);
+			freezeDissolvingNjs?.Freeze(beatmapObjectManager._allBeatmapObjects);
 
 			foreach(var boc in beatmapObjectManager._allBeatmapObjects)
 				boc.Dissolve(dissolveTime);

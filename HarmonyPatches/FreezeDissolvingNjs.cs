@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using HarmonyLib;
 using SiraUtil.Affinity;
 using UnityEngine;
 
@@ -8,56 +9,56 @@ namespace Shaffuru.HarmonyPatches {
 	/*
 	 * Notes, walls and arcs read the shared jump / NJS data every frame. When switching maps it gets re-initialized
 	 * for the new map while the old maps objects are still dissolving, which would make them jump around, so while
-	 * dissolving they get a frozen copy of the old data swapped in instead
+	 * dissolving they get a frozen copy of the old data instead
 	 */
 	class FreezeDissolvingNjs : IAffinity {
 		static readonly MethodInfo METHOD_object_MemberwiseClone = typeof(object).GetMethod("MemberwiseClone", BindingFlags.Instance | BindingFlags.NonPublic);
 
+		// The fields are readonly, so the publicizer alone doesnt allow writing them
+		static readonly AccessTools.FieldRef<NoteJump, IVariableMovementDataProvider> FIELD_NoteJump_provider =
+			AccessTools.FieldRefAccess<NoteJump, IVariableMovementDataProvider>(nameof(NoteJump._variableMovementDataProvider));
+		static readonly AccessTools.FieldRef<NoteFloorMovement, IVariableMovementDataProvider> FIELD_NoteFloorMovement_provider =
+			AccessTools.FieldRefAccess<NoteFloorMovement, IVariableMovementDataProvider>(nameof(NoteFloorMovement._variableMovementDataProvider));
+		static readonly AccessTools.FieldRef<NoteWaiting, IVariableMovementDataProvider> FIELD_NoteWaiting_provider =
+			AccessTools.FieldRefAccess<NoteWaiting, IVariableMovementDataProvider>(nameof(NoteWaiting._variableMovementDataProvider));
+		static readonly AccessTools.FieldRef<ObstacleControllerBase, IVariableMovementDataProvider> FIELD_ObstacleControllerBase_provider =
+			AccessTools.FieldRefAccess<ObstacleControllerBase, IVariableMovementDataProvider>(nameof(ObstacleControllerBase._variableMovementDataProvider));
+		static readonly AccessTools.FieldRef<SliderController, IVariableMovementDataProvider> FIELD_SliderController_provider =
+			AccessTools.FieldRefAccess<SliderController, IVariableMovementDataProvider>(nameof(SliderController._variableMovementDataProvider));
+		static readonly AccessTools.FieldRef<SliderMovement, IVariableMovementDataProvider> FIELD_SliderMovement_provider =
+			AccessTools.FieldRefAccess<SliderMovement, IVariableMovementDataProvider>(nameof(SliderMovement._variableMovementDataProvider));
+
 		readonly ConditionalWeakTable<MonoBehaviour, IVariableMovementDataProvider> originalProviders = new ConditionalWeakTable<MonoBehaviour, IVariableMovementDataProvider>();
 		IVariableMovementDataProvider frozenProvider;
-		// Only so we dont have to check the table for every object every frame when nothing is dissolving
-		float frozenUntil;
 
-		public void Freeze(IEnumerable<IBeatmapObjectController> dissolvingObjects, float dissolveTime) {
+		public void Freeze(IEnumerable<IBeatmapObjectController> dissolvingObjects) {
 			frozenProvider = null;
-			frozenUntil = Time.time + dissolveTime + 0.5f;
 
 			foreach(var x in dissolvingObjects) {
 				switch(x) {
 					case NoteController note:
-						Add(note._noteMovement._jump, note._noteMovement._jump._variableMovementDataProvider);
-						Add(note._noteMovement._floorMovement, note._noteMovement._floorMovement._variableMovementDataProvider);
-						Add(note._noteMovement._waiting, note._noteMovement._waiting._variableMovementDataProvider);
+						Freeze(note._noteMovement._jump, ref FIELD_NoteJump_provider(note._noteMovement._jump));
+						Freeze(note._noteMovement._floorMovement, ref FIELD_NoteFloorMovement_provider(note._noteMovement._floorMovement));
+						Freeze(note._noteMovement._waiting, ref FIELD_NoteWaiting_provider(note._noteMovement._waiting));
 						break;
 					case ObstacleController obstacle:
-						Add(obstacle, obstacle._variableMovementDataProvider);
+						Freeze(obstacle, ref FIELD_ObstacleControllerBase_provider(obstacle));
 						break;
 					case SliderController slider:
-						Add(slider, slider._variableMovementDataProvider);
-						Add(slider._sliderMovement, slider._sliderMovement._variableMovementDataProvider);
+						Freeze(slider, ref FIELD_SliderController_provider(slider));
+						Freeze(slider._sliderMovement, ref FIELD_SliderMovement_provider(slider._sliderMovement));
 						break;
 				}
 			}
 		}
 
-		void Add(MonoBehaviour element, IVariableMovementDataProvider provider) {
-			originalProviders.Remove(element);
-			originalProviders.Add(element, provider);
-			frozenProvider ??= (IVariableMovementDataProvider)METHOD_object_MemberwiseClone.Invoke(provider, null);
-		}
+		void Freeze(MonoBehaviour element, ref IVariableMovementDataProvider provider) {
+			// Might still be frozen from a previous switch, in which case the field doesnt hold the original anymore
+			if(!originalProviders.TryGetValue(element, out _))
+				originalProviders.Add(element, provider);
 
-		[AffinityPatch(typeof(NoteJump), nameof(NoteJump.ManualUpdate))]
-		[AffinityPatch(typeof(NoteFloorMovement), nameof(NoteFloorMovement.ManualUpdate))]
-		[AffinityPatch(typeof(NoteFloorMovement), nameof(NoteFloorMovement.ShouldMove))]
-		[AffinityPatch(typeof(NoteWaiting), nameof(NoteWaiting.ShouldWait))]
-		[AffinityPatch(typeof(ObstacleController), nameof(ObstacleController.ManualUpdate))]
-		[AffinityPatch(typeof(SliderController), nameof(SliderController.ManualUpdate))]
-		[AffinityPatch(typeof(SliderMovement), nameof(SliderMovement.ManualUpdate))]
-		[AffinityPrefix]
-		void Prefix(MonoBehaviour __instance, ref IVariableMovementDataProvider ____variableMovementDataProvider) {
-			// Once set it stays until the object gets re-used
-			if(Time.time < frozenUntil && originalProviders.TryGetValue(__instance, out _))
-				____variableMovementDataProvider = frozenProvider;
+			frozenProvider ??= (IVariableMovementDataProvider)METHOD_object_MemberwiseClone.Invoke(provider, null);
+			provider = frozenProvider;
 		}
 
 		// Objects are pooled, once they get re-used they are not dissolving anymore
