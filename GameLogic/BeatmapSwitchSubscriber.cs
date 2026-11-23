@@ -25,7 +25,7 @@ namespace Shaffuru.GameLogic {
 			queueProcessor.switchedToNewSong -= QueueProcessor_switchedToNewSong;
 		}
 
-		private void QueueProcessor_switchedToNewSong(ShaffuruSong song, IDifficultyBeatmap beatmap, IReadonlyBeatmapData beatmapData) {
+		private void QueueProcessor_switchedToNewSong(ShaffuruSong song, LoadedDifficultyBeatmap beatmap, IReadonlyBeatmapData beatmapData) {
 			void cont() => beatmapSwitcher.SwitchToDifferentBeatmap(beatmap, beatmapData, (float)song.startTime, (float)song.length);
 
 			if(delayMs == 0) {
@@ -33,7 +33,8 @@ namespace Shaffuru.GameLogic {
 				return;
 			}
 
-			Task.Delay(delayMs).ContinueWith(_ => cont(), TaskContinuationOptions.None);
+			// The switch starts a coroutine, so it has to continue on the main thread
+			Task.Delay(delayMs).ContinueWith(_ => cont(), IPA.Utilities.Async.UnityMainThreadTaskScheduler.Default);
 		}
 	}
 }

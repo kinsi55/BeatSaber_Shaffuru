@@ -7,27 +7,27 @@ using System.Threading.Tasks;
 
 namespace Shaffuru.Util {
 	static class PlaylistsUtil {
-		public static ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> GetAllSongsInPlaylist(string playlistName) {
+		public static Dictionary<string, BeatmapDifficulty[]> GetAllSongsInPlaylist(string playlistName) {
 			// This implementation kinda pains me from an overhead standpoint but its the simplest I could come up with
 			var x = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager
 				.GetAllPlaylists(true)
-				.FirstOrDefault(x => x.packName == playlistName);
+				.FirstOrDefault(x => x.Title == playlistName);
 
-			IEnumerable<IGrouping<IPreviewBeatmapLevel, BeatSaberPlaylistsLib.Types.PlaylistSong>> theThing = null;
+			IEnumerable<IGrouping<string, BeatSaberPlaylistsLib.Types.PlaylistSong>> theThing = null;
 
 			if(x is BeatSaberPlaylistsLib.Legacy.LegacyPlaylist l) {
-				theThing = l.BeatmapLevels.Cast<BeatSaberPlaylistsLib.Types.PlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
+				theThing = l.Cast<BeatSaberPlaylistsLib.Types.PlaylistSong>().Where(x => x.BeatmapLevel != null).GroupBy(x => x.LevelId);
 			} else if(x is BeatSaberPlaylistsLib.Blist.BlistPlaylist bl) {
-				theThing = bl.BeatmapLevels.Cast<BeatSaberPlaylistsLib.Blist.BlistPlaylistSong>().GroupBy(x => x.PreviewBeatmapLevel);
+				theThing = bl.Cast<BeatSaberPlaylistsLib.Blist.BlistPlaylistSong>().Where(x => x.BeatmapLevel != null).GroupBy(x => x.LevelId);
 			} else {
 				return null;
 			}
 
-			var playlistSongs = new ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]>();
+			var playlistSongs = new Dictionary<string, BeatmapDifficulty[]>();
 
 			foreach(var xy in theThing) {
 				if(!Config.Instance.filter_playlist_onlyHighlighted) {
-					playlistSongs.Add(xy.First().PreviewBeatmapLevel, null);
+					playlistSongs.Add(xy.Key, null);
 					continue;
 				}
 
@@ -35,7 +35,7 @@ namespace Shaffuru.Util {
 					.SelectMany(x => x.Difficulties);
 
 				playlistSongs.Add(
-					xy.First().PreviewBeatmapLevel,
+					xy.Key,
 
 					!highlightedDiffs.Any() ? null : highlightedDiffs.Select(x => x.BeatmapDifficulty).Distinct().ToArray()
 				);

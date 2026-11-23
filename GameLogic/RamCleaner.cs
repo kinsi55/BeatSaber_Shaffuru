@@ -49,19 +49,16 @@ namespace Shaffuru.GameLogic {
 			CreateLabelIfNeededAndEnableIt();
 
 			cleanLabel.text = clearingText + "0.00%";
-			/*
-			 * I have no idea why I need to do it 8 times, but It is always the 7-8th
-			 * time when the memory is ACTUALLY freed
-			 */
-			for(var i = 1; i <= 8; i++) {
+			const int clearAmount = 2;
+			for(var i = 1; i <= clearAmount; i++) {
 				yield return new WaitForSeconds(0.2f);
 				UnityEngine.Scripting.GarbageCollector.GCMode = UnityEngine.Scripting.GarbageCollector.Mode.Enabled;
 				GC.Collect();
-				if(i == 8) {
+				if(i == clearAmount) {
 					GC.WaitForPendingFinalizers();
 					GC.Collect();
 				}
-				cleanLabel.text = clearingText + (i / 8f).ToString("0.00%");
+				cleanLabel.text = clearingText + (i / (float)clearAmount).ToString("0.00%");
 			}
 			UnityEngine.Scripting.GarbageCollector.GCMode = oldMode;
 			cleanInfoText.SetActive(false);

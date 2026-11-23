@@ -72,7 +72,7 @@ namespace Shaffuru {
 
 		public bool random_prefer_top_diff = false;
 
-		public int ramclearer_frequency = 25;
+		public int ramclearer_frequency = 20;
 
 
 		void Sanitize() {

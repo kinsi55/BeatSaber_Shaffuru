@@ -1,30 +1,41 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using Polyglot;
+using BGLib.Polyglot;
 using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
 using UnityEngine;
 using Zenject;
 
 namespace Shaffuru.MenuLogic {
+	static class BeatmapLevelDataSOExtensions {
+		public static void SetJsonData(this BeatmapLevelDataSO beatmapLevelData, string json) {
+			beatmapLevelData.SetDifficultyBeatmapSets(new[] {
+				new BeatmapLevelDataSO.DifficultyBeatmapSet(Anlasser.standardCharacteristic.serializedName, new[] {
+					new BeatmapLevelDataSO.DifficultyBeatmap(BeatmapDifficulty.ExpertPlus, new TextAsset(json))
+				})
+			});
+		}
+	}
+
 	class Anlasser {
 		public const string LevelIdPrefix = "___Shaffuru_";
 
 		readonly PlayerDataModel playerDataModel;
 		readonly MenuTransitionsHelper menuTransitionsHelper;
+		readonly EnvironmentsListModel environmentsListModel;
 
 
 		static int lastShaffuruMapLength = 0;
-		public readonly static BeatmapLevelSO beatmapLevel = ScriptableObject.CreateInstance<BeatmapLevelSO>();
-		readonly static BeatmapDataSO beatmapLevelData = ScriptableObject.CreateInstance<BeatmapDataSO>();
-		public readonly static BeatmapLevelSO.DifficultyBeatmap difficultyBeatmap = new BeatmapLevelSO.DifficultyBeatmap(beatmapLevel, BeatmapDifficulty.ExpertPlus, 0, 10, 0, 0, beatmapLevelData);
+		public static BeatmapLevel beatmapLevel { get; private set; }
+		public readonly static BeatmapLevelDataSO beatmapLevelData = ScriptableObject.CreateInstance<BeatmapLevelDataSO>();
 		
 		static UBinder<Plugin, System.Random> rngSource;
 
 
-		static EnvironmentInfoSO defaultEnvironment;
+		static string defaultEnvironment;
 		public static BeatmapCharacteristicSO standardCharacteristic { get; private set; }
 
 		public Anlasser(
@@ -32,47 +43,33 @@ namespace Shaffuru.MenuLogic {
 			CustomLevelLoader customLevelLoader,
 			[InjectOptional] MenuTransitionsHelper menuTransitionsHelper,
 			BeatmapCharacteristicCollection beatmapCharacteristicCollection,
+			EnvironmentsListModel environmentsListModel,
 			UBinder<Plugin, System.Random> rng
 		) {
 			this.playerDataModel = playerDataModel;
 			this.menuTransitionsHelper = menuTransitionsHelper;
+			this.environmentsListModel = environmentsListModel;
 
 			rngSource = rng;
 
-			defaultEnvironment ??= customLevelLoader.LoadEnvironmentInfo("", false);
+			customLevelLoader._defaultEnvironmentInfo.OperationHandle.WaitForCompletion();
+			defaultEnvironment ??= customLevelLoader.CreateEnvironmentName("", customLevelLoader._defaultEnvironmentInfo);
 			standardCharacteristic = beatmapCharacteristicCollection.GetBeatmapCharacteristicBySerializedName("Standard");
 		}
 
 		public event Action<LevelCompletionResults> finishedOrFailedCallback;
 
-
-		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelData, AudioClip>.Accessor BeatmapLevelData_audioClip =
-			IPA.Utilities.FieldAccessor<BeatmapLevelData, AudioClip>.GetAccessor("_audioClip");
-
-		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelSO, string>.Accessor BeatmapLevelSO_songName =
-			IPA.Utilities.FieldAccessor<BeatmapLevelSO, string>.GetAccessor("_songName");
-
-		static readonly IPA.Utilities.FieldAccessor<BeatmapLevelSO, string>.Accessor BeatmapLevelSO_levelID =
-			IPA.Utilities.FieldAccessor<BeatmapLevelSO, string>.GetAccessor("_levelID");
-
 		public void UpdateFakeBeatmap(int lengthSeconds) {
 			if(lengthSeconds > 120 * 60)
 				throw new ArgumentOutOfRangeException();
 
-			// for ref access
-			var beatmapLevel = Anlasser.beatmapLevel;
-
-			var isFirst = beatmapLevel.songAudioClip == null;
-
 			if(lastShaffuruMapLength != lengthSeconds) {
-				if(beatmapLevel.songAudioClip != null)
-					GameObject.Destroy(beatmapLevel.songAudioClip);
+				if(beatmapLevelData.songAudioClip != null)
+					GameObject.Destroy(beatmapLevelData.songAudioClip);
 
 				var audioClip = AudioClip.Create("", lengthSeconds * 1000, 1, 1000, false);
 
-				beatmapLevel._audioClip = audioClip;
-				if(beatmapLevel.beatmapLevelData is BeatmapLevelData b)
-					BeatmapLevelData_audioClip(ref b) = audioClip;
+				beatmapLevelData.SetAudioClip(audioClip);
 				lastShaffuruMapLength = lengthSeconds;
 			}
 
@@ -87,30 +84,27 @@ namespace Shaffuru.MenuLogic {
 				beatmapLevelData.SetJsonData(@"{""_version"":""2.2.0"",""_events"":[{""_value"":3}],""_notes"":[{""_time"":0.5,""_lineIndex"":1,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":1,""_lineLayer"":1,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":1,""_lineLayer"":2,""_cutDirection"":1},{""_time"":0.5,""_lineIndex"":2,""_type"":1,""_cutDirection"":8},{""_time"":" + a + @"}],""_obstacles"":[{""_time"":0.4,""_lineIndex"":3,""_duration"":3,""_width"":1},{""_time"":0.4,""_duration"":3,""_width"":1},{""_time"":" + a + @",""_duration"":0.1,""_width"":4}],""_waypoints"":[]}");
 			}
 
-			if(isFirst) {
-				beatmapLevel.InitFull(
-					LevelIdPrefix,
-					"Shaffuru",
-					"",
-					"Kinsi55",
-					"Kinsi55",
-					beatmapLevel.songAudioClip,
-					bpm,
-					0,
-					0,
-					0,
-					0,
-					0,
-					SongCore.Loader.defaultCoverImage,
-					defaultEnvironment,
-					defaultEnvironment,
-					new EnvironmentInfoSO[] { },
-					new[] { new BeatmapLevelSO.DifficultyBeatmapSet(standardCharacteristic, new[] { difficultyBeatmap }) }
-				);
-			}
-
-			BeatmapLevelSO_songName(ref beatmapLevel) = $"Shaffuru ({lengthSeconds / 60} Minutes)";
-			BeatmapLevelSO_levelID(ref beatmapLevel) = $"{LevelIdPrefix}{lengthSeconds}";
+			beatmapLevel = new BeatmapLevel(
+				0,
+				false,
+				$"{LevelIdPrefix}{lengthSeconds}",
+				$"Shaffuru ({lengthSeconds / 60} Minutes)",
+				"",
+				"Kinsi55",
+				new[] { "Kinsi55" },
+				new string[] { },
+				bpm,
+				-6f,
+				0,
+				0,
+				0,
+				lengthSeconds,
+				PlayerSensitivityFlag.Safe,
+				new StaticPreviewMediaData(SongCore.Loader.defaultCoverImage, beatmapLevelData.songAudioClip),
+				new Dictionary<(BeatmapCharacteristicSO, BeatmapDifficulty), BeatmapBasicData>() {
+					{ (standardCharacteristic, BeatmapDifficulty.ExpertPlus), new BeatmapBasicData(10, 0, defaultEnvironment, null, 0, 0, 0, 0, new[] { "Kinsi55" }, new string[] { }) }
+				}
+			);
 		}
 
 		static MethodInfo StartStandardLevelMethod = typeof(MenuTransitionsHelper).GetMethods().FirstOrDefault(
@@ -143,17 +137,21 @@ namespace Shaffuru.MenuLogic {
 
 			menuTransitionsHelper.StartStandardLevel(
 				"Shaffuru",
-				difficultyBeatmap,
+				new BeatmapKey(beatmapLevel.levelID, standardCharacteristic, BeatmapDifficulty.ExpertPlus),
 				beatmapLevel,
+				beatmapLevelData,
 				playerDataModel.playerData.overrideEnvironmentSettings,
 				playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(),
+				playerDataModel.playerData.colorSchemesSettings.ShouldOverrideLightshowColors(),
 				playerDataModel.playerData.colorSchemesSettings.GetOverrideColorScheme(),
 				playerDataModel.playerData.gameplayModifiers,
 				playerDataModel.playerData.playerSpecificSettings,
 				null,
+				environmentsListModel,
 				Localization.Get("BUTTON_MENU"),
 				false,
 				false,
+				null,
 				null,
 				endCallback,
 				null

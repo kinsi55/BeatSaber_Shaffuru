@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Shaffuru.AppLogic;
+using Shaffuru.HarmonyPatches;
 using Zenject;
 
 namespace Shaffuru.GameLogic {
@@ -18,12 +19,18 @@ namespace Shaffuru.GameLogic {
 		}
 
 		public void DissolveAll(float dissolveTime) {
+			// The old maps objects which are dissolving keep moving with the NJS they have now
+			freezeDissolvingNjs?.Freeze(beatmapObjectManager._allBeatmapObjects, dissolveTime);
+
 			foreach(var boc in beatmapObjectManager._allBeatmapObjects)
 				boc.Dissolve(dissolveTime);
 		}
 
-		public BeatmapObjectDissolver(BeatmapObjectManager beatmapObjectManager) {
+		readonly FreezeDissolvingNjs freezeDissolvingNjs;
+
+		public BeatmapObjectDissolver(BeatmapObjectManager beatmapObjectManager, [InjectOptional] FreezeDissolvingNjs freezeDissolvingNjs) {
 			this.beatmapObjectManager = beatmapObjectManager;
+			this.freezeDissolvingNjs = freezeDissolvingNjs;
 		}
 
 		public void Initialize() {

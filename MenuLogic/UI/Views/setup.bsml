@@ -1,4 +1,4 @@
-﻿<vertical child-control-height='false' child-expand-height='false' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+﻿<vertical child-control-height='false' child-expand-height='false' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:noNamespaceSchemaLocation='https://monkeymanboy.github.io/BSML-Docs/BSMLSchema.xsd'>
 	<tab-selector tab-tag='tabs' id='tabSelector'/>
 	<vertical vertical-fit="PreferredSize" preferred-height="62" pad-bottom="2" pad-top="8">
 		<tab tags='tabs' tab-name='Song Filtering'>
@@ -36,29 +36,29 @@
 					<!--<toggle-setting value='chat_currentmap_enabled' text='Allow Getting current song (!chaoslink)' apply-on-change='true'/>-->
 					<toggle-setting value='chat_request_enabled' text='Allow Chat requests (!sr/!chaos [bsr code])' apply-on-change='true'/>
 					<toggle-setting value='chat_request_show_name' text='Show name of request song in Chat' apply-on-change='true'/>
-					<toggle-setting value='request_allowDownloading' text='Allow downloading of requested songs *²' apply-on-change='true'
+					<toggle-setting value='request_allowDownloading' text='Allow downloading of requested songs *' apply-on-change='true'
 						hover-hint='When a user requests a song that you have not downloaded yet should they be downloaded?'
 					/>
 					<toggle-setting value='request_allowSpecificDiff' text='Allow a specific difficulty to be requested' apply-on-change='true'
 						hover-hint='Usage: !sr 25f Normal or !sr 25f ExpertPlus 4:20'
 					/>
-					<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *' apply-on-change='true'
+					<toggle-setting value='request_allowSpecificTime' text='Allow a specific start time to be requested *²' apply-on-change='true'
 						hover-hint='Usage: !sr 25f 4:20 or !sr 25f Expert 4:20'
 					/>
 					<slider-setting value='request_limitPerUser' text='Max queued songs per user' integer-only='true' min='1' max='10' apply-on-change='true'/>
 				</macro.as-host>
-					
-				<text text='* Only respected when Jumpcut is enabled' color='cyan' font-size='3.5' align='Center'/>
-				<text text='*² Not possible when you have a Playlist filter applied' color='cyan' font-size='3.5' align='Center'/>
+
+				<text text='* Not possible when you have a Playlist filter applied' color='cyan' font-size='3.5' align='Center'/>
+				<text text='*² Only respected when Jumpcut is enabled' color='cyan' font-size='3.5' align='Center'/>
 			</modifier-container>
 		</tab>
 		<tab tags='tabs' tab-name='Map Transition'>
 			<modifier-container child-expand-width='true' horizontal-fit='PreferredSize'>
 				<macro.as-host host='config'>
-					<slider-setting value='transition_reactionTime' text='Transition duration (Seconds)' min='0.3' max='1.0' increment='0.01' apply-on-change='true'
+					<slider-setting value='transition_reactionTime' text='Transition duration (Seconds)' word-wrapping='false' min='0.3' max='1.0' increment='0.01' apply-on-change='true'
 						hover-hint='How long should the transition from one song to another be?'
 					/>
-					<slider-setting value='transition_gracePeriod' text='Transition grace period (Seconds)' min='0.0' max='1.2' increment='0.01' apply-on-change='true'
+					<slider-setting value='transition_gracePeriod' text='Transition grace period (Seconds)' word-wrapping='false' min='0.0' max='1.2' increment='0.01' apply-on-change='true'
 						hover-hint='Amount of seconds that you cant lose health in when the map switches'
 					/>
 					<toggle-setting value='jumpcut_enabled' text='Enable Jumpcut (Aka "Chaosmod")' apply-on-change='true'
@@ -129,7 +129,7 @@
 						<slider-setting value='advanced_nps_min' text='Min. Note/s' min='0' max='10' increment='0.2' apply-on-change='true' show-buttons='true'/>
 						<slider-setting value='advanced_nps_max' text='Max. Note/s' min='2' max='25' increment='0.2' apply-on-change='true' show-buttons='true'/>
 						<slider-setting value='advanced_bpm_min' text='Min. BPM' integer-only='true' min='0' max='300' increment='5' apply-on-change='true' show-buttons='true'/>
-						<toggle-setting value='advanced_only_ranked' text='Must be ranked' apply-on-change='true'/>
+						<toggle-setting value='advanced_only_ranked' text='Must be ranked (On SS)' apply-on-change='true'/>
 					</macro.as-host>
 					<slider-setting value='_hideOlderThan' text='Min. upload date' max='~hideOlderThanOptionsCount' bind-value="true" apply-on-change="true" integer-only='true' formatter='DateTimeToStr'/>
 				</modifier-container>

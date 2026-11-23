@@ -11,9 +11,6 @@ using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class CustomAudioSource {
-		static readonly FieldInfo FIELD_GameSongController_failAudioPitchGainEffect 
-			= AccessTools.Field(typeof(GameSongController), "_failAudioPitchGainEffect");
-
 		readonly AudioMixerGroup mixer;
 		readonly float defaultPitch = 0;
 
@@ -36,7 +33,7 @@ namespace Shaffuru.GameLogic {
 
 			this.audioTimeWrapper = audioTimeWrapper;
 
-			audioLatency = gameplayCoreSceneSetupData.mainSettingsModel.audioLatency;
+			audioLatency = gameplayCoreSceneSetupData._settingsManager.settings.audio.latency;
 
 			source = new GameObject("CAS", typeof(AudioSource)).GetComponent<AudioSource>();
 
@@ -72,7 +69,7 @@ namespace Shaffuru.GameLogic {
 			source.pitch = defaultPitch;
 			source.volume = defaultVolume;
 
-			((AudioPitchGainEffect)FIELD_GameSongController_failAudioPitchGainEffect.GetValue(gameSongController))?.SetAudioSource(source);
+			gameSongController._failAudioPitchGainEffect?.SetAudioSource(source);
 		}
 
 		public void ResetFailEffect() {

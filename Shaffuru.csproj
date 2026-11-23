@@ -49,7 +49,10 @@
     <Reference Include="0Harmony">
       <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="BeatmapCore">
+    <Reference Include="AdditionalContentModel.Interfaces">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\AdditionalContentModel.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="BeatmapCore" Publicize="true">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
     </Reference>
     <Reference Include="BeatSaberPlaylistsLib">
@@ -57,6 +60,24 @@
     </Reference>
     <Reference Include="BeatSaberPlus">
       <HintPath>Refs\BeatSaberPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="BeatSaber.GameSettings">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.GameSettings.dll</HintPath>
+    </Reference>
+    <Reference Include="BeatSaber.Settings">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.Settings.dll</HintPath>
+    </Reference>
+    <Reference Include="BeatSaber.ViewSystem">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
+    </Reference>
+    <Reference Include="BGLib.AppFlow">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.AppFlow.dll</HintPath>
+    </Reference>
+    <Reference Include="BGLib.Polyglot">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.Polyglot.dll</HintPath>
+    </Reference>
+    <Reference Include="BGLib.UnityExtension">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
     </Reference>
     <Reference Include="BSML">
       <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
@@ -70,6 +91,9 @@
     <Reference Include="Colors">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Colors.dll</HintPath>
     </Reference>
+    <Reference Include="DataModels" Publicize="true">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
+    </Reference>
     <Reference Include="GameplayCore">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\GameplayCore.dll</HintPath>
     </Reference>
@@ -79,11 +103,11 @@
     <Reference Include="MappingExtensions">
       <HintPath>Refs\MappingExtensions.dll</HintPath>
     </Reference>
+    <Reference Include="MediaLoader">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\MediaLoader.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Polyglot">
-      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Polyglot.dll</HintPath>
     </Reference>
     <Reference Include="protobuf-net">
       <HintPath>$(BeatSaberDir)\Libs\protobuf-net.dll</HintPath>
@@ -115,6 +139,15 @@
     </Reference>
     <Reference Include="IPA.Loader">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+    </Reference>
+    <Reference Include="Tweening">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.Addressables">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.Addressables.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.ResourceManager">
+      <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.ResourceManager.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>

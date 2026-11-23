@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Shaffuru.Util {
 	static class MapUtil {
-		public static string GetHashOfPreview(IPreviewBeatmapLevel preview) {
+		public static string GetHashOfPreview(BeatmapLevel preview) {
 			if(preview.levelID.Length < 53)
 				return null;
 

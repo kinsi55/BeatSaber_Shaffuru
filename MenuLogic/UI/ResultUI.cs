@@ -17,7 +17,7 @@ namespace Shaffuru.MenuLogic.UI {
 	[ViewDefinition("Shaffuru.MenuLogic.UI.Views.result.bsml")]
 	class ResultUI : BSMLAutomaticViewController {
 		public event Action closed;
-		public event Action<IPreviewBeatmapLevel> playSong;
+		public event Action<BeatmapLevel> playSong;
 
 		[UIAction("closexd")] void closexd() => closed.Invoke();
 
@@ -42,7 +42,7 @@ namespace Shaffuru.MenuLogic.UI {
 			[UIComponent("cover")] readonly ImageView cover = null;
 
 			readonly ShaffuruSong song;
-			internal IPreviewBeatmapLevel preview { get; private set; }
+			internal BeatmapLevel preview { get; private set; }
 
 			readonly string songName;
 			readonly string playTime;
@@ -73,7 +73,7 @@ namespace Shaffuru.MenuLogic.UI {
 				bg.color = new Color(0, 0, 0, 0.55f);
 
 				cover.sprite = SongCore.Loader.defaultCoverImage;
-				preview?.GetCoverImageAsync(CancellationToken.None).ContinueWith(x => {
+				preview?.previewMediaData.GetCoverSpriteAsync().ContinueWith(x => {
 					cover.sprite = x.Result;
 				}, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.FromCurrentSynchronizationContext());
 			}
@@ -109,19 +109,19 @@ namespace Shaffuru.MenuLogic.UI {
 
 			sessionAcc.text = string.Format("Score: {0:n0}", levelCompletionResult.multipliedScore);
 
-			songList.data.Clear();
-			songList.tableView.ReloadData();
+			songList.Data = Array.Empty<object>();
+			songList.TableView.ReloadData();
 
 
 			void SpawnTable() {
 				float accu = 0;
-				songList.data = playedSongList.list.Select(x => new SongListSong(x, accu += (float)x.length)).ToList<object>();
-				songList.tableView.ReloadData();
+				songList.Data = playedSongList.list.Select(x => new SongListSong(x, accu += (float)x.length)).ToList<object>();
+				songList.TableView.ReloadData();
 
-				songList.tableView.SelectCellWithIdx(0, true);
+				songList.TableView.SelectCellWithIdx(0, true);
 			}
 
-			void SpawnTableWhenSongsLoaded(SongCore.Loader _, ConcurrentDictionary<string, CustomPreviewBeatmapLevel> _2) {
+			void SpawnTableWhenSongsLoaded(SongCore.Loader _, ConcurrentDictionary<string, BeatmapLevel> _2) {
 				SongCore.Loader.SongsLoadedEvent -= SpawnTableWhenSongsLoaded;
 				SpawnTable();
 			}

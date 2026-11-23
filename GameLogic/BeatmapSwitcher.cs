@@ -10,11 +10,6 @@ using Zenject;
 
 namespace Shaffuru.GameLogic {
 	class BeatmapSwitcher : IDisposable {
-		static readonly IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.Accessor SETTER_BeatmapDataItem_time 
-			= IPA.Utilities.FieldAccessor<BeatmapDataItem, float>.GetAccessor($"<{nameof(BeatmapDataItem.time)}>k__BackingField");
-		static readonly IPA.Utilities.FieldAccessor<SliderData, float>.Accessor SETTER_SliderData_tailTime 
-			= IPA.Utilities.FieldAccessor<SliderData, float>.GetAccessor($"<{nameof(SliderData.tailTime)}>k__BackingField");
-
 		static readonly IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.Accessor SETTER_BeatmapDataCallbackWrapper_aheadTime 
 			= IPA.Utilities.FieldAccessor<BeatmapDataCallbackWrapper, float>.GetAccessor(nameof(BeatmapDataCallbackWrapper.aheadTime));
 
@@ -34,6 +29,7 @@ namespace Shaffuru.GameLogic {
 		public readonly CustomAudioSource customAudioSource;
 
 		readonly BeatmapObjectSpawnMovementData beatmapObjectSpawnMovementData;
+		readonly IVariableMovementDataProvider variableMovementDataProvider;
 
 		readonly RamCleaner ramCleaner;
 
@@ -63,24 +59,34 @@ namespace Shaffuru.GameLogic {
 
 			if(beatmapObjectSpawnController != null) {
 				beatmapObjectSpawnMovementData = beatmapObjectSpawnController.beatmapObjectSpawnMovementData;
-				startBeatmapCallbackAheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
+				variableMovementDataProvider = beatmapObjectSpawnController._variableMovementDataProvider;
+				startBeatmapCallbackAheadTime = variableMovementDataProvider.spawnAheadTime;
 			}
 		}
 
-		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset, int noteLinesCount) {
+		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset, int noteLinesCount, float startRelativeNjs, float minRelativeNjs) {
 			BeatmapObjectSpawnControllerHelpers.GetNoteJumpValues(sceneSetupData.playerSpecificSettings, mapOffset, out var noteJumpValueType, out var noteJumpValue);
 			beatmapObjectSpawnMovementData.Init(
 				// If this changes the game would probably explode - I dont think it does ever tho?
 				noteLinesCount,
+				jumpOffsetYProvider,
+				// This (probably?) wont work with 360 - too bad!
+				Vector3.right
+			);
+			variableMovementDataProvider.Init(
+				beatmapObjectSpawnMovementData.startHalfJumpDurationInBeats,
+				beatmapObjectSpawnMovementData.maxHalfJumpDistance,
 				njs,
+				minRelativeNjs,
 				bpm,
 				noteJumpValueType,
 				noteJumpValue,
-				jumpOffsetYProvider,
-				// This (probably?) wont work with 360 - too bad!
-				Vector3.right,
+				beatmapObjectSpawnMovementData.centerPos,
 				Vector3.forward
 			);
+			// Init() resets the variable NJS, start on the one the map would be at at this point
+			if(variableMovementDataProvider is VariableMovementDataProvider vmdp)
+				vmdp._relativeNoteJumpSpeedInterpolation.SetValues(startRelativeNjs, startRelativeNjs, 0, 0, EaseType.None);
 			beatmapCallbacksController.TriggerBeatmapEvent(new BPMChangeBeatmapEventData(0, bpm));
 		}
 
@@ -89,7 +95,7 @@ namespace Shaffuru.GameLogic {
 				beatmapObjectSpawnController._disableSpawning = !enable;
 		}
 
-		public void SwitchToDifferentBeatmap(IDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
+		public void SwitchToDifferentBeatmap(LoadedDifficultyBeatmap difficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
 			SharedCoroutineStarter.instance.StartCoroutine(NoSpawnZone());
 
 			IEnumerator NoSpawnZone() {
@@ -103,7 +109,7 @@ namespace Shaffuru.GameLogic {
 			}
 		}
 
-		IEnumerator Switcher(IDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
+		IEnumerator Switcher(LoadedDifficultyBeatmap replacementDifficultyBeatmap, IReadonlyBeatmapData replacementBeatmapData, float startTime, float secondsToInsert = 0) {
 			var reactionTime = Config.Instance.transition_reactionTime;
 			var dissolveTime = reactionTime * 0.6f;
 
@@ -114,7 +120,7 @@ namespace Shaffuru.GameLogic {
 				
 				audioTimeWrapper.Pause();
 
-				customAudioSource.SetClip(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
+				customAudioSource.SetClip(replacementDifficultyBeatmap.audioClip);
 
 				yield return new WaitForSecondsRealtime(dissolveTime * 0.2f);
 				yield return ramCleaner.ClearRam();
@@ -135,6 +141,9 @@ namespace Shaffuru.GameLogic {
 
 			var currentAudioTime = audioTimeWrapper.songTime;
 
+			// Variable NJS: The last NJS change before startTime (Which we start on) and the lowest one we might play at
+			var startRelativeNjs = 0f;
+			var minRelativeNjs = 0f;
 
 			if(readonlyBeatmapData != null) {
 				LinkedListNode<BeatmapDataItem> prevNode = null;
@@ -151,6 +160,13 @@ namespace Shaffuru.GameLogic {
 					// If we are past the time which we want to add / replace in, break
 					if(secondsToInsert > 0 && relativeSongTime > secondsToInsert + 1)
 						break;
+
+					if(x is NoteJumpSpeedEventData njsEvent) {
+						minRelativeNjs = Math.Min(minRelativeNjs, njsEvent.relativeNoteJumpSpeed);
+
+						if(relativeSongTime < 0)
+							startRelativeNjs = njsEvent.relativeNoteJumpSpeed;
+					}
 
 					// If the current nodes (start) is in the past...
 					if(relativeSongTime < 0) {
@@ -183,35 +199,34 @@ namespace Shaffuru.GameLogic {
 					prevNode = prevNode.Next;
 
 					// Change the nodes time to be at the right time in the modified context
-					var j = x;
 					var bmot = relativeSongTime + currentAudioTime;
 
 					// Sliders and arcs have an end time that we need to correct also
 					if(x.type == BeatmapDataItem.BeatmapDataItemType.BeatmapObject && x is SliderData xSlider)
-						SETTER_SliderData_tailTime(ref xSlider) = bmot + xSlider.tailTime - x.time;
+						xSlider.tailTime = bmot + xSlider.tailTime - x.time;
 
-					SETTER_BeatmapDataItem_time(ref j) = bmot;
+					x.time = bmot;
 				}
 
 				// Keep all beatmap items past the end of what we inserted now for Memory / Allocation reasons, but move them baaaack
-				for(; prevNode != null; prevNode = prevNode.Next) {
-					var iv = prevNode.Value;
-					SETTER_BeatmapDataItem_time(ref iv) = float.MaxValue;
-				}
+				for(; prevNode != null; prevNode = prevNode.Next)
+					prevNode.Value.time = float.MaxValue;
 			}
 
 			if(beatmapObjectSpawnController != null) {
 				// Update to the new maps stuffs
 				var njs = replacementDifficultyBeatmap.noteJumpMovementSpeed;
 				if(njs == 0)
-					njs = BeatmapDifficultyMethods.NoteJumpMovementSpeed(replacementDifficultyBeatmap.difficulty);
+					njs = BeatmapDifficultyMethods.DefaultNoteJumpMovementSpeed(replacementDifficultyBeatmap.difficulty);
 
 				// This updates the spawnAheadTime amonguser things
 				UpdateBeatmapObjectSpawnControllerInitData(
 					replacementDifficultyBeatmap.level.beatsPerMinute,
 					njs,
 					replacementDifficultyBeatmap.noteJumpStartBeatOffset,
-					replacementBeatmapData.numberOfLines
+					replacementBeatmapData.numberOfLines,
+					startRelativeNjs,
+					minRelativeNjs
 				);
 			}
 
@@ -222,7 +237,7 @@ namespace Shaffuru.GameLogic {
 					// I hate that i actually have to do this. Writes the correct / new aheadTime to the callbacks for the object spawns
 					if(x.Key == startBeatmapCallbackAheadTime) {
 						var cbs = v._callbacks;
-						aheadTime = beatmapObjectSpawnMovementData.spawnAheadTime;
+						aheadTime = variableMovementDataProvider.spawnAheadTime;
 						foreach(var cbl in cbs.Values) {
 							cbl.ForEach(cb => { SETTER_BeatmapDataCallbackWrapper_aheadTime(ref cb) = aheadTime; });
 						}
@@ -247,7 +262,7 @@ namespace Shaffuru.GameLogic {
 			// New audio
 			// This is where I would go ahead and fiddle with the AudioTimeSync controller and swap out the audio clip etc
 			// But that would be a MASSIVE pain, so why dont we just create our own audioclip and sync that to the normal sync controller? :)
-			customAudioSource.SetClip(replacementDifficultyBeatmap.level.beatmapLevelData.audioClip);
+			customAudioSource.SetClip(replacementDifficultyBeatmap.audioClip);
 			customAudioSource.Play(startTime + (audioTimeWrapper.songTime - timePre));
 
 			HeckOffCutSoundsCrash.enablePatch = false;

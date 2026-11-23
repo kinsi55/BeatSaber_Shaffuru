@@ -23,11 +23,11 @@ namespace Shaffuru.AppLogic {
 		}
 
 		public struct ValidSong {
-			public IPreviewBeatmapLevel level;
+			public BeatmapLevel level;
 			// I really didnt want a ref type per song just to store the valid diffs, so I store all valid diffs as a bitsum
 			public int validDiffs;
 
-			public ValidSong(IPreviewBeatmapLevel level) {
+			public ValidSong(BeatmapLevel level) {
 				this.level = level;
 				validDiffs = 0;
 			}
@@ -81,7 +81,20 @@ namespace Shaffuru.AppLogic {
 		public static bool supportsMappingExtensions => IPA.Loader.PluginManager.GetPluginFromId("MappingExtensions") != null;
 		bool allowMappingExtensions = false;
 
-		ValidSong LevelFilterCheck(IPreviewBeatmapLevel level, ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null, bool forceNoFilters = false) {
+		bool RequiresUnallowedMod(in string[] r) {
+			foreach(var x in r) {
+				// Mapping Extensions works on dynamically loaded levels, Noodle wont, neither would Vivify
+				if(allowMappingExtensions && x == "Mapping Extensions")
+					continue;
+				// Chroma wont work properly but does it really matter
+				if(x == "Chroma")
+					continue;
+				return true;
+			}
+			return false;
+		}
+
+		ValidSong LevelFilterCheck(BeatmapLevel level, Dictionary<string, BeatmapDifficulty[]> playlistSongs = null, bool forceNoFilters = false) {
 			if(!forceNoFilters) {
 				if(level.songDuration - level.songTimeOffset < minSongLength)
 					return default;
@@ -92,14 +105,14 @@ namespace Shaffuru.AppLogic {
 
 			BeatmapDifficulty[] playlistDiffs = null;
 
-			if(playlistSongs?.TryGetValue(level, out playlistDiffs) == false)
+			if(playlistSongs?.TryGetValue(level.levelID, out playlistDiffs) == false)
 				return default;
 
 			var songHash = MapUtil.GetHashOfPreview(level);
-			Dictionary<BeatmapDifficulty, SongCore.Data.ExtraSongData.DifficultyData> mappedExtraData = null;
+			Dictionary<BeatmapDifficulty, SongCore.Data.SongData.DifficultyData> mappedExtraData = null;
 
 			if(songHash != null) {
-				var extraData = SongCore.Collections.RetrieveExtraSongData(songHash);
+				var extraData = SongCore.Collections.GetCustomLevelSongData(level.levelID);
 
 				if(extraData?._difficulties == null)
 					return default;
@@ -109,15 +122,15 @@ namespace Shaffuru.AppLogic {
 					if(x._beatmapCharacteristicName != Anlasser.standardCharacteristic.serializedName)
 						continue;
 
-					mappedExtraData ??= new Dictionary<BeatmapDifficulty, SongCore.Data.ExtraSongData.DifficultyData>();
+					mappedExtraData ??= new Dictionary<BeatmapDifficulty, SongCore.Data.SongData.DifficultyData>();
 
 					mappedExtraData[x._difficulty] = x;
 				}
 			}
 
-			foreach(var beatmapSet in level.previewDifficultyBeatmapSets) {
+			foreach(var beatmapSet in level.GetCharacteristics()) {
 				// For now we limit to just Standard characteristic. This might not be necessary
-				if(beatmapSet.beatmapCharacteristic != Anlasser.standardCharacteristic)
+				if(beatmapSet != Anlasser.standardCharacteristic)
 					continue;
 
 				var songDetailsSong = SongDetailsCache.Structs.Song.none;
@@ -134,7 +147,7 @@ namespace Shaffuru.AppLogic {
 
 				var validSonge = new ValidSong(level);
 
-				foreach(var beatmapDiff in beatmapSet.beatmapDifficulties) {
+				foreach(var beatmapDiff in level.GetDifficulties(beatmapSet)) {
 					// playlistDiffs is only created if the playlist entry actually has any highlit diffs (And the option is enabled)
 					if(playlistDiffs?.Contains(beatmapDiff) == false)
 						continue;
@@ -147,7 +160,7 @@ namespace Shaffuru.AppLogic {
 						var r = extradata.additionalDifficultyData._requirements;
 
 						// I have a feeling any requirements in the map would be BAAAD
-						if(r.Length != 0 && (!allowMappingExtensions || Array.Exists(r, x => x != "Mapping Extensions")))
+						if(RequiresUnallowedMod(r))
 							continue;
 					}
 
@@ -183,6 +196,10 @@ namespace Shaffuru.AppLogic {
 
 			var __SongdetailsFilterCheckVS = new ValidSong();
 
+			// Filter mods not explicitly allowed (Chroma doesnt work but is fine to be loaded, same for Cinema)
+			var allowedMods = SongDetailsCache.Structs.MapMods.Chroma | SongDetailsCache.Structs.MapMods.Cinema |
+				(allowMappingExtensions ? SongDetailsCache.Structs.MapMods.MappingExtensions : 0);
+
 			for(var i = (int)song.diffOffset + song.diffCount; --i >= song.diffOffset;) {
 				ref var diff = ref SongDetailsUtil.instance.difficulties[i];
 
@@ -197,17 +214,12 @@ namespace Shaffuru.AppLogic {
 					if(nps < currentFilterConfig.advanced_nps_min || nps > currentFilterConfig.advanced_nps_max)
 						continue;
 
-					if(currentFilterConfig.advanced_only_ranked && !diff.ranked)
+					if(currentFilterConfig.advanced_only_ranked && (diff.stars <= 0 || (song.rankedStates & SongDetailsCache.Structs.RankedStates.ScoresaberRanked) == 0))
 						continue;
 				}
 
-				if(fullCheck) {
-					if(!allowMappingExtensions && (diff.mods & SongDetailsCache.Structs.MapMods.MappingExtensions) != 0)
-						continue;
-
-					if((diff.mods & (SongDetailsCache.Structs.MapMods.NoodleExtensions | SongDetailsCache.Structs.MapMods.Chroma)) != 0)
-						continue;
-				}
+				if(fullCheck && (diff.mods & ~allowedMods) != 0)
+					continue;
 
 				__SongdetailsFilterCheckVS.SetDiffValid((BeatmapDifficulty)diff.difficulty);
 			}
@@ -217,7 +229,7 @@ namespace Shaffuru.AppLogic {
 		}
 
 
-		public bool AddRequestableLevel(IPreviewBeatmapLevel level, bool forceNoFilters = false) {
+		public bool AddRequestableLevel(BeatmapLevel level, bool forceNoFilters = false) {
 			var hash = MapUtil.GetHashOfPreview(level);
 
 			if(hash == null)
@@ -249,9 +261,9 @@ namespace Shaffuru.AppLogic {
 			minSongLength = Config.Instance.jumpcut_enabled ? Math.Max(currentFilterConfig.minSeconds, Config.Instance.jumpcut_minSeconds) : currentFilterConfig.minSeconds;
 
 			var maps = beatmapLevelsModel
-				.allLoadedBeatmapLevelPackCollection.beatmapLevelPacks
-				.Where(x => !(x is PreviewBeatmapLevelPackSO))
-				.SelectMany(x => x.beatmapLevelCollection.beatmapLevels);
+				.GetAllPacks()
+				.Where(x => !beatmapLevelsModel.dlcBeatmapLevelsRepository.beatmapLevelPacks.Contains(x))
+				.SelectMany(x => x.AllBeatmapLevels());
 
 			if(!forceNoFilters)
 				maps = maps.Where(x => x.songDuration - x.songTimeOffset >= minSongLength);
@@ -262,7 +274,7 @@ namespace Shaffuru.AppLogic {
 			 */
 			maps = maps.OrderBy(x => x.levelID.Length);
 
-			ConditionalWeakTable<IPreviewBeatmapLevel, BeatmapDifficulty[]> playlistSongs = null;
+			Dictionary<string, BeatmapDifficulty[]> playlistSongs = null;
 
 			if(!forceNoFilters &&
 				Config.Instance.filter_playlist != Config.filter_playlist_default && 

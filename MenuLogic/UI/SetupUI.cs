@@ -52,24 +52,30 @@ namespace Shaffuru.MenuLogic.UI {
 		void PreparePlaylistStuff(bool rebuild = true) {
 			var hasLib = IPA.Loader.PluginManager.GetPluginFromId("BeatSaberPlaylistsLib") != null;
 			if(playlistDropdown != null)
-				playlistDropdown.interactable = hasLib;
+				playlistDropdown.Interactable = hasLib;
 
 			if(!rebuild)
 				return;
 
-			playlists = new List<object>() { Config.filter_playlist_default };
+			// The dropdown keeps a reference to this exact list, so it has to be updated in place after parsing
+			playlists ??= new List<object>() { Config.filter_playlist_default };
 
 			if(hasLib)
 				Task.Run(LoadPlaylistsList);
 		}
 
 		void LoadPlaylistsList() {
-			playlists.AddRange(BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.packName).Distinct());
+			var names = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).Select(x => x.Title).Distinct().ToList();
 
-			if(playlistDropdown != null) {
-				playlistDropdown.UpdateChoices();
-				playlistDropdown.ReceiveValue();
-			}
+			_ = IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => {
+				playlists.RemoveRange(1, playlists.Count - 1);
+				playlists.AddRange(names);
+
+				if(playlistDropdown != null) {
+					playlistDropdown.UpdateChoices();
+					playlistDropdown.ReceiveValue();
+				}
+			});
 		}
 
 		[UIComponent("button_advancedFiltersConfig")] readonly NoTransitionsButton advancedFiltersConfigButton = null;

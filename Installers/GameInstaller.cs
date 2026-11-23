@@ -9,7 +9,7 @@ namespace Shaffuru.Installers {
 		public override void InstallBindings() {
 			var setupData = Container.Resolve<GameplayCoreSceneSetupData>();
 
-			if(!setupData.difficultyBeatmap.level.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
+			if(!setupData.beatmapLevel.levelID.StartsWith(Anlasser.LevelIdPrefix, System.StringComparison.OrdinalIgnoreCase))
 				return;
 
 			Container.BindInterfacesAndSelfTo<SongQueueManager>().AsSingle();
@@ -28,6 +28,7 @@ namespace Shaffuru.Installers {
 
 		public void IngameInstaller() {
 			Container.BindInterfacesTo<ReassignBasegameFailEffectToCustomAudioSource>().AsSingle().NonLazy();
+			Container.BindInterfacesAndSelfTo<FreezeDissolvingNjs>().AsSingle();
 			Container.BindInterfacesTo<BeatmapObjectDissolver>().AsSingle().NonLazy();
 			Container.BindInterfacesAndSelfTo<BeatmapSwitcher>().AsSingle();
 		}

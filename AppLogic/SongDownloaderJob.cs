@@ -16,6 +16,7 @@ namespace Shaffuru.AppLogic {
 	struct SongDownloaderJob : IJob {
 		public static readonly HashSet<uint> downloadingMaps = new HashSet<uint>();
 		public static readonly string ShaffuruDownloadPath = Path.Combine(Directory.GetCurrentDirectory(), CustomLevelPathHelper.customLevelsDirectoryPath, "SHAFFURU_DOWNLOADS");
+		public static SongCore.Data.SeparateSongFolder downloadsFolder;
 
 		uint beatsaverId;
 
@@ -26,10 +27,6 @@ namespace Shaffuru.AppLogic {
 		}
 
 		static readonly char[] InvalidPathChars = Path.GetInvalidFileNameChars();
-
-		static readonly MethodInfo SongCore_LoadSongAndAddToDictionaries = IPA.Loader.PluginManager.GetPluginFromId("SongCore")?
-			.Assembly.GetType("SongCore.Loader")?
-			.GetMethod("LoadSongAndAddToDictionaries", BindingFlags.NonPublic | BindingFlags.Instance);
 
 		static readonly string UserAgent = "Shaffuru/" + Assembly.GetExecutingAssembly().GetName().Version.ToString(3);
 		public unsafe void Execute() {
@@ -49,11 +46,19 @@ namespace Shaffuru.AppLogic {
 					if(p == null)
 						return;
 
-					var data = SongCore.Loader.Instance.LoadCustomLevelSongData(p);
+					var data = SongCore.Loader.LoadCustomLevel(p);
 
-					var preview = (CustomPreviewBeatmapLevel)SongCore_LoadSongAndAddToDictionaries.Invoke(SongCore.Loader.Instance, new object[] {
-						CancellationToken.None, data, p, null
-					});
+					if(data == null)
+						return;
+
+					var preview = data.Value.beatmapLevel;
+
+					// SongCore only hands the save data over to the game's CustomLevelLoader on a refresh, which it doesn't do ingame
+					var folder = new DirectoryInfo(p);
+					var loaded = SongCore.Loader.CustomLevelLoader.LoadBeatmapLevelAsync(new CustomLevelFolderInfo(folder.FullName, folder.Name, File.ReadAllText(Path.Combine(p, "Info.dat"))), CancellationToken.None).Result;
+					SongCore.Loader.CustomLevelLoader._loadedBeatmapSaveData[preview.levelID] = loaded.Value.Item2;
+					// Else the post-session song refresh loads it again under a "custom_level_HASH_FolderName" levelID
+					downloadsFolder.Levels[Path.GetDirectoryName(Path.Combine(p, "Info.dat"))] = preview;
 
 					BeatmapLoader.AddBeatmapToLoadedPreviewBeatmaps(preview.levelID, preview);
 
