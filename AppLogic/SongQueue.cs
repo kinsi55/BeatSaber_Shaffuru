@@ -55,7 +55,10 @@ namespace Shaffuru.AppLogic {
 			return s;
 		}
 
-		public void Clear() => _queue?.Clear();
+		public void Clear() {
+			_queue?.Clear();
+			_requeueBlockList?.Clear();
+		}
 
 		public int Count(Func<ShaffuruSong, bool> action) => _queue.Count(action);
 		public bool Contains(Func<ShaffuruSong, bool> action) => _queue.Any(action);

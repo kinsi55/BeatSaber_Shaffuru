@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using BGLib.Polyglot;
+using Shaffuru.AppLogic;
 using Shaffuru.GameLogic;
 using SiraUtil.Zenject;
 using UnityEngine;
@@ -26,6 +27,7 @@ namespace Shaffuru.MenuLogic {
 		readonly PlayerDataModel playerDataModel;
 		readonly MenuTransitionsHelper menuTransitionsHelper;
 		readonly EnvironmentsListModel environmentsListModel;
+		readonly PlayedSongList playedSongList;
 
 
 		static int lastShaffuruMapLength = 0;
@@ -44,11 +46,13 @@ namespace Shaffuru.MenuLogic {
 			[InjectOptional] MenuTransitionsHelper menuTransitionsHelper,
 			BeatmapCharacteristicCollection beatmapCharacteristicCollection,
 			EnvironmentsListModel environmentsListModel,
+			PlayedSongList playedSongList,
 			UBinder<Plugin, System.Random> rng
 		) {
 			this.playerDataModel = playerDataModel;
 			this.menuTransitionsHelper = menuTransitionsHelper;
 			this.environmentsListModel = environmentsListModel;
+			this.playedSongList = playedSongList;
 
 			rngSource = rng;
 
@@ -115,6 +119,9 @@ namespace Shaffuru.MenuLogic {
 		public void Start(int lengthSeconds, int rngSeed = 0) {
 			if(rngSeed != 0)
 				rngSource.Value = new System.Random(rngSeed);
+
+			// Also called again when restarting, which is a new run
+			playedSongList.Clear();
 
 			UpdateFakeBeatmap(lengthSeconds);
 

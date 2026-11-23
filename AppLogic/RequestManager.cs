@@ -43,7 +43,7 @@ namespace Shaffuru.AppLogic {
 				return;
 
 			if(chatHandler == null) {
-				Msg(sender, "Shaffuru is not initialized", channel);
+				Msg("Shaffuru is not initialized", sender, channel);
 				return;
 			}
 

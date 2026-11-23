@@ -100,7 +100,7 @@ namespace Shaffuru.MenuLogic.UI {
 
 			var ts = TimeSpan.FromSeconds(levelCompletionResult.endSongTime);
 
-			sessionLength.text = $"Session Length: {ts.Minutes + (ts.Hours * 60)}:{ts.Seconds}";
+			sessionLength.text = $"Session Length: {(int)ts.TotalMinutes:00}:{ts.Seconds:00}";
 
 			var totalnotes = levelCompletionResult.goodCutsCount + levelCompletionResult.badCutsCount + levelCompletionResult.missedCount;
 			songCount.text = $"Songs Played: {playedSongList.list.Count} ({totalnotes} Notes)";

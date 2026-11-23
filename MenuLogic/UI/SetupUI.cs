@@ -27,7 +27,6 @@ namespace Shaffuru.MenuLogic.UI {
 		[Inject] readonly SongQueue songQueue = null;
 		[InjectOptional] readonly RequestManager requestManager = null;
 		[Inject] readonly Anlasser anlasser = null;
-		[Inject] readonly PlayedSongList playedSongList = null;
 
 		[UIParams] readonly BSMLParserParams parserParams = null;
 
@@ -138,7 +137,6 @@ namespace Shaffuru.MenuLogic.UI {
 
 		[UIAction("StartGame")]
 		void StartGame() {
-			playedSongList.Clear();
 			anlasser.Start(60 * playDuration);
 		}
 
