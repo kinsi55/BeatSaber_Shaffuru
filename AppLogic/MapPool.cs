@@ -33,11 +33,11 @@ namespace Shaffuru.AppLogic {
 			}
 
 			public BeatmapDifficulty GetRandomValidDiff() {
-				var start =
-					Config.Instance.random_prefer_top_diff ? 0 : rngSource.Next((int)BeatmapDifficulty.ExpertPlus);
-
 				// I wish I commented how this works when I wrote it
 				var m = 1 + (int)BeatmapDifficulty.ExpertPlus;
+
+				var start =
+					Config.Instance.random_prefer_top_diff ? 0 : rngSource.Next(m);
 
 				for(var i = m; i-- > 0;) {
 					var x = (start + i) % m;
