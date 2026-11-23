@@ -64,7 +64,7 @@ namespace Shaffuru.GameLogic {
 			}
 		}
 
-		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset, int noteLinesCount) {
+		void UpdateBeatmapObjectSpawnControllerInitData(float bpm, float njs, float mapOffset, int noteLinesCount, float startRelativeNjs, float minRelativeNjs) {
 			BeatmapObjectSpawnControllerHelpers.GetNoteJumpValues(sceneSetupData.playerSpecificSettings, mapOffset, out var noteJumpValueType, out var noteJumpValue);
 			beatmapObjectSpawnMovementData.Init(
 				// If this changes the game would probably explode - I dont think it does ever tho?
@@ -77,13 +77,16 @@ namespace Shaffuru.GameLogic {
 				beatmapObjectSpawnMovementData.startHalfJumpDurationInBeats,
 				beatmapObjectSpawnMovementData.maxHalfJumpDistance,
 				njs,
-				0,
+				minRelativeNjs,
 				bpm,
 				noteJumpValueType,
 				noteJumpValue,
 				beatmapObjectSpawnMovementData.centerPos,
 				Vector3.forward
 			);
+			// Init() resets the variable NJS, start on the one the map would be at at this point
+			if(variableMovementDataProvider is VariableMovementDataProvider vmdp)
+				vmdp._relativeNoteJumpSpeedInterpolation.SetValues(startRelativeNjs, startRelativeNjs, 0, 0, EaseType.None);
 			beatmapCallbacksController.TriggerBeatmapEvent(new BPMChangeBeatmapEventData(0, bpm));
 		}
 
@@ -138,6 +141,9 @@ namespace Shaffuru.GameLogic {
 
 			var currentAudioTime = audioTimeWrapper.songTime;
 
+			// Variable NJS: The last NJS change before startTime (Which we start on) and the lowest one we might play at
+			var startRelativeNjs = 0f;
+			var minRelativeNjs = 0f;
 
 			if(readonlyBeatmapData != null) {
 				LinkedListNode<BeatmapDataItem> prevNode = null;
@@ -154,6 +160,13 @@ namespace Shaffuru.GameLogic {
 					// If we are past the time which we want to add / replace in, break
 					if(secondsToInsert > 0 && relativeSongTime > secondsToInsert + 1)
 						break;
+
+					if(x is NoteJumpSpeedEventData njsEvent) {
+						minRelativeNjs = Math.Min(minRelativeNjs, njsEvent.relativeNoteJumpSpeed);
+
+						if(relativeSongTime < 0)
+							startRelativeNjs = njsEvent.relativeNoteJumpSpeed;
+					}
 
 					// If the current nodes (start) is in the past...
 					if(relativeSongTime < 0) {
@@ -211,7 +224,9 @@ namespace Shaffuru.GameLogic {
 					replacementDifficultyBeatmap.level.beatsPerMinute,
 					njs,
 					replacementDifficultyBeatmap.noteJumpStartBeatOffset,
-					replacementBeatmapData.numberOfLines
+					replacementBeatmapData.numberOfLines,
+					startRelativeNjs,
+					minRelativeNjs
 				);
 			}
 
