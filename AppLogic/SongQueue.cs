@@ -21,7 +21,7 @@ namespace Shaffuru.AppLogic {
 			_queue ??= new Queue<ShaffuruSong>();
 
 			if(_requeueBlockList == null) {
-				_requeueBlockList = new RollingList<string>(Config.Instance.queue_requeueLimit);
+				_requeueBlockList = new RollingList<string>(Config.Instance.queue_requeueLimit, true);
 			} else {
 				SetRequeueBlockListSize(Config.Instance.queue_requeueLimit);
 			}
