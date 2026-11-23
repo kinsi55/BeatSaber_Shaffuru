@@ -58,8 +58,8 @@
     <Reference Include="BeatSaberPlaylistsLib">
       <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
     </Reference>
-    <Reference Include="BeatSaberPlus">
-      <HintPath>Refs\BeatSaberPlus.dll</HintPath>
+    <Reference Include="ChatPlexSDK_BS">
+      <HintPath>Refs\ChatPlexSDK_BS.dll</HintPath>
     </Reference>
     <Reference Include="BeatSaber.GameSettings">
       <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.GameSettings.dll</HintPath>

@@ -69,26 +69,26 @@ namespace Shaffuru.Util {
 		public void Dispose() => twitch.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 	}
 
-	class BeatSaberPlusSource : IChatMessageSource {
+	class ChatPlexSource : IChatMessageSource {
 		public event IChatMessageSource.IncomingChatMessage OnTextMessageReceived;
 
-		BeatSaberPlus.SDK.Chat.Services.ChatServiceMultiplexer multiplexer;
+		CP_SDK.Chat.Services.ChatServiceMultiplexer multiplexer;
 
-		BeatSaberPlusSource() {
-			BeatSaberPlus.SDK.Chat.Service.Acquire();
-			multiplexer = BeatSaberPlus.SDK.Chat.Service.Multiplexer;
+		ChatPlexSource() {
+			CP_SDK.Chat.Service.Acquire();
+			multiplexer = CP_SDK.Chat.Service.Multiplexer;
 			multiplexer.OnTextMessageReceived += Twitch_OnTextMessageReceived;
 		}
 
-		void Twitch_OnTextMessageReceived(BeatSaberPlus.SDK.Chat.Interfaces.IChatService _, BeatSaberPlus.SDK.Chat.Interfaces.IChatMessage msg) {
+		void Twitch_OnTextMessageReceived(CP_SDK.Chat.Interfaces.IChatService _, CP_SDK.Chat.Interfaces.IChatMessage msg) {
 			OnTextMessageReceived?.Invoke(msg.Sender.UserName, msg.Message, msg.Channel);
 		}
 
 		public void SendChatMessage(string message, object channel) {
-			multiplexer.SendTextMessage((BeatSaberPlus.SDK.Chat.Interfaces.IChatChannel)channel, message);
+			multiplexer.SendTextMessage((CP_SDK.Chat.Interfaces.IChatChannel)channel, message);
 		}
 
-		~BeatSaberPlusSource() => Dispose();
+		~ChatPlexSource() => Dispose();
 		public void Dispose() => multiplexer.OnTextMessageReceived -= Twitch_OnTextMessageReceived;
 	}
 }
