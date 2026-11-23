@@ -81,7 +81,21 @@ namespace Shaffuru.GameLogic {
 			var playerSpecificSettings = _sceneSetupData.playerSpecificSettings;
 			var gameplayModifiers = _sceneSetupData.gameplayModifiers;
 
-			difficulty.audioClip = await _sceneSetupData._audioClipAsyncLoader.LoadSong(difficulty.beatmapLevelData);
+			var audioClipAsyncLoader = _sceneSetupData._audioClipAsyncLoader;
+			difficulty.audioClip = await audioClipAsyncLoader.LoadSong(difficulty.beatmapLevelData);
+
+			/*
+			 * The game releases one reference of the audio once the level drops out of its level data cache. If the level
+			 * was still cached (Played recently) we must not hold a second reference, or the audio would never be unloaded
+			 */
+			int? audioCacheKey = difficulty.beatmapLevelData switch {
+				IAssetSongAudioClipProvider asset when asset.songAudioClip != null => audioClipAsyncLoader.GetCacheKey(asset.songAudioClip),
+				IFilePathSongAudioClipProvider file when !string.IsNullOrEmpty(file.songAudioClipPath) => audioClipAsyncLoader.GetCacheKey(file.songAudioClipPath),
+				_ => null
+			};
+
+			if(audioCacheKey != null && audioClipAsyncLoader._cache.GetReferenceCount(audioCacheKey.Value) > 1)
+				audioClipAsyncLoader.UnloadSong(difficulty.beatmapLevelData);
 
 			// Process the new beatmap as tho we'd play it so LeftHanded etc is accounted for
 			var environmentEffectsFilterPreset = (difficulty.difficulty == BeatmapDifficulty.ExpertPlus) ? playerSpecificSettings.environmentEffectsFilterExpertPlusPreset : playerSpecificSettings.environmentEffectsFilterDefaultPreset;
