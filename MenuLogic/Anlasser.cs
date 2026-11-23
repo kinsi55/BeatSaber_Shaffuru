@@ -30,7 +30,7 @@ namespace Shaffuru.MenuLogic {
 
 		static int lastShaffuruMapLength = 0;
 		public static BeatmapLevel beatmapLevel { get; private set; }
-		readonly static BeatmapLevelDataSO beatmapLevelData = ScriptableObject.CreateInstance<BeatmapLevelDataSO>();
+		public readonly static BeatmapLevelDataSO beatmapLevelData = ScriptableObject.CreateInstance<BeatmapLevelDataSO>();
 		
 		static UBinder<Plugin, System.Random> rngSource;
 
