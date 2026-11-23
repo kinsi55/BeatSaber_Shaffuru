@@ -33,7 +33,8 @@ namespace Shaffuru.GameLogic {
 				return;
 			}
 
-			Task.Delay(delayMs).ContinueWith(_ => cont(), TaskContinuationOptions.None);
+			// The switch starts a coroutine, so it has to continue on the main thread
+			Task.Delay(delayMs).ContinueWith(_ => cont(), IPA.Utilities.Async.UnityMainThreadTaskScheduler.Default);
 		}
 	}
 }
