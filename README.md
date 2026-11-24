@@ -24,7 +24,7 @@ For now - **Make sure to not use any mods that disable score submission** as tha
 - **SiraUtil**
 - **BeatSaberMarkupLanguage**
 - **SongDetailsCache**
-- **CatCore** or **ChatCore** (Optional, only needed if you want Chat requests to work)
+- **CatCore** or **BS+ / ChatPlex** (Optional, only needed if you want Chat requests to work)
 - **BeatSaberPlaylistsLib** (Optional, only needed for playlist filtering)
 
 ## How to Play
@@ -52,6 +52,6 @@ Other than that, the Multiplayer experience is supposed to be exactly the same a
 
 ## Limitations
 
-- If a map has any requirement *other than Mapping Extensions* it cannot be played
+- If a map has any requirement *other than Mapping Extensions* it cannot be played with the exception of Chroma - Maps that require Chroma can be loaded but Chroma doesnt actually function.
 - Score submission obviously isnt gonna happen
 - Some Counters / Mods dont like this like the "Notes left" and "PB" display, they'll just display garbage
