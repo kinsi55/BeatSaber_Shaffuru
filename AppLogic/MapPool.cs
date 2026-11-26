@@ -42,18 +42,17 @@ namespace Shaffuru.AppLogic {
 				for(var i = m; i-- > 0;) {
 					var x = (start + i) % m;
 
-					if((validDiffs & (1 << x)) != 0)
+					if(IsDiffValid(validDiffs, (BeatmapDifficulty)x))
 						return (BeatmapDifficulty)x;
 				}
 				return BeatmapDifficulty.Easy;
 			}
 
-			public bool IsDiffValid(BeatmapDifficulty diff) => (validDiffs & (1 << (int)diff)) != 0;
+			public bool IsDiffValid(BeatmapDifficulty diff) => IsDiffValid(validDiffs, diff);
 			public static bool IsDiffValid(int validDiffsMask, BeatmapDifficulty diff) => (validDiffsMask & (1 << (int)diff)) != 0;
 
-			public void SetDiffValid(BeatmapDifficulty diff) {
-				validDiffs |= (1 << (int)diff);
-			}
+			public void SetDiffValid(BeatmapDifficulty diff) => SetDiffValid(ref validDiffs, diff);
+			public static void SetDiffValid(ref int validDiffs, BeatmapDifficulty diff) => validDiffs |= (1 << (int)diff);
 		}
 
 		public string currentPlaylistFilter;
@@ -133,12 +132,11 @@ namespace Shaffuru.AppLogic {
 				if(beatmapSet != Anlasser.standardCharacteristic)
 					continue;
 
-				var songDetailsSong = SongDetailsCache.Structs.Song.none;
 				var validDiffsSongdetailsFilterCheck = int.MaxValue;
 
 				// If advanced filters are on the song needs to exist in SongDetails.. because we need that info to filter with
 				if(!forceNoFilters && currentFilterConfig.enableAdvancedFilters) {
-					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out songDetailsSong))
+					if(songHash == null || !SongDetailsUtil.instance.songs.FindByHash(songHash, out var songDetailsSong))
 						break;
 
 					if(!SongdetailsFilterCheck(songDetailsSong, out validDiffsSongdetailsFilterCheck, false))
@@ -194,8 +192,6 @@ namespace Shaffuru.AppLogic {
 				return true;
 			}
 
-			var __SongdetailsFilterCheckVS = new ValidSong();
-
 			// Filter mods not explicitly allowed (Chroma doesnt work but is fine to be loaded, same for Cinema)
 			var allowedMods = SongDetailsCache.Structs.MapMods.Chroma | SongDetailsCache.Structs.MapMods.Cinema |
 				(allowMappingExtensions ? SongDetailsCache.Structs.MapMods.MappingExtensions : 0);
@@ -221,10 +217,9 @@ namespace Shaffuru.AppLogic {
 				if(fullCheck && (diff.mods & ~allowedMods) != 0)
 					continue;
 
-				__SongdetailsFilterCheckVS.SetDiffValid((BeatmapDifficulty)diff.difficulty);
+				ValidSong.SetDiffValid(ref validDiffs, (BeatmapDifficulty)diff.difficulty);
 			}
 
-			validDiffs = __SongdetailsFilterCheckVS.validDiffs;
 			return validDiffs != 0;
 		}
 
